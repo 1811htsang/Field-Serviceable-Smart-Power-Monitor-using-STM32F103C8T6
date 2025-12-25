@@ -74,3 +74,29 @@ Trong trường hợp `HSE làm nguồn cho PLL, PLL làm nguồn SYSCLK`, khi H
 1. `PLL tắt`.
 2. `SYSCLK tự động chuyển sang HSI`.
 3. Thực hiện các bước giải quyết.
+
+# MCO
+Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 98
+
+MCO (Microcontroller Clock Output) dùng để xuất một trong các nguồn clock nội bộ ra chân GPIO để sử dụng bên ngoài.
+
+Nguồn có thể xuất ra chân MCO bao gồm:
+- SYSCLK
+- HSI
+- HSE
+- PLL/2
+
+# Quy trình select và khởi động nguồn clock chính cho hệ thống
+0. reset STM32, lúc này nguồn SYSCLK là HSI
+1. reset RCC_CR, RCC_CFGR, RCC_CIR về mặc định
+2. RCC_CFGR->SW = 00; // Chọn HSI làm nguồn SYSCLK tạm thời
+3. RCC_CR->CSSON = 1; // Bật CSS để giám sát HSE trước
+4. RCC_CIR->HSERDYIE = 1; // Enable ngắt HSE ready
+5. RCC_CR->HSEON = 1; // Bật HSE lên
+6. Chờ HSE ready
+7. Khi HSE ready
+   - RCC_CIR->HSEDYF = 1; // Cờ từ hệ thống ngắt  
+   - RCC_CR->HSERRDY = 1; // Cờ từ RCC_CR
+8. RCC_CFGR->SW = 01; // Chuyển SYSCLK sang HSE
+9. RCC_CIR->HSERDYC = 1; // Xóa cờ ngắt HSE ready
+10. Tiếp tục cấu hình các nguồn clock khác nếu cần thiết
