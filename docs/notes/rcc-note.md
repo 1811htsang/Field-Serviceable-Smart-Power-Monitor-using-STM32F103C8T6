@@ -89,32 +89,32 @@ Nguồn có thể xuất ra chân MCO bao gồm:
 # Quy trình select và khởi động nguồn clock chính cho hệ thống
 0. reset STM32, lúc này nguồn SYSCLK là HSI
 1. reset RCC_CR, RCC_CFGR, RCC_CIR về mặc định
-2. RCC_CFGR->SW = 00; // Chọn HSI làm nguồn SYSCLK tạm thời
-3. RCC_CR->CSSON = 1; // Bật CSS để giám sát HSE trước
-4. RCC_CIR->HSERDYIE = 1; // Enable ngắt HSE ready
-5. RCC_CR->HSEON = 1; // Bật HSE lên
+2. `RCC_CFGR->SW = 00;` // Chọn HSI làm nguồn SYSCLK tạm thời
+3. `RCC_CR->CSSON = 1;` // Bật CSS để giám sát HSE trước
+4. `RCC_CIR->HSERDYIE = 1;` // Enable ngắt HSE ready
+5. `RCC_CR->HSEON = 1;` // Bật HSE lên
 6. Chờ HSE ready
 7. Khi HSE ready
-   - RCC_CIR->HSEDYF = 1; // Cờ từ hệ thống ngắt  
-   - RCC_CR->HSERRDY = 1; // Cờ từ RCC_CR
-8. RCC_CFGR->SW = 01; // Chuyển SYSCLK sang HSE
-9. RCC_CIR->HSERDYC = 1; // Xóa cờ ngắt HSE ready
+   - `RCC_CIR->HSEDYF = 1;` // Cờ từ hệ thống ngắt  
+   - `RCC_CR->HSERRDY = 1;` // Cờ từ RCC_CR
+8. `RCC_CFGR->SW = 01;` // Chuyển SYSCLK sang HSE
+9. `RCC_CIR->HSERDYC = 1;` // Xóa cờ ngắt HSE ready
 10. Tiếp tục cấu hình các nguồn clock khác nếu cần thiết
 
 # Quy trình xử lý khi HSE lỗi
 1. Xảy ra lỗi HSE
    -  Nghĩa là khi xảy ra lỗi HSE, HSE tự động tắt
-   -  RCC_CR->CSSON = 0; // Tắt CSS để tránh lặp ngắt
-   -  RCC_CR->HSEON = 0; // HSE tắt
-   -  RCC_CR->HSERDY = 0; // Cờ HSE ready tắt sau khi HSEON = 0 trong 6 chu kỳ
-   -  RCC_CFGR->SW = 00; // Chuyển SYSCLK sang HSI
-2. RCC_CIR->CSSF = 1; // Cờ từ hệ thống ngắt
-3. RCC_CIR->HSIDYIE = 1; // Enable ngắt HSI ready
-4. RCC_CR->HSION = 1; // Ép bật HSI lên nếu chưa bật
+   -  `RCC_CR->CSSON = 0;` // Tắt CSS để tránh lặp ngắt
+   -  `RCC_CR->HSEON = 0;` // HSE tắt
+   -  `RCC_CR->HSERDY = 0;` // Cờ HSE ready tắt sau khi HSEON = 0 trong 6 chu kỳ
+   -  `RCC_CFGR->SW = 00;` // Chuyển SYSCLK sang HSI
+2. `RCC_CIR->CSSF = 1;` // Cờ từ hệ thống ngắt
+3. `RCC_CIR->HSIDYIE = 1;` // Enable ngắt HSI ready
+4. `RCC_CR->HSION = 1;` // Ép bật HSI lên nếu chưa bật
 5. Chờ HSI ready
 6. Khi HSI ready
-   - RCC_CIR->HSIRDYF = 1; // Cờ từ hệ thống ngắt
-   - RCC_CR->HSIRDY = 1; // Cờ từ RCC_CR
+   - `RCC_CIR->HSIRDYF = 1;` // Cờ từ hệ thống ngắt
+   - `RCC_CR->HSIRDY = 1;` // Cờ từ RCC_CR
 7. RCC_CIR->HSIRDYC = 1; // Xóa cờ ngắt HSI ready
 8. Thực hiện các bước xử lý khác nếu cần thiết
 
