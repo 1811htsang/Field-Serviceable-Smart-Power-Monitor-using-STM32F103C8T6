@@ -21,7 +21,7 @@ Các nguồn này có thể xác định thông qua kiểm tra RCC_CSR.
 ### Software reset
 Bật bit SYSRESETREQ trong thanh ghi SCB_AIRCR để yêu cầu một system reset.(Yêu cầu quyền truy cập viết vào thanh ghi này)
 
-Cụ thể hơn phải ghi `0x5FA` vào trường VECTKEY[31:16] và `1` vào trường SYSRESETREQ[2] của thanh ghi SCB_AIRCR để được chấp nhận.
+Cụ thể hơn phải ghi `0x5FA` vào trường `VECTKEY[31:16]` và `1` vào trường `SYSRESETREQ[2]` của thanh ghi SCB_AIRCR để được chấp nhận.
 
 Kiểm chứng thông tin này trong [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 90 và [pm0056-stm32](/docs/references/pm0056-stm32-f10-f20-f21-l1-cortex-m3-programming-manual.pdf) trang 134.
 
@@ -56,10 +56,10 @@ Chỉ xảy ra khi có tín hiệu SWRST hoặc VDD/VBAT bật lên sau khi bị
 
 ## Quy trình reset khi sử dụng chân NRST (cần lưu ý lại)
 1. NRST pin bị kéo thấp
-2. RCC_CSR->PINRSTF = 1; // Cờ từ RCC_CSR
+2. `RCC_CSR->PINRSTF = 1;` // Cờ từ RCC_CSR
 3. Thông báo reset tự động đến các module
 4. Hiển thị tín hiệu reset trên pin / console log nếu cần thiết
-5. RCC_CSR->RMVF = 1; // Xóa cờ reset
+5. `RCC_CSR->RMVF = 1;` // Xóa cờ reset
 6. NRST pin trở về mức cao
 
 **Lưu ý**: Trong schematics và mạch thật thì sẽ có 1 chân R (Reset) và 1 nút Reset riêng biệt. Chưa làm rõ thông tin về tín hiệu NRST sẽ thuộc về chân R hay nút Reset.
@@ -73,8 +73,8 @@ Kiểm chứng thông tin này trong [đây](https://dev.to/carolineee/what-is-t
 Do đó, khi nhấn nút Reset, nó sẽ kéo chân NRST xuống mức thấp, từ đó kích hoạt quá trình reset trên MCU mà không cần bổ sung mạch reset phức tạp.
 
 ## Quy trình reset khi sử dụng Software reset
-1. SCB_AIRCR->VECTKEY[31:16] = 0x5FA // Khóa ghi để mở quyền truy cập viết vào thanh ghi AIRCR
-2. SCB_AIRCR->SYSRESETREQ[2] = 1; // Yêu cầu system reset
+1. `SCB_AIRCR->VECTKEY[31:16] = 0x5FA` // Khóa ghi để mở quyền truy cập viết vào thanh ghi AIRCR
+2. `SCB_AIRCR->SYSRESETREQ[2] = 1;` // Yêu cầu system reset
 
 **Lưu ý**: Do có các báo cáo bổ sung về ARM Cortex-M4 lỗi khi thực hiện Software reset (*thông qua sử dụng hàm `NVIC_SystemReset()`*), nên cần kiểm tra kỹ lưỡng trong quá trình triển khai bằng việc đảm bảo không xảy ra quá trình thao tác với bộ nhớ trong khi thực hiện Software reset, hoặc ràng buộc các thao tác này phải hoàn thành trước khi gọi hàm reset.
 
@@ -107,11 +107,11 @@ Không cần dùng clock ngoài, thời gian khởi động nhanh nhưng độ c
 Nguồn này có thể làm nguồn dự phòng trong trường hợp HSE bị lỗi
 -> Ưu tiên sử dụng HSE làm nguồn CLK chính cho hệ thống, nếu HSE lỗi thì chuyển sang HSI.
 
-NSX đã hiệu chỉnh sẵn tần số HSI trong nhà máy, sai số tối đa ±1% ở nhiệt độ 25°C. Giá trị hiệu chỉnh nằm trong thanh ghi RCC_CR->HSITRIM[7:0].
+NSX đã hiệu chỉnh sẵn tần số HSI trong nhà máy, sai số tối đa ±1% ở nhiệt độ 25°C. Giá trị hiệu chỉnh nằm trong thanh ghi `RCC_CR->HSITRIM[7:0]`.
 
 Nguyên tắc sử dụng bộ HSI:
-- Bật HSI: đặt HSION bit trong RCC_CR (RCC_CR->HSION = 1)
-- Chờ HSI sẵn sàng: kiểm tra HSIRDY bit trong RCC_CR (RCC_CR->HSIRDY == 1)
+- Bật HSI: đặt HSION bit trong RCC_CR (`RCC_CR->HSION = 1`)
+- Chờ HSI sẵn sàng: kiểm tra HSIRDY bit trong RCC_CR (`RCC_CR->HSIRDY == 1`)
 
 ## HSE
 Kiểm tra trong các nguồn:
@@ -120,8 +120,8 @@ Kiểm tra trong các nguồn:
 Nguồn này sử dụng bộ thạch anh ngoài cho tần số từ 4MHz đến 16MHz, cho ra tần số chính xác cao hơn HSI.
 
 Nguyên tắc sử dụng bộ HSE:
-- Bật HSE: đặt HSEON bit trong RCC_CR (RCC_CR->HSEON = 1)
-- Chờ HSE sẵn sàng: kiểm tra HSERDY bit trong RCC_CR (RCC_CR->HSERDY == 1)
+- Bật HSE: đặt HSEON bit trong RCC_CR (`RCC_CR->HSEON = 1`)
+- Chờ HSE sẵn sàng: kiểm tra HSERDY bit trong RCC_CR (`RCC_CR->HSERDY == 1`)
   - Ngắt có thể tạo ra nếu enable trong RCC_CIR 
 
 
@@ -151,12 +151,12 @@ Lưu ý:
 2. Chỉ khi `CSS được bật` và `HSE lỗi` thì `CSSI xảy ra` và `NMI xảy ra`. NMI xử lý vô thời hạn cho tới khi bit `CSSI pending` được xóa. *(Điều này có nghĩa là NMI ISR phải xóa CSSI thông qua bit CSSC trong RCC_CIR)*
 
 Trong trường hợp `HSE sử dụng làm nguồn trực tiếp hoặc gián tiếp`, khi HSE lỗi:
-1. `SYSCLK tự động chuyển sang HSI` và `tắt HSE`.
+1. SYSCLK tự động chuyển sang HSI và tắt HSE.
 2. Thực hiện các bước giải quyết.
 
 Trong trường hợp `HSE làm nguồn cho PLL, PLL làm nguồn SYSCLK`, khi HSE lỗi:
-1. `PLL tắt`.
-2. `SYSCLK tự động chuyển sang HSI`.
+1. PLL tắt.
+2. SYSCLK tự động chuyển sang HSI.
 3. Thực hiện các bước giải quyết.
 
 ## MCO
