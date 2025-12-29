@@ -1,3 +1,58 @@
+# Reset
+Chia ra làm 3 loại:
+- System reset
+- Power reset
+- Backup domain reset
+
+## System reset
+Reset tất cả thanh ghi về giá trị mặc định, ngoại trừ thanh ghi trong khu vực CSR và Backup domain
+
+Chỉ xảy ra reset với các trường hợp:
+1. NRST pin bị kéo thấp (này là external)
+2. Window watchdog timeout (WWGD reset)
+3. Independent watchdog timeout (IWDG reset)
+4. Software reset (SW reset)
+5. Low-power management reset (LPM reset)
+
+Các nguồn này có thể xác định thông qua kiểm tra RCC_CSR.
+
+### Software reset
+Bật bit SYSRESETREQ trong thanh ghi SCB_AIRCR để yêu cầu một system reset.(Yêu cầu quyền truy cập viết vào thanh ghi này)
+
+Cụ thể hơn phải ghi `0x5FA` vào trường VECTKEY[31:16] và `1` vào trường SYSRESETREQ[2] của thanh ghi SCB_AIRCR để được chấp nhận.
+
+Kiểm chứng thông tin này trong [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 90 và [pm0056-stm32](/docs/references/pm0056-stm32-f10-f20-f21-l1-cortex-m3-programming-manual.pdf) trang 134.
+
+### LPM reset
+Xảy ra khi:
+1. Hệ thống thoát khỏi chế độ Standby. 
+   
+   *Loại này thực hiện thông qua reset bit nRST_STDBBY trong User Option Bytes. Trong trường hợp này, khi chuỗi entry vào chế độ Standby được thực hiện, hệ thống sẽ tự động reset.*
+2. Hệ thống thoát khỏi chế độ Stop. 
+   
+   *Loại này thực hiện thông qua reset bit nRST_STOP trong User Option Bytes. Trong trường hợp này, khi chuỗi entry vào chế độ Stop được thực hiện, hệ thống sẽ tự động reset.*
+
+Kiểm chứng thông tin này trong [pm0075-stm32f10xxx](/docs/references/pm0075-stm32f10xxx-flash-programming-manual.pdf) trang 19-20-21.
+
+## Power reset
+Chỉ xảy ra trong 2 events:
+1. POR/PDR reset: Bật nguồn hoặc khôi phục nguồn.
+2. Thoát Standby mode.
+
+Power reset sẽ reset tất cả thanh ghi về giá trị mặc định ngoại trừ Backup domain.
+
+Các nguồn event reset này phụ thuộc vào chân NRST và giữ mức thấp trong delay phase. 
+
+Vector của RST_SVC_RTN giữ cố định ở địa chỉ `0x00000004` trong suốt quá trình Power reset.
+
+Tín hiệu để thực hiện reset từ bên ngoài là thông qua chân NRST, khi nhấn giữ NRST (*tức là NRST đang mức thấp*), xung reset được tạo ra. Bất kể trường hợp reset từ chân NRST hay từ bên trong, đều sẽ có khoảng delay tối thiểu 20 micro-s với mỗi tín hiệu. 
+
+Kiểm chứng thông tin này [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 91.
+
+## Backup domain reset
+Chỉ xảy ra khi có tín hiệu SWRST hoặc VDD/VBAT bật lên sau khi bị tắt trước đó.
+
+# Clock System trên STM32F1xx
 Các src CLK chính sử dụng trong RCC:
 - HSI
 - LSI
@@ -6,12 +61,12 @@ Các src CLK chính sử dụng trong RCC:
 
 Trong đa số trường hợp sử dụng HSI/HSE làm nguồn CLK chính cho hệ thống.
 
-# CLK tree
+## CLK tree
 Kiểm tra trong trng:
 - [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 12
 - [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 93
 
-# HSI
+## HSI
 Kiểm tra trong các nguồn:
 - [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 54
 - [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 95
@@ -29,7 +84,7 @@ Nguyên tắc sử dụng bộ HSI:
 - Bật HSI: đặt HSION bit trong RCC_CR (RCC_CR->HSION = 1)
 - Chờ HSI sẵn sàng: kiểm tra HSIRDY bit trong RCC_CR (RCC_CR->HSIRDY == 1)
 
-# HSE
+## HSE
 Kiểm tra trong các nguồn:
 - [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 52
 
@@ -41,7 +96,7 @@ Nguyên tắc sử dụng bộ HSE:
   - Ngắt có thể tạo ra nếu enable trong RCC_CIR 
 
 
-# SYSCLK select
+## SYSCLK select
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 97
 
 Nguyên tắc lựa chọn nguồn SYSCLK:
@@ -52,7 +107,7 @@ Nguyên tắc lựa chọn nguồn SYSCLK:
 
 Lưu ý: Nếu đã có nguồn clock khác đang sử dụng trực tiếp hoặc thông qua PLL thì không thể stop 
 
-# Clock Security System (CSS)
+## Clock Security System (CSS)
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 97
 
 CSS có thể kích hoạt phần mềm, enable sau startup delay của HSE, disable khi HSE tắt.
@@ -75,7 +130,7 @@ Trong trường hợp `HSE làm nguồn cho PLL, PLL làm nguồn SYSCLK`, khi H
 2. `SYSCLK tự động chuyển sang HSI`.
 3. Thực hiện các bước giải quyết.
 
-# MCO
+## MCO
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 98
 
 MCO (Microcontroller Clock Output) dùng để xuất một trong các nguồn clock nội bộ ra chân GPIO để sử dụng bên ngoài.
@@ -86,7 +141,7 @@ Nguồn có thể xuất ra chân MCO bao gồm:
 - HSE
 - PLL/2
 
-# Quy trình select và khởi động nguồn clock chính cho hệ thống
+### Quy trình select và khởi động nguồn clock chính cho hệ thống
 0. reset STM32, lúc này nguồn SYSCLK là HSI
 1. reset RCC_CR, RCC_CFGR, RCC_CIR về mặc định
 2. `RCC_CFGR->SW = 00;` // Chọn HSI làm nguồn SYSCLK tạm thời
@@ -101,7 +156,7 @@ Nguồn có thể xuất ra chân MCO bao gồm:
 9. `RCC_CIR->HSERDYC = 1;` // Xóa cờ ngắt HSE ready
 10. Tiếp tục cấu hình các nguồn clock khác nếu cần thiết
 
-# Quy trình xử lý khi HSE lỗi
+### Quy trình xử lý khi HSE lỗi
 1. Xảy ra lỗi HSE
    -  Nghĩa là khi xảy ra lỗi HSE, HSE tự động tắt
    -  `RCC_CR->CSSON = 0;` // Tắt CSS để tránh lặp ngắt
@@ -115,7 +170,7 @@ Nguồn có thể xuất ra chân MCO bao gồm:
 6. Khi HSI ready
    - `RCC_CIR->HSIRDYF = 1;` // Cờ từ hệ thống ngắt
    - `RCC_CR->HSIRDY = 1;` // Cờ từ RCC_CR
-7. RCC_CIR->HSIRDYC = 1; // Xóa cờ ngắt HSI ready
+7. `RCC_CIR->HSIRDYC = 1;` // Xóa cờ ngắt HSI ready
 8. Thực hiện các bước xử lý khác nếu cần thiết
 
    
