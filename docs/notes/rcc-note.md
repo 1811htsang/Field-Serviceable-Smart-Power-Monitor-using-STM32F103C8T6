@@ -5,7 +5,9 @@ Chia ra làm 3 loại:
 - Backup domain reset
 
 ## System reset
-Reset tất cả thanh ghi về giá trị mặc định, ngoại trừ thanh ghi trong khu vực CSR và Backup domain
+Reset tất cả thanh ghi về giá trị mặc định, ngoại trừ thanh ghi trong khu vực CSR và Backup domain. 
+
+**Lưu ý**: System reset này không có nghĩa là reset tất cả mọi thứ về trạng thái ban đầu như lúc mới cấp nguồn (Power-on reset) mà chỉ thực hiện reset các thanh ghi trong hệ thống ngoại trừ các thanh ghi trong khu vực CSR và Backup domain.
 
 Chỉ xảy ra reset với các trường hợp:
 1. NRST pin bị kéo thấp (này là external)
@@ -51,6 +53,33 @@ Kiểm chứng thông tin này [rm0008-stm32](/docs/references/rm0008-stm32-f101
 
 ## Backup domain reset
 Chỉ xảy ra khi có tín hiệu SWRST hoặc VDD/VBAT bật lên sau khi bị tắt trước đó.
+
+## Quy trình reset khi sử dụng chân NRST (cần lưu ý lại)
+1. NRST pin bị kéo thấp
+2. RCC_CSR->PINRSTF = 1; // Cờ từ RCC_CSR
+3. Thông báo reset tự động đến các module
+4. Hiển thị tín hiệu reset trên pin / console log nếu cần thiết
+5. RCC_CSR->RMVF = 1; // Xóa cờ reset
+6. NRST pin trở về mức cao
+
+**Lưu ý**: Trong schematics và mạch thật thì sẽ có 1 chân R (Reset) và 1 nút Reset riêng biệt. Chưa làm rõ thông tin về tín hiệu NRST sẽ thuộc về chân R hay nút Reset.
+
+**Bổ sung**: Sau khi tìm hiểu các tài liệu trực tuyến, có thể rút ra kết luận như sau:
+- Chân NRST là chân vật lý trên MCU, dùng để nhận tín hiệu reset từ bên ngoài (như nút reset, mạch reset,...)
+- Nút Reset là nút nhấn được thiết kế sẵn trên board mạch, kết nối với chân NRST để tạo tín hiệu reset.
+
+Kiểm chứng thông tin này trong [đây](https://dev.to/carolineee/what-is-the-r-pin-on-the-stm32-blue-pill-1ma5).
+
+Do đó, khi nhấn nút Reset, nó sẽ kéo chân NRST xuống mức thấp, từ đó kích hoạt quá trình reset trên MCU mà không cần bổ sung mạch reset phức tạp.
+
+## Quy trình reset khi sử dụng Software reset
+1. SCB_AIRCR->VECTKEY[31:16] = 0x5FA // Khóa ghi để mở quyền truy cập viết vào thanh ghi AIRCR
+2. SCB_AIRCR->SYSRESETREQ[2] = 1; // Yêu cầu system reset
+
+**Lưu ý**: Do có các báo cáo bổ sung về ARM Cortex-M4 lỗi khi thực hiện Software reset (*thông qua sử dụng hàm `NVIC_SystemReset()`*), nên cần kiểm tra kỹ lưỡng trong quá trình triển khai bằng việc đảm bảo không xảy ra quá trình thao tác với bộ nhớ trong khi thực hiện Software reset, hoặc ràng buộc các thao tác này phải hoàn thành trước khi gọi hàm reset.
+
+Kiểm chứng thông tin tại [đây](https://www.systemonchips.com/arm-cortex-m4-system-reset-failure-via-nvic_systemreset-function/).
+
 
 # Clock System trên STM32F1xx
 Các src CLK chính sử dụng trong RCC:
