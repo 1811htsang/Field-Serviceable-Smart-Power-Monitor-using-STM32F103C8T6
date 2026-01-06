@@ -31,14 +31,14 @@ Tình trạng dừng:
 Tính năng này được kích hoạt thông qua option bits, giúp cho IWDG luôn hoạt động ngay sau khi khởi động hệ thống, tạo ra reset trừ khi IWDG_KR được ghi bởi chương trình trước khi bộ đếm đạt giá trị `0x0000`.
 
 ## Bảo vệ quyền truy cập thanh ghi
-`IWDG_PR` và `IWDG_RLR` được bảo vệ để tránh ghi nhầm. Ghi 0x5555 vào `IWDG_KR` để mở khóa.
+`IWDG_PR` và `IWDG_RLR` được bảo vệ để tránh ghi nhầm. Ghi `0x5555` vào `IWDG_KR` để mở khóa.
 
 Lưu ý rằng, bất kỳ giá trị khác `0x5555` sẽ không mở khóa được.
 
 Ngoài ra, IWDG cũng được thiết kế bổ sung 1 thanh ghi trạng thái để chỉ ra sự cập nhật prescaler hoặc reload value đang diễn ra.
 
 ## Chế độ debug
-Trong chế độ debug, bộ đếm IWDG có thể được tạm dừng hoặc tiếp tục hoạt động dựa trên cấu hình trong thanh ghi DBG_IWDG_STOP.
+Trong chế độ debug, bộ đếm IWDG có thể được tạm dừng hoặc tiếp tục hoạt động dựa trên cấu hình trong thanh ghi `DBG_IWDG_STOP`.
 
 ## Thời gian timeout
 Phụ thuộc vào giá trị prescaler và bit `PR[2:0]`.
@@ -46,8 +46,13 @@ Phụ thuộc vào giá trị prescaler và bit `PR[2:0]`.
 Bảng tin này có trong [rm0008](../references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 495, 496.
 
 ## Quy trình sử dụng IWDG
-1. Kích hoạt IWDG bằng cách ghi 0xCCCC vào `IWDG_KR` ~ `IWDG->KEY = 0xCCCC;`
-2. 
+1. Khởi động nguồn LSI.
+2. Mở quyền truy cập cho `IWDG_PR` và `IWDG_RLR` bằng cách ghi `0x5555` vào `IWDG_KR`.
+3. Cấu hình prescaler trong `IWDG_PR`.
+4. Cấu hình giá trị tải lại trong `IWDG_RLR`.
+5. Đợi hoàn tất cấu hình từ `IWDG_SR`.
+6. Khởi động IWDG bằng cách ghi `0xCCCC` vào `IWDG_KR`.
+7. Trong vòng lặp chính, ghi `0xAAAA` vào `IWDG_KR` để tải lại bộ đếm.
 
 # Window Watchdog (WWDG)
 Dùng để giám sát lỗi chương trình, thường được tại ra bởi các lỗi như vòng lặp vô hạn hoặc lỗi logic.
@@ -129,3 +134,12 @@ Ví dụ bổ sung có trong [rm0008](../references/rm0008-stm32-f101-f102-f103-
 
 ## Chế độ debug
 Trong chế độ debug, bộ đếm WWDG có thể được tạm dừng hoặc tiếp tục hoạt động dựa trên cấu hình trong thanh ghi `DBG_WWDG_STOP`.
+
+## Quy trình sử dụng WWDG
+1. Khởi động nguồn PCLK1.
+2. Cấu hình ngắt cho EWI nếu cần.
+3. Cấu hình prescaler trong `WWDG_CFR`.
+4. Cấu hình giá trị cửa sổ trong `WWDG_CFR`.
+5. Cấu hình giá trị bộ đếm lùi trong `WWDG_CR`.
+6. Kích hoạt WWDG bằng cách set bit `WDGA` trong `WWDG_CR`.
+7. Trong vòng lặp chính, ghi giá trị mới vào `WWDG_CR` để tải lại bộ đếm lùi trong khung cửa sổ xác định.

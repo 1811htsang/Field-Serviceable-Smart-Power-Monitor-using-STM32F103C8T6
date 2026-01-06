@@ -114,8 +114,7 @@ Nguyên tắc sử dụng bộ HSI:
 - Chờ HSI sẵn sàng: kiểm tra HSIRDY bit trong RCC_CR (`RCC_CR->HSIRDY == 1`)
 
 ## HSE
-Kiểm tra trong các nguồn:
-- [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 52
+Kiểm tra trong nguồn [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 52
 
 Nguồn này sử dụng bộ thạch anh ngoài cho tần số từ 4MHz đến 16MHz, cho ra tần số chính xác cao hơn HSI.
 
@@ -125,7 +124,7 @@ Nguyên tắc sử dụng bộ HSE:
   - Ngắt có thể tạo ra nếu enable trong RCC_CIR 
 
 ## LSI
-Bổ sung sau
+
 
 ## SYSCLK select
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 97
