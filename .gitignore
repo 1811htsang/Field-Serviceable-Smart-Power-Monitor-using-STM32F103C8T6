@@ -1,48 +1,19 @@
-project-obsidianspace/.obsidian/app.json
-project-obsidianspace/.obsidian/appearance.json
-project-obsidianspace/.obsidian/community-plugins.json
-project-obsidianspace/OBSIDIAN-README.md
-project-obsidianspace/.obsidian/core-plugins.json
-project-obsidianspace/.obsidian/workspace.json
-project-obsidianspace/.obsidian/plugins/obsidian-excalidraw-plugin/data.json
-project-obsidianspace/.obsidian/plugins/obsidian-excalidraw-plugin/main.js
-project-obsidianspace/.obsidian/plugins/obsidian-excalidraw-plugin/manifest.json
-project-obsidianspace/.obsidian/plugins/obsidian-excalidraw-plugin/styles.css
-project-obsidianspace/.obsidian/plugins/obsidian-local-file-interface-plugin/main.js
-project-obsidianspace/.obsidian/plugins/obsidian-local-file-interface-plugin/manifest.json
-project-obsidianspace/.obsidian/themes/Tokyo Night/manifest.json
-project-obsidianspace/.obsidian/themes/Tokyo Night/theme.css
-project-obsidianspace/notes/to-do.md
-project-obsidianspace/references/mastering-stm32-book.pdf
-project-obsidianspace/references/pm0056-stm32-f10-f20-f21-l1-cortex-m3-programming-manual.pdf
-project-obsidianspace/notes/rcc-note.md
-project-obsidianspace/references/production-stm32-f103x8-f103xb-datasheet.pdf
-project-obsidianspace/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf
+# Ignore Obsidian configuration files
+project-obsidianspace/.obsidian/
+
+# Ignore project-artifactspace build and IDE files
+project-artifactspace/.settings/
+project-artifactspace/Debug/
+project-artifactspace/Inc/
+project-artifactspace/Debug/
+project-artifactspace/Startup/
 project-artifactspace/.cproject
 project-artifactspace/.project
 project-artifactspace/STM32F103C8TX_FLASH.ld
-project-artifactspace/.settings/language.settings.xml
-project-artifactspace/Debug/Custom-Bootloader-Bare-metal-Drivers-on-STM32F103C8T6.elf
-project-artifactspace/Debug/Custom-Bootloader-Bare-metal-Drivers-on-STM32F103C8T6.list
-project-artifactspace/Debug/Custom-Bootloader-Bare-metal-Drivers-on-STM32F103C8T6.map
-project-artifactspace/Debug/makefile
-project-artifactspace/Debug/objects.list
-project-artifactspace/Debug/objects.mk
-project-artifactspace/Debug/sources.mk
-project-artifactspace/Debug/Src/main.cyclo
-project-artifactspace/Debug/Src/main.d
-project-artifactspace/Debug/Src/main.o
-project-artifactspace/Debug/Src/main.su
-project-artifactspace/Debug/Src/subdir.mk
-project-artifactspace/Debug/Src/syscalls.cyclo
-project-artifactspace/Debug/Src/syscalls.d
-project-artifactspace/Debug/Src/syscalls.o
-project-artifactspace/Debug/Src/syscalls.su
-project-artifactspace/Debug/Src/sysmem.cyclo
-project-artifactspace/Debug/Src/sysmem.d
-project-artifactspace/Debug/Src/sysmem.o
-project-artifactspace/Debug/Src/sysmem.su
-project-artifactspace/Debug/Startup/startup_stm32f103c8tx.d
-project-artifactspace/Debug/Startup/startup_stm32f103c8tx.o
-project-artifactspace/Debug/Startup/subdir.mk
-project-artifactspace/Startup/startup_stm32f103c8tx.s
+
+# Ignore project-halartifactspace build and IDE files
+project-halartifactspace/Drivers/
+project-halartifactspace/EWARM/
+project-halartifactspace/.mxproject
+project-halartifactspace/.project
+project-halartifactspace/project-halartifactspace.ioc
