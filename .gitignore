@@ -4,8 +4,6 @@ project-obsidianspace/.obsidian/
 # Ignore project-artifactspace build and IDE files
 project-artifactspace/.settings/
 project-artifactspace/Debug/
-project-artifactspace/Inc/
-project-artifactspace/Debug/
 project-artifactspace/Startup/
 project-artifactspace/.cproject
 project-artifactspace/.project
