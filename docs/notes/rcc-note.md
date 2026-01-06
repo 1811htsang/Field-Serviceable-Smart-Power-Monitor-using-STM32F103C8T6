@@ -114,8 +114,7 @@ Nguyên tắc sử dụng bộ HSI:
 - Chờ HSI sẵn sàng: kiểm tra HSIRDY bit trong RCC_CR (`RCC_CR->HSIRDY == 1`)
 
 ## HSE
-Kiểm tra trong các nguồn:
-- [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 52
+Kiểm tra trong nguồn [prod-stm32](/docs/references/production-stm32-f103x8-f103xb-datasheet.pdf) trang 52
 
 Nguồn này sử dụng bộ thạch anh ngoài cho tần số từ 4MHz đến 16MHz, cho ra tần số chính xác cao hơn HSI.
 
@@ -124,6 +123,17 @@ Nguyên tắc sử dụng bộ HSE:
 - Chờ HSE sẵn sàng: kiểm tra HSERDY bit trong RCC_CR (`RCC_CR->HSERDY == 1`)
   - Ngắt có thể tạo ra nếu enable trong RCC_CIR 
 
+## LSI
+LSI là nguồn clock năng lượng thấp có thể dùng trong chế độ tiết kiệm năng lượng cho IWDG và AWU (Auto-Wakeup Unit) với tần số khoảng 40kHz (range 30-60kHz).
+
+Lưu ý rằng việc hiệu chỉnh LSI chỉ dành cho các thiết bị có mật độ thiết kế từ cao, XL và CL.
+
+Nguyên tắc sử dụng bộ LSI:
+- Bật LSI: đặt LSION bit trong RCC_CSR (`RCC_CSR->LSION = 1`).
+- Chờ LSI sẵn sàng: kiểm tra LSIRDY bit trong RCC_CSR (`RCC_CSR->LSIRDY == 1`).
+  - Ngắt có thể tạo ra nếu enable trong RCC_CIR.
+
+Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 96
 
 ## SYSCLK select
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 97
