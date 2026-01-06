@@ -10,6 +10,7 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Bổ sung các tài liệu căn bản của dự án
 - [x] Tìm hiểu đầy đủ về Clock System
 - [x] Tìm hiểu về reset và khởi động STM32
+- [x] Tìm hiểu về Watchdog Timer
 - [ ] Thiết lập môi trường & Linker Script
 - [ ] Viết Driver RCC (Reset and Clock Control)
 - [ ] Viết Driver GPIO
