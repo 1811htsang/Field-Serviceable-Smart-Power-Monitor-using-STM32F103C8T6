@@ -124,7 +124,16 @@ Nguyên tắc sử dụng bộ HSE:
   - Ngắt có thể tạo ra nếu enable trong RCC_CIR 
 
 ## LSI
+LSI là nguồn clock năng lượng thấp có thể dùng trong chế độ tiết kiệm năng lượng cho IWDG và AWU (Auto-Wakeup Unit) với tần số khoảng 40kHz (range 30-60kHz).
 
+Lưu ý rằng việc hiệu chỉnh LSI chỉ dành cho các thiết bị có mật độ thiết kế từ cao, XL và CL.
+
+Nguyên tắc sử dụng bộ LSI:
+- Bật LSI: đặt LSION bit trong RCC_CSR (`RCC_CSR->LSION = 1`).
+- Chờ LSI sẵn sàng: kiểm tra LSIRDY bit trong RCC_CSR (`RCC_CSR->LSIRDY == 1`).
+  - Ngắt có thể tạo ra nếu enable trong RCC_CIR.
+
+Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 96
 
 ## SYSCLK select
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 97
