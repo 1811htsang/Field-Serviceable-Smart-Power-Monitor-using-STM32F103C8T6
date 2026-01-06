@@ -124,6 +124,8 @@ Nguyên tắc sử dụng bộ HSE:
 - Chờ HSE sẵn sàng: kiểm tra HSERDY bit trong RCC_CR (`RCC_CR->HSERDY == 1`)
   - Ngắt có thể tạo ra nếu enable trong RCC_CIR 
 
+## LSI
+Bổ sung sau
 
 ## SYSCLK select
 Kiểm tra trong nguồn [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 97

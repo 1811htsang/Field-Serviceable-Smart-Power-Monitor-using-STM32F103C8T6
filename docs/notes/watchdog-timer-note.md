@@ -45,6 +45,10 @@ Phụ thuộc vào giá trị prescaler và bit `PR[2:0]`.
 
 Bảng tin này có trong [rm0008](../references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 495, 496.
 
+## Quy trình sử dụng IWDG
+1. Kích hoạt IWDG bằng cách ghi 0xCCCC vào `IWDG_KR` ~ `IWDG->KEY = 0xCCCC;`
+2. 
+
 # Window Watchdog (WWDG)
 Dùng để giám sát lỗi chương trình, thường được tại ra bởi các lỗi như vòng lặp vô hạn hoặc lỗi logic.
 
