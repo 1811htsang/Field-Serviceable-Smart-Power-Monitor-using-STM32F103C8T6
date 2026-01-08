@@ -180,7 +180,7 @@ Nguồn có thể xuất ra chân MCO bao gồm:
 - HSE
 - PLL/2
 
-### Quy trình select và khởi động nguồn clock chính cho hệ thống
+# Quy trình select và khởi động nguồn clock chính cho hệ thống
 0. reset STM32, lúc này nguồn SYSCLK là HSI
 1. reset RCC_CR, RCC_CFGR, RCC_CIR về mặc định
 2. `RCC_CFGR->SW = 00;` // Chọn HSI làm nguồn SYSCLK tạm thời
@@ -195,7 +195,7 @@ Nguồn có thể xuất ra chân MCO bao gồm:
 9. `RCC_CIR->HSERDYC = 1;` // Xóa cờ ngắt HSE ready
 10. Tiếp tục cấu hình các nguồn clock khác nếu cần thiết
 
-### Quy trình xử lý khi HSE lỗi
+# Quy trình xử lý khi HSE lỗi
 1. Xảy ra lỗi HSE
    -  Nghĩa là khi xảy ra lỗi HSE, HSE tự động tắt
    -  `RCC_CR->CSSON = 0;` // Tắt CSS để tránh lặp ngắt
