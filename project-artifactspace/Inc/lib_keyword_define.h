@@ -26,5 +26,13 @@
 #define RESET LOW
 #define ul unsigned long
 
+typedef enum
+{
+  STAT_OK       = 0x00U,
+  STAT_ERROR    = 0x01U,
+  STAT_BUSY     = 0x02U,
+  STAT_TIMEOUT  = 0x03U
+} RETR_STAT;
+
 #endif /* LIB_KEYWORD_DEFINE_H_ */
 

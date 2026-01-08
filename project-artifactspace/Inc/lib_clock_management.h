@@ -25,9 +25,10 @@
 // Khai báo cấu trúc thanh ghi
 
 /*
-  Ghi chú:
-  STM32 sử dụng kiểu little-endian, nghĩa là bit thấp nhất được đánh số 0.
-*/
+ * Ghi chú:
+ * STM32 sử dụng kiểu little-endian, 
+ * nghĩa là bit thấp nhất được đánh số 0. 
+ */
 
 typedef __vo struct SCB_AIRCR_REG
 {
@@ -109,9 +110,18 @@ typedef __vo struct RCC_REGS
 } RCC_REGS;
 
 // Tạo con trỏ tới thanh ghi
+
 #define SCB_AIRCR_REG_PTR ((SCB_AIRCR_REG *)SCB_AIRCR_REG_ADDR)
 #define RCC_REGS_PTR ((RCC_REGS *)RCC_REGS_BASEADDR)
 
-// Khai báo các hàm tại bên dưới (lát làm)
+// Khai báo các hàm tại bên dưới
+
+RETR_STAT RCC_CLK_Init(void);
+RETR_STAT RCC_CLK_DeInit(void);
+
+/**
+ * ghi chú:
+ * bổ sung các khai báo sử dụng riêng cho LSI, HSI, HSE nhưng thống nhất param trong hàm init/deinit chung
+ */
 
 #endif /* LIB_RCC_H_ */
