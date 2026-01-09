@@ -7,6 +7,7 @@ The obsidianspace of the project **Custom-Bootloader-Bare-metal-Drivers-on-STM32
 Below is short explanation of the folder structure in the obsidianspace.
 
 ```
-├── references
-└── excalidraws
+├── excalidraws
+├── notes
+└── references
 ```
