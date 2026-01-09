@@ -25,6 +25,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal_def.h"
+#include "lib_include_management.h"
 
 
 /** @addtogroup STM32F1xx_HAL_Driver
