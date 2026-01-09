@@ -2,15 +2,15 @@
 Phần ghi chú này trình bày các hướng dẫn nhằm chuẩn hóa quá trình viết mã nguồn và các hạng mục hỗ trợ cần lưu ý khi phát triển phần mềm. Mục tiêu là đảm bảo tính nhất quán, dễ bảo trì và nâng cao chất lượng mã nguồn trong các dự án phần mềm.
 
 # Phương pháp tiếp cận
-Đối với dự án này, ở thời điểm ngày 9/1/2025 là tiếp cận theo hướng Master Header File. 
+Quá trình viết mã nguồn nên tuân theo các nguyên tắc sau:
+- Tính nhất quán: Sử dụng cùng một phong cách viết mã nguồn, bao gồm cách đặt tên biến, hàm và cấu trúc thư mục.
+- Tính dễ đọc: Viết mã nguồn sao cho dễ hiểu, sử dụng các chú thích hợp lý để giải thích các phần phức tạp.
+- Tính tái sử dụng: Thiết kế mã nguồn sao cho các thành phần có thể tái sử dụng trong các dự án khác nhau.
+- Tính kiểm thử: Đảm bảo mã nguồn có thể được kiểm thử dễ dàng thông qua các unit test và integration test.
 
-Trong đó, phương pháp này tập trung vào việc tạo ra các file header chính (master header files) để quản lý và tổ chức các khai báo, định nghĩa và cấu trúc dữ liệu quan trọng trong dự án. Các file header chính này sẽ đóng vai trò như một điểm trung tâm để các phần khác của mã nguồn có thể tham chiếu và sử dụng.
+Ngoài ra, một lưu ý cần tránh trong thiết kế chính là sử dụng các master header file để chứa tất cả các khai báo. Điều này có thể dẫn đến việc phụ thuộc lẫn nhau giữa các module và làm tăng độ phức tạp của mã nguồn.
 
-Các header file chính này sẽ không bao gồm các cài đặt chi tiết của hàm hay logic phức tạp, mà thay vào đó sẽ tập trung vào việc cung cấp các khai báo và định nghĩa cần thiết để đảm bảo tính nhất quán và dễ dàng bảo trì mã nguồn.
-
-Một điểm cần lưu ý chính, cách tiếp cận này là hardware specific và không áp dụng cho các thư viện bên thứ ba (third-party libraries), do đó vấn đề về scalability sẽ không được xét đến trong dự án này.
-
-Tuy nhiên, trong tương lai nếu dự án phát triển lớn hơn và cần tích hợp các thư viện bên thứ ba, có thể xem xét việc áp dụng các phương pháp quản lý mã nguồn khác như modular programming hoặc sử dụng các công cụ quản lý phụ thuộc (dependency management tools) để đảm bảo tính mở rộng và khả năng tái sử dụng của mã nguồn.
+Nên đảm bảo rằng các header riêng có thể tự chứa tất cả các khai báo cần thiết để hoạt động độc lập, giúp giảm thiểu sự phụ thuộc và tăng tính mô-đun của mã nguồn.
 
 # Cấu trúc mã nguồn
 Trong quá trình thiết kế mã nguồn, sẽ tồn tại rất nhiều file mã nguồn khác nhau, bao gồm các file header (.h) và file cài đặt (.c). 
