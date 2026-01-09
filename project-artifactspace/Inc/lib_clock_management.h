@@ -1,5 +1,5 @@
 /*
- * lib_rcc.h
+ * lib_clock_management.h
  *
  *  Created on: Jan 6, 2026
  *      Author: shanghuang
@@ -227,6 +227,12 @@
     ul SYSCLK_Source; // Chọn nguồn clock hệ thống
   } RCC_CLK_Init_Param;
 
+  // Khai báo các kiểm tra tham số đầu vào nội bộ
+  #define IS_RCC_SYSCLK_SOURCE(SOURCE) (((SOURCE) == RCC_SYSCLK_SOURCE_HSI) || \
+                                        ((SOURCE) == RCC_SYSCLK_SOURCE_HSE) || \
+                                        ((SOURCE) == RCC_SYSCLK_SOURCE_PLL))
+  #define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
+
   // Khai báo các hàm tại bên dưới
 
   RETR_STAT RCC_CLK_Init(void);
@@ -235,10 +241,4 @@
   void RCC_CSS_Disable(void);
   void RCC_NMI_IRQ_Handler(void);
   void RCC_CSS_Callback(void);
-
-  /**
-   * ghi chú:
-   * bổ sung các khai báo nội bộ để khi định nghĩa hàm có thể sử dụng
-   */
-
-#endif /* LIB_RCC_H_ */
+#endif /* LIB_CLOCK_MANAGEMENT_H_ */
