@@ -42,6 +42,7 @@
   #define ul unsigned long
   #define BLANK_REG uint32_t
   #define __weak __attribute__((weak))
+  #define DEBUG_MODE ENABLE
 
   #ifdef  USE_FULL_ASSERT
     #define assert_param(expr) ((expr) ? (void)0u : assert_failed((uint8_t *)__FILE__, __LINE__))

@@ -225,21 +225,39 @@
   // Khai báo cấu trúc tham số hàm khởi tạo
   typedef struct
   {
-    ul SYSCLK_Source; // Chọn nguồn clock hệ thống
+    ul CLK_Source; // Chọn nguồn clock hệ thống
   } RCC_CLK_Init_Param;
 
   // Khai báo các kiểm tra tham số đầu vào nội bộ
   #define IS_RCC_SYSCLK_SOURCE(SOURCE) (((SOURCE) == RCC_SYSCLK_SOURCE_HSI) || \
-                                        ((SOURCE) == RCC_SYSCLK_SOURCE_HSE) || \
-                                        ((SOURCE) == RCC_SYSCLK_SOURCE_PLL))
+                                        ((SOURCE) == RCC_SYSCLK_SOURCE_HSE))
   #define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
+
+  // Khai báo IQRHandler 
+  #define RCC_NMI_IRQ_Handler NMI_Handler
+  #define RCC_GNR_IRQ_Handler RCC_IRQHandler
 
   // Khai báo các hàm thành phần 
 
-  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param init_param);
-  RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param init_param);
+  // >> Hàm khởi tạo clock hệ thống
+  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param);
+
+  // >> Hàm de-initialize clock hệ thống
+  RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param);
+
+  // >> Hàm bật CSS
   void RCC_CSS_Enable(void);
+
+  // >> Hàm tắt CSS
   void RCC_CSS_Disable(void);
+
+  // >> Hàm xử lý ngắt NMI do CSS
   void RCC_NMI_IRQ_Handler(void);
-  void RCC_CSS_Callback(void);
+
+  // >> Hàm xử lý ngắt chung RCC
+  void RCC_GNR_IRQ_Handler(void);
+
+  // >> Hàm callback CSS weak
+  __weak void RCC_CSS_Callback(void);
+
 #endif /* LIB_CLOCK_MANAGEMENT_H_ */
