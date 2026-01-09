@@ -20,8 +20,7 @@
   #define LIB_KEYWORD_DEFINE_H_
 
   // Khai báo các thư viện sử dụng chung
-
-  #include "lib_include_management.h"
+  #include <stdint.h>
 
   // Khai báo các định nghĩa dùng chung
 

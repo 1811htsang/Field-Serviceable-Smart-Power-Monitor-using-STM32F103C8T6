@@ -233,7 +233,7 @@
                                         ((SOURCE) == RCC_SYSCLK_SOURCE_PLL))
   #define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
 
-  // Khai báo các hàm tại bên dưới
+  // Khai báo các hàm thành phần 
 
   RETR_STAT RCC_CLK_Init(void);
   RETR_STAT RCC_CLK_DeInit(void);
