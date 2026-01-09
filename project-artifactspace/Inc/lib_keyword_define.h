@@ -20,6 +20,7 @@
   #define LIB_KEYWORD_DEFINE_H_
 
   // Khai báo các thư viện sử dụng chung
+
   #include <stdint.h>
 
   // Khai báo các định nghĩa dùng chung
@@ -40,12 +41,13 @@
   #define u unsigned
   #define ul unsigned long
   #define BLANK_REG uint32_t
+  #define __weak __attribute__((weak))
 
   #ifdef  USE_FULL_ASSERT
-    #define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
+    #define assert_param(expr) ((expr) ? (void)0u : assert_failed((uint8_t *)__FILE__, __LINE__))
     void assert_failed(uint8_t* file, uint32_t line);
   #else
-    #define assert_param(expr) ((void)0U)
+    #define assert_param(expr) ((void)0u)
   #endif /* USE_FULL_ASSERT */
 
   // Khai báo kiểu trả về chung

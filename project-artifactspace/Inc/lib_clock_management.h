@@ -10,6 +10,7 @@
 
   // Khai báo các thư viện sử dụng chung
 
+  #include <stdint.h>
   #include "lib_keyword_define.h"
 
   // Khai báo địa chỉ ngoại vi
@@ -235,8 +236,8 @@
 
   // Khai báo các hàm thành phần 
 
-  RETR_STAT RCC_CLK_Init(void);
-  RETR_STAT RCC_CLK_DeInit(void);
+  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param init_param);
+  RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param init_param);
   void RCC_CSS_Enable(void);
   void RCC_CSS_Disable(void);
   void RCC_NMI_IRQ_Handler(void);
