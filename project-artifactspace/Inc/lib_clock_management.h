@@ -8,6 +8,13 @@
 #ifndef LIB_CLOCK_MANAGEMENT_H_
   #define LIB_CLOCK_MANAGEMENT_H_
 
+  /**
+   * Ghi chú:
+   * Nhớ bổ sung thêm việc phân tách các khởi tạo
+   * nhằm tuân theo tiêu chuẩn 3 lớp HAL
+   * Điều này giúp việc bảo trì và mở rộng dễ dàng hơn trong tương lai
+   */
+
   // Khai báo các thư viện sử dụng chung
 
   #include <stdint.h>
