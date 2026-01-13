@@ -230,12 +230,14 @@
    */
 
   // Khai báo cấu trúc tham số hàm khởi tạo
+  
   typedef struct
   {
     ul CLK_Source; // Chọn nguồn clock hệ thống
   } RCC_CLK_Init_Param;
 
   // Khai báo các kiểm tra tham số đầu vào nội bộ
+  
   #define IS_RCC_SYSCLK_SOURCE(SOURCE) (((SOURCE) == RCC_SYSCLK_SOURCE_HSI) || \
                                         ((SOURCE) == RCC_SYSCLK_SOURCE_HSE))
   #define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
