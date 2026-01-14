@@ -1,0 +1,56 @@
+/*
+ * lib_clock_hal.h
+ *
+ *  Created on: Jan 14, 2026
+ *      Author: shanghuang
+ */
+
+#ifndef LIB_CLOCK_HAL_H_
+  #define LIB_CLOCK_HAL_H_
+
+  // Khai báo các thư viện sử dụng chung
+
+  	#include <lib_keyword_def.h>
+
+  // Khai báo cấu trúc tham số hàm khởi tạo
+
+		typedef struct
+		{
+			ul CLK_Source; // Chọn nguồn clock hệ thống
+		} RCC_CLK_Init_Param;
+
+  // Khai báo các kiểm tra tham số đầu vào nội bộ
+
+		#define IS_RCC_SYSCLK_SOURCE(SOURCE) (((SOURCE) == RCC_SYSCLK_SOURCE_HSI) || \
+																					((SOURCE) == RCC_SYSCLK_SOURCE_HSE))
+		#define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
+
+  // Khai báo IQRHandler
+
+		#define RCC_NMI_IRQ_Handler NMI_Handler
+		#define RCC_GNR_IRQ_Handler RCC_IRQHandler
+
+  // Khai báo các hàm thành phần
+
+		// >> Hàm khởi tạo clock hệ thống
+		RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param);
+
+		// >> Hàm de-initialize clock hệ thống
+		RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param);
+
+		// >> Hàm bật CSS
+		void RCC_CSS_Enable(void);
+
+		// >> Hàm tắt CSS
+		void RCC_CSS_Disable(void);
+
+		// >> Hàm xử lý ngắt NMI do CSS
+		void RCC_NMI_IRQ_Handler(void);
+
+		// >> Hàm xử lý ngắt chung RCC
+		void RCC_GNR_IRQ_Handler(void);
+
+		// >> Hàm callback CSS weak
+		__weak void RCC_CSS_Callback(void);
+
+#endif /* LIB_CLOCK_HAL_H_ */

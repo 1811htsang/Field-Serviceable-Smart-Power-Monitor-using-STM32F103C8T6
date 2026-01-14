@@ -10,8 +10,9 @@
 
   // Khai báo các thư viện sử dụng chung
 
-  #include "lib_keyword_define.h"
-  #include "lib_clock_management.h"
+  #include <lib_keyword_define.h>
+
+#include "lib_clock_management.h"
 
   /**
    * Ghi chú:

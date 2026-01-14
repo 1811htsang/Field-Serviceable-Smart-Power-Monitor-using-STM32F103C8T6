@@ -16,8 +16,8 @@
  ******************************************************************************
  */
 
-#ifndef LIB_KEYWORD_DEFINE_H_
-  #define LIB_KEYWORD_DEFINE_H_
+#ifndef LIB_KEYWORD_DEF_H_
+  #define LIB_KEYWORD_DEF_H_
 
   // Khai báo các thư viện sử dụng chung
 
@@ -61,5 +61,5 @@
     STAT_TIMEOUT  = 0x03U
   } RETR_STAT;
 
-#endif /* LIB_KEYWORD_DEFINE_H_ */
+#endif /* LIB_KEYWORD_DEF_H_ */
 

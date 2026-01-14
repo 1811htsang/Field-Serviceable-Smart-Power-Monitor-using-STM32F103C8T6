@@ -1,15 +1,19 @@
 /*
- * lib_clock_management.c
+ * lib_clock_hal.c
  *
  *  Created on: Jan 9, 2026
  *      Author: shanghuang
  */
 
 // Khai báo các thư viện sử dụng chung
+
 #include <stdint.h>
 #include <stdio.h>
-#include "lib_keyword_define.h"
-#include "lib_clock_management.h"
+#include <lib_clock_def.h>
+#include <lib_clock_hal.h>
+#include <lib_keyword_def.h>
+
+// Định nghĩa các hàm thành phần
 
 RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param) {
   
@@ -32,12 +36,12 @@ RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param) {
   }
 
   /**
-     * Ghi chú:
-     * Trong thiết phần cứng, việc kiểm tra hoạt động của HSI/HSE/LSI
-     * được thực hiện thông qua các flag hoặc là ngắt.
-     * Do đó, trong hàm khởi tạo này, ta chỉ cần thiết lập 
-     * và kiểm tra các flag tương ứng để đảm bảo nguồn clock được bật đúng cách.
-     */
+	 * Ghi chú:
+	 * Trong thiết phần cứng, việc kiểm tra hoạt động của HSI/HSE/LSI
+	 * được thực hiện thông qua các flag hoặc là ngắt.
+	 * Do đó, trong hàm khởi tạo này, ta chỉ cần thiết lập
+	 * và kiểm tra các flag tương ứng để đảm bảo nguồn clock được bật đúng cách.
+	 */
 
   switch (init_param->CLK_Source) {
 
