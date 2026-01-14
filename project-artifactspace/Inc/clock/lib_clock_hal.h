@@ -10,12 +10,12 @@
 
   // Khai báo các thư viện sử dụng chung
 
-  	#include <lib_keyword_def.h>
+  	#include "lib_keyword_def.h"
+		#include "clock/lib_clock_def.h"
 
   // Khai báo cấu trúc tham số hàm khởi tạo
 
-		typedef struct
-		{
+		tdf_strc RCC_CLK_Init_Param{
 			ul CLK_Source; // Chọn nguồn clock hệ thống
 		} RCC_CLK_Init_Param;
 
@@ -52,5 +52,14 @@
 
 		// >> Hàm callback CSS weak
 		__weak void RCC_CSS_Callback(void);
+
+		// >> Hàm kiểm tra clock HSI sẵn sàng
+		RETR_STAT RCC_IsHSIReady(void);
+
+		// >> Hàm kiểm tra clock HSE sẵn sàng
+		RETR_STAT RCC_IsHSEReady(void);
+
+		// >> Hàm kiểm tra clock LSI sẵn sàng
+		RETR_STAT RCC_IsLSIReady(void);
 
 #endif /* LIB_CLOCK_HAL_H_ */

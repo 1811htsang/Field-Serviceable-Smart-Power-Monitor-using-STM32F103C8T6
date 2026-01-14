@@ -17,8 +17,9 @@
 
   // Khai báo các thư viện sử dụng chung
 
-		#include <lib_keyword_def.h>
 		#include <stdint.h>
+		#include "lib_keyword_def.h"
+
   
 
   // Khai báo địa chỉ ngoại vi
@@ -40,93 +41,92 @@
 		* nghĩa là bit thấp nhất được đánh số 0.
 		*/
 
-		typedef struct RCC_CR_REG
+		tdf_strc RCC_CR_REG
 		{
-			__vo unsigned int HSION : 1;
-			__vo unsigned int HSIRDY : 1;
-			__vo unsigned int RESERVED0 : 1;
-			__vo unsigned int HSITRIM : 5;
-			__vo unsigned int HSICAL : 8;
-			__vo unsigned int HSEON : 1;
-			__vo unsigned int HSERDY : 1;
-			__vo unsigned int HSEBYP : 1;
-			__vo unsigned int CSSON : 1;
-			__vo unsigned int RESERVED1 : 4;
-			__vo unsigned int PLLON : 1;
-			__vo unsigned int PLLRDY : 1;
-			__vo unsigned int RESERVED2 : 6;
-		} RCC_CR_REG;
+			__vo ui HSION : 1;
+			__vo ui HSIRDY : 1;
+			__vo ui RESERVED0 : 1;
+			__vo ui HSITRIM : 5;
+			__vo ui HSICAL : 8;
+			__vo ui HSEON : 1;
+			__vo ui HSERDY : 1;
+			__vo ui HSEBYP : 1;
+			__vo ui CSSON : 1;
+			__vo ui RESERVED1 : 4;
+			__vo ui PLLON : 1;
+			__vo ui PLLRDY : 1;
+			__vo ui RESERVED2 : 6;
+		} RCC_CR_REG_Typedef;
 
-		typedef struct RCC_CFGR_REG
+		tdf_strc RCC_CFGR_REG
 		{
-			__vo unsigned int SW : 2;
-			__vo unsigned int SWS : 2;
-			__vo unsigned int HPRE : 4;
-			__vo unsigned int PPRE1 : 3;
-			__vo unsigned int PPRE2 : 3;
-			__vo unsigned int ADCPRE : 2;
-			__vo unsigned int PLLSRC : 1;
-			__vo unsigned int PLLXTPRE : 1;
-			__vo unsigned int PLLMUL : 4;
-			__vo unsigned int USBPRE : 1;
-			__vo unsigned int RESERVED0 : 1;
-			__vo unsigned int MCO : 3;
-			__vo unsigned int RESERVED1 : 5;
-		} RCC_CFGR_REG;
+			__vo ui SW : 2;
+			__vo ui SWS : 2;
+			__vo ui HPRE : 4;
+			__vo ui PPRE1 : 3;
+			__vo ui PPRE2 : 3;
+			__vo ui ADCPRE : 2;
+			__vo ui PLLSRC : 1;
+			__vo ui PLLXTPRE : 1;
+			__vo ui PLLMUL : 4;
+			__vo ui USBPRE : 1;
+			__vo ui RESERVED0 : 1;
+			__vo ui MCO : 3;
+			__vo ui RESERVED1 : 5;
+		} RCC_CFGR_REG_Typedef;
 
-		typedef struct RCC_CIR_REG
+		tdf_strc RCC_CIR_REG
 		{
-			__vo unsigned int LSIRDYF : 1;
-			__vo unsigned int LSERDYF : 1;
-			__vo unsigned int HSIRDYF : 1;
-			__vo unsigned int HSERDYF : 1;
-			__vo unsigned int PLLRDYF : 1;
-			__vo unsigned int RESERVED0 : 2;
-			__vo unsigned int CSSF : 1;
-			__vo unsigned int LSIRDYIE : 1;
-			__vo unsigned int LSERDYIE : 1;
-			__vo unsigned int HSIRDYIE : 1;
-			__vo unsigned int HSERDYIE : 1;
-			__vo unsigned int PLLRDYIE : 1;
-			__vo unsigned int RESERVED1 : 3;
-			__vo unsigned int LSIRDYC : 1;
-			__vo unsigned int LSERDYC : 1;
-			__vo unsigned int HSIRDYC : 1;
-			__vo unsigned int HSERDYC : 1;
-			__vo unsigned int PLLRDYC : 1;
-			__vo unsigned int RESERVED2 : 2;
-			__vo unsigned int CSSC : 1;
-			__vo unsigned int RESERVED3 : 8;
-		} RCC_CIR_REG;
+			__vo ui LSIRDYF : 1;
+			__vo ui LSERDYF : 1;
+			__vo ui HSIRDYF : 1;
+			__vo ui HSERDYF : 1;
+			__vo ui PLLRDYF : 1;
+			__vo ui RESERVED0 : 2;
+			__vo ui CSSF : 1;
+			__vo ui LSIRDYIE : 1;
+			__vo ui LSERDYIE : 1;
+			__vo ui HSIRDYIE : 1;
+			__vo ui HSERDYIE : 1;
+			__vo ui PLLRDYIE : 1;
+			__vo ui RESERVED1 : 3;
+			__vo ui LSIRDYC : 1;
+			__vo ui LSERDYC : 1;
+			__vo ui HSIRDYC : 1;
+			__vo ui HSERDYC : 1;
+			__vo ui PLLRDYC : 1;
+			__vo ui RESERVED2 : 2;
+			__vo ui CSSC : 1;
+			__vo ui RESERVED3 : 8;
+		} RCC_CIR_REG_Typedef;
 
-		typedef struct RCC_CSR
+		tdf_strc RCC_CSR
 		{
-			__vo unsigned int LSION : 1;
-			__vo unsigned int LSIRDY : 1;
-			__vo unsigned int RESERVED0 : 22;
-			__vo unsigned int RMVF : 1;
-			__vo unsigned int RESERVED1 : 1;
-			__vo unsigned int PINRSTF : 1;
-			__vo unsigned int PORRSTF : 1;
-			__vo unsigned int SFTRSTF : 1;
-			__vo unsigned int IWDGRSTF : 1;
-			__vo unsigned int WWDGRSTF : 1;
-			__vo unsigned int LPWRRSTF : 1;
-		} RCC_CSR;
+			__vo ui LSION : 1;
+			__vo ui LSIRDY : 1;
+			__vo ui RESERVED0 : 22;
+			__vo ui RMVF : 1;
+			__vo ui RESERVED1 : 1;
+			__vo ui PINRSTF : 1;
+			__vo ui PORRSTF : 1;
+			__vo ui SFTRSTF : 1;
+			__vo ui IWDGRSTF : 1;
+			__vo ui WWDGRSTF : 1;
+			__vo ui LPWRRSTF : 1;
+		} RCC_CSR_REG_Typedef;
 
-		typedef struct RCC_REGS
+		tdf_strc RCC_REGS
   {
-    __vo RCC_CR_REG CR;
-    __vo RCC_CFGR_REG CFGR;
-    __vo RCC_CIR_REG CIR;
+    __vo RCC_CR_REG_Typedef CR;
+    __vo RCC_CFGR_REG_Typedef CFGR;
+    __vo RCC_CIR_REG_Typedef CIR;
     __vo BLANK_REG RESERVED[6];
-    __vo RCC_CSR CSR;
-  } RCC_REGS;
+    __vo RCC_CSR_REG_Typedef CSR;
+  } RCC_REGS_Typedef;
 
   // >> Tạo con trỏ tới ngoại vi
 
-  	#define RCC_REGS_PTR ((RCC_REGS *)RCC_REGS_BASEADDR)
-
+  	#define RCC_REGS_PTR ((RCC_REGS_Typedef *)RCC_REGS_BASEADDR)
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CR_REG
 
 		#define RCC_CR_REG_HSION_RESET RESET

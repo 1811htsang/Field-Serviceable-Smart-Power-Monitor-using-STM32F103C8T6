@@ -40,6 +40,8 @@
   #define FALSE LOW
   #define u unsigned
   #define ul unsigned long
+  #define ui unsigned int
+  #define tdf_strc typedef struct
   #define BLANK_REG uint32_t
   #define __weak __attribute__((weak))
   #define DEBUG_MODE ENABLE
@@ -58,7 +60,9 @@
     STAT_OK       = 0x00U,
     STAT_ERROR    = 0x01U,
     STAT_BUSY     = 0x02U,
-    STAT_TIMEOUT  = 0x03U
+    STAT_TIMEOUT  = 0x03U,
+    STAT_NRDY     = STAT_ERROR,
+    STAT_RDY      = STAT_OK
   } RETR_STAT;
 
 #endif /* LIB_KEYWORD_DEF_H_ */
