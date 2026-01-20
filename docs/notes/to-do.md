@@ -11,6 +11,8 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Tìm hiểu đầy đủ về Clock System
 - [x] Tìm hiểu về reset và khởi động STM32
 - [x] Tìm hiểu về Watchdog Timer
+- [x] Tìm hiểu về Unit Testing trong Embedded
+- [ ] Thiết kế Unit Test Framework cho dự án
 - [ ] Viết Driver RCC (Reset and Clock Control)
 - [ ] Viết Driver IWDG (Independent Watchdog)
 - [ ] Viết Driver GPIO
