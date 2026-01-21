@@ -18,6 +18,14 @@
 
   RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
 
+    /**
+     * Dependency của hàm:
+     * - RETR của RCC_IsLSIReady
+     * - RETR của RCC_CLK_Init
+     * - RETR của IWDG_IsPrescalerUpdated
+     * - RETR của IWDG_IsReloadValueUpdated
+     */
+
     if (DEBUG_MODE == ENABLE) {
       printf("IWDG_Init, DBG1: Check Null pointer.\n");
     }
@@ -58,7 +66,7 @@
     }
 
     // Cấu hình giá trị nạp lại
-    if (IWDG_IsReloaded() == STAT_RDY) {
+    if (IWDG_IsReloadValueUpdated() == STAT_RDY) {
       IWDG_REGS_PTR->RLR.RL = init_param->Reload;
     } else {
       return STAT_NRDY;
@@ -77,7 +85,7 @@
     // Tắt quyền ghi vào các thanh ghi cấu hình IWDG
     IWDG_DisableWriteAccess();
 
-    return STAT_OK;
+    return STAT_DONE;
   }
 
   RETR_STAT IWDG_DeInit(IWDG_Init_Param *init_param) {
@@ -96,7 +104,7 @@
     // Khóa quyền ghi vào các thanh ghi cấu hình IWDG
     IWDG_DisableWriteAccess();
 
-    return STAT_OK;
+    return STAT_DONE;
   }
 
   void IWDG_Start(void) {

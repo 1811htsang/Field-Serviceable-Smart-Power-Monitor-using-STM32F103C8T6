@@ -53,9 +53,14 @@
 			__vo IWDG_SR_REG_Typedef SR;
 		} IWDG_REGS_Typedef;
 
-	// >> Tạo con trỏ tới ngoại vi
+	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
 
-		#define IWDG_REGS_PTR ((IWDG_REGS_Typedef *) IWDG_REGS_BASEADDR)
+		#ifndef UNIT_TEST
+			#define IWDG_REGS_PTR ((IWDG_REGS_Typedef *) IWDG_REGS_BASEADDR)
+		#else
+			extern IWDG_REGS_Typedef MOCK_IWDG_REGS;
+			#define IWDG_REGS_PTR (&MOCK_IWDG_REGS)
+		#endif
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_KR_REG
 

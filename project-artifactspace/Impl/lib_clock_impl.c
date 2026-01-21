@@ -121,26 +121,26 @@
 
     /**
      * Ghi chú:
-     * Ở đây sử dụng STAT_OK để biểu thị hàm thực thi thành công
+     * Ở đây sử dụng STAT_DONE để biểu thị hàm thực thi thành công
      * Còn kết quả cụ thể của việc khởi tạo nguồn clock
      * sẽ được kiểm tra thông qua các flag trạng thái tương ứng
      * của switch bên trên.
      */
 
-    return STAT_OK;
+    return STAT_DONE;
   }
 
   RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param) {
 
     /**
      * Ghi chú:
-     * Ở đây sử dụng STAT_OK để biểu thị hàm thực thi thành công
+     * Ở đây sử dụng STAT_DONE để biểu thị hàm thực thi thành công
      * Còn kết quả cụ thể của việc khởi tạo nguồn clock
      * sẽ được kiểm tra thông qua các flag trạng thái tương ứng
      * của switch bên trên.
      */
 
-    return STAT_OK;
+    return STAT_DONE;
   }
 
   void RCC_CSS_Enable(void) {

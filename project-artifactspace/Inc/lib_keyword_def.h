@@ -61,6 +61,7 @@
     STAT_ERROR    = 0x01U,
     STAT_BUSY     = 0x02U,
     STAT_TIMEOUT  = 0x03U,
+    STAT_DONE     = 0x04U,
     STAT_NRDY     = STAT_ERROR,
     STAT_RDY      = STAT_OK
   } RETR_STAT;
