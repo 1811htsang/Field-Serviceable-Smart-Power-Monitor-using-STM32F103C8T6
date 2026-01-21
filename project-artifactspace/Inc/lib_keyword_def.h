@@ -41,6 +41,9 @@
   #define u unsigned
   #define ul unsigned long
   #define ui unsigned int
+  #define ui8 uint8_t
+  #define ui16 uint16_t
+  #define ui32 uint32_t
   #define tdf_strc typedef struct
   #define BLANK_REG uint32_t
   #define __weak __attribute__((weak))

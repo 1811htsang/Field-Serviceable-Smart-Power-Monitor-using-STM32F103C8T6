@@ -41,8 +41,7 @@
 		* nghĩa là bit thấp nhất được đánh số 0.
 		*/
 
-		tdf_strc RCC_CR_REG
-		{
+		tdf_strc RCC_CR_REG {
 			__vo ui HSION : 1;
 			__vo ui HSIRDY : 1;
 			__vo ui RESERVED0 : 1;
@@ -58,8 +57,7 @@
 			__vo ui RESERVED2 : 6;
 		} RCC_CR_REG_Typedef;
 
-		tdf_strc RCC_CFGR_REG
-		{
+		tdf_strc RCC_CFGR_REG {
 			__vo ui SW : 2;
 			__vo ui SWS : 2;
 			__vo ui HPRE : 4;
@@ -75,8 +73,7 @@
 			__vo ui RESERVED1 : 5;
 		} RCC_CFGR_REG_Typedef;
 
-		tdf_strc RCC_CIR_REG
-		{
+		tdf_strc RCC_CIR_REG {
 			__vo ui LSIRDYF : 1;
 			__vo ui LSERDYF : 1;
 			__vo ui HSIRDYF : 1;
@@ -100,8 +97,7 @@
 			__vo ui RESERVED3 : 8;
 		} RCC_CIR_REG_Typedef;
 
-		tdf_strc RCC_CSR
-		{
+		tdf_strc RCC_CSR {
 			__vo ui LSION : 1;
 			__vo ui LSIRDY : 1;
 			__vo ui RESERVED0 : 22;
@@ -115,18 +111,18 @@
 			__vo ui LPWRRSTF : 1;
 		} RCC_CSR_REG_Typedef;
 
-		tdf_strc RCC_REGS
-  {
-    __vo RCC_CR_REG_Typedef CR;
-    __vo RCC_CFGR_REG_Typedef CFGR;
-    __vo RCC_CIR_REG_Typedef CIR;
-    __vo BLANK_REG RESERVED[6];
-    __vo RCC_CSR_REG_Typedef CSR;
-  } RCC_REGS_Typedef;
+		tdf_strc RCC_REGS {
+			__vo RCC_CR_REG_Typedef CR;
+			__vo RCC_CFGR_REG_Typedef CFGR;
+			__vo RCC_CIR_REG_Typedef CIR;
+			__vo BLANK_REG RESERVED[6];
+			__vo RCC_CSR_REG_Typedef CSR;
+		} RCC_REGS_Typedef;
 
   // >> Tạo con trỏ tới ngoại vi
 
   	#define RCC_REGS_PTR ((RCC_REGS_Typedef *)RCC_REGS_BASEADDR)
+
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CR_REG
 
 		#define RCC_CR_REG_HSION_RESET RESET

@@ -12,7 +12,13 @@
   #include "lib_keyword_def.h"
   #include "iwdg/lib_iwdg_def.h"
   #include "iwdg/lib_iwdg_hal.h"
-  #include "clock/lib_clock_hal.h"
+
+  #ifndef UNIT_TEST
+    #include "clock/lib_clock_hal.h"
+  #else
+    #include "header_dependency.h"
+  #endif
+  
 
 // Định nghĩa các hàm thành phần
 
@@ -50,7 +56,8 @@
     if (RCC_IsLSIReady() != STAT_RDY) {
       RCC_CLK_Init_Param rcc_lsi_init;
       rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-      if (RCC_CLK_Init(&rcc_lsi_init) != STAT_OK) {
+      RCC_RDYFLG_Typdef rdy_flg;
+      if (RCC_CLK_Init(&rcc_lsi_init, &rdy_flg) != STAT_OK) {
         return STAT_ERROR;
       }
     }

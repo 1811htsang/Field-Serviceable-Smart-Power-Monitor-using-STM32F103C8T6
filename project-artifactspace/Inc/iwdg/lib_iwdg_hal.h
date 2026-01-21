@@ -15,10 +15,13 @@
 
 	// Khai báo cấu trúc tham số hàm khởi tạo
 
-		tdf_strc IWDG_Init_Param {
-			ui Prescaler; // Chọn bộ chia tần số của IWDG
-			ui Reload;    // Giá trị nạp lại cho bộ đếm giảm
-		} IWDG_Init_Param;
+		#ifndef IWDG_INIT_PARAM_TYPE
+			#define IWDG_INIT_PARAM_TYPE
+			tdf_strc IWDG_Init_Param {
+				ui Prescaler; // Chọn bộ chia tần số của IWDG
+				ui Reload;    // Giá trị nạp lại cho bộ đếm giảm
+			} IWDG_Init_Param;
+		#endif
 
 	// Khai báo các kiểm tra tham số đầu vào nội bộ
 

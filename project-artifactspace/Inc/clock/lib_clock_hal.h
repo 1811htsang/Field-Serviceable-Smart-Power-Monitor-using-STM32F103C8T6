@@ -19,6 +19,22 @@
 			ul CLK_Source; // Chọn nguồn clock hệ thống
 		} RCC_CLK_Init_Param;
 
+	// Khai báo các cờ trả về có thời hạn 
+
+		tdf_strc RCC_RDYFLG_Typdef {
+			ui HSI_RDY_FLG : 1;
+			ui HSE_RDY_FLG : 1;
+			ui LSI_RDY_FLG : 1;
+		} RCC_RDYFLG_Typdef;
+
+		/**
+		 * Ghi chú:
+		 * Do các cờ trạng thái này sẽ được thiết lập về 0 trong 
+		 * N chu kỳ hoạt động tiếp theo của hệ thống,
+		 * Do đó cần có biến lưu trữ trạng thái này
+		 * để người dùng có thể kiểm tra trạng thái khởi tạo nguồn clock
+		 */
+
   // Khai báo các kiểm tra tham số đầu vào nội bộ
 
 		#define IS_RCC_SYSCLK_SOURCE(SOURCE) (((SOURCE) == RCC_SYSCLK_SOURCE_HSI) || \
@@ -33,7 +49,7 @@
   // Khai báo các hàm thành phần
 
 		// >> Hàm khởi tạo clock hệ thống
-		RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param);
+		RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg);
 
 		// >> Hàm de-initialize clock hệ thống
 		RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param);

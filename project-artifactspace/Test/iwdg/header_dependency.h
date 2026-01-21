@@ -24,9 +24,25 @@
         ul CLK_Source; // Chọn nguồn clock hệ thống
       } RCC_CLK_Init_Param;
 
-  // Khai báo các dependency function từ các file header cần thiết
+      tdf_strc RCC_RDYFLG_Typdef {
+        volatile ui HSI_RDY_FLG : 1;
+        volatile ui HSE_RDY_FLG : 1;
+        volatile ui LSI_RDY_FLG : 1;
+      } RCC_RDYFLG_Typdef;
+
+    // >> Từ lib_iwdg_hal
+
+      #ifndef IWDG_INIT_PARAM_TYPE
+        #define IWDG_INIT_PARAM_TYPE
+        tdf_strc IWDG_Init_Param {
+          ui Prescaler; // Chọn bộ chia tần số của IWDG
+          ui Reload;    // Giá trị nạp lại cho bộ đếm giảm
+        } IWDG_Init_Param;
+      #endif
+
+  // Khai báo các dependency function từ các file header cần thiết ngoài module đang test
 
     RETR_STAT RCC_IsLSIReady(void);
-    RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param);
+    RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg);
 
 #endif /* IWDG_HEADER_DEPENDENCY_H_ */

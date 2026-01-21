@@ -9,13 +9,14 @@
 
   #include <stdint.h>
   #include <stdio.h>
+	#include <string.h>
   #include "lib_keyword_def.h"
   #include "clock/lib_clock_def.h"
   #include "clock/lib_clock_hal.h"
 
 // Định nghĩa các hàm thành phần
 
-  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param) {
+  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
     
     if (DEBUG_MODE == ENABLE) {
       printf("RCC_CLK_Init, DBG1: Check Null pointer.\n");
@@ -32,7 +33,13 @@
     assert_param(IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source));
 
     if (DEBUG_MODE == ENABLE) {
-      printf("RCC_CLK_Init, DBG3: Setup procedure starts.\n");
+      printf("RCC_CLK_Init, DBG3: Refresh Clock ready flags kit.\n");
+    }
+
+    memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
+
+    if (DEBUG_MODE == ENABLE) {
+      printf("RCC_CLK_Init, DBG4: Setup procedure starts.\n");
     }
 
     /**
@@ -66,6 +73,14 @@
            */
         }
 
+        /**
+         * Ghi chú:
+         * Lúc này cờ trạng thái sẵn sàng của HSI sẽ được thiết lập
+         * Thực hiện lưu cờ trạng thái vào biến trả về
+         */ 
+
+        rdy_flg->HSI_RDY_FLG = SET;
+
         return STAT_OK;
 
         break;
@@ -91,6 +106,14 @@
            */
         }
 
+        /**
+         * Ghi chú:
+         * Lúc này cờ trạng thái sẵn sàng của HSE sẽ được thiết lập
+         * Thực hiện lưu cờ trạng thái vào biến trả về
+         */
+
+        rdy_flg->HSE_RDY_FLG = SET;
+
         RCC_REGS_PTR->CFGR.SW = 0x01ul; // Chọn HSE làm nguồn SYSCLK
 
         if (RCC_REGS_PTR->CFGR.SWS != 0x01ul) {
@@ -107,6 +130,14 @@
 
         // Chờ LSI sẵn sàng
         while (RCC_REGS_PTR->CSR.LSIRDY == RESET) {}
+
+        /**
+         * Ghi chú:
+         * Lúc này cờ trạng thái sẵn sàng của LSI sẽ được thiết lập
+         * Thực hiện lưu cờ trạng thái vào biến trả về
+         */
+
+        rdy_flg->LSI_RDY_FLG = SET;
 
         return STAT_OK;
 
@@ -140,6 +171,14 @@
      * của switch bên trên.
      */
 
+    /**
+     * Ghi chú:
+     * Bổ sung các thao tác tắt nguồn clock và chuyển 
+     * nguồn clock về mặc định HSI
+     * Bổ sung các thao tác clear cờ trạng thái sẵn sàng
+     * tương ứng với từng nguồn clock
+     */
+
     return STAT_DONE;
   }
 
@@ -161,4 +200,12 @@
 
   __weak void RCC_CSS_Callback(void) {
 
-}
+  }
+
+  RETR_STAT RCC_IsLSIReady(void) {
+    if (RCC_REGS_PTR->CSR.LSIRDY == SET) {
+      return STAT_RDY;
+    } else {
+      return STAT_NRDY;
+    }
+  }

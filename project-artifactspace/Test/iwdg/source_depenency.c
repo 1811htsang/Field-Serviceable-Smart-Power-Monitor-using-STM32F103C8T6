@@ -16,31 +16,29 @@
 // Khai báo các thư viện cho unit test
 
   #include "lib_keyword_def.h"
-  #include "iwdg/lib_iwdg_def.h"
-  #include "iwdg/lib_iwdg_hal.h"
-  #include "Test/iwdg/header_dependency.h"
+  #include "header_dependency.h"
 
 // Khai báo các dependency của các hàm IWDG_Init
 
-  RETR_STAT MOCK_RCC_IsLSIReady = STAT_RDY;
-  RETR_STAT MOCK_RCC_CLK_Init = STAT_OK;
-  RETR_STAT MOCK_IWDG_IsPrescalerUpdated = STAT_RDY;
-  RETR_STAT MOCK_IWDG_IsReloadValueUpdated = STAT_RDY;
+  RETR_STAT RCC_IsLSIReady_Expect = STAT_RDY;
+  RETR_STAT RCC_CLK_Init_Expect = STAT_OK;
+  RETR_STAT IWDG_IsPrescalerUpdated_Expect = STAT_RDY;
+  RETR_STAT IWDG_IsReloadValueUpdated_Expect = STAT_RDY;
 
 // Định nghĩa các hàm mock tương ứng
 
   RETR_STAT RCC_IsLSIReady(void) {
-    return MOCK_RCC_IsLSIReady;
+    return RCC_IsLSIReady_Expect;
   }
 
-  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param) {
-    return MOCK_RCC_CLK_Init;
-  }
+  RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
+    if (init_param->CLK_Source != RCC_IWDG_SOURCE_LSI) {
+      return STAT_ERROR;
+    }
 
-  RETR_STAT IWDG_IsPrescalerUpdated(void) {
-    return MOCK_IWDG_IsPrescalerUpdated;
-  }
-
-  RETR_STAT IWDG_IsReloadValueUpdated(void) {
-    return MOCK_IWDG_IsReloadValueUpdated;
+    if (rdy_flg->LSI_RDY_FLG != SET) {
+      return STAT_ERROR;
+    } else {
+      return RCC_CLK_Init_Expect;
+    }
   }
