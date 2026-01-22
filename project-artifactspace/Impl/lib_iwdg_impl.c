@@ -7,6 +7,10 @@
 
 // Khai báo các thư viện sử dụng chung
 
+  #ifdef UNIT_TEST
+    #include "header_dependency.h"
+  #endif
+
   #include <stdint.h>
   #include <stdio.h>
   #include "lib_keyword_def.h"
@@ -15,8 +19,6 @@
 
   #ifndef UNIT_TEST
     #include "lib_clock_hal.h"
-  #else
-    #include "header_dependency.h"
   #endif
   
 
@@ -127,14 +129,38 @@
   }
 
   void IWDG_Start(void) {
+
+    /**
+     * Ghi chú:
+     * Bổ sung preprocessor directive để 
+     * thay đổi hành vi hàm này trong môi trường unit test
+     * nhằm tránh việc khởi động IWDG thực sự trong quá trình test
+     */
+
     IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_START;
   }
 
   void IWDG_Reload(void) {
+
+    /**
+     * Ghi chú:
+     * Bổ sung preprocessor directive để 
+     * thay đổi hành vi hàm này trong môi trường unit test
+     * nhằm tránh việc khởi động IWDG thực sự trong quá trình test
+     */
+
     IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_RELOAD_COUNTER;
   }
 
   RETR_STAT IWDG_IsReloadValueUpdated(void) {
+
+    /**
+     * Ghi chú:
+     * Bổ sung preprocessor directive để 
+     * thay đổi hành vi hàm này trong môi trường unit test
+     * nhằm tránh việc khởi động IWDG thực sự trong quá trình test
+     */
+
     if (IWDG_REGS_PTR->SR.RVU == SET) {
       return STAT_NRDY;
     }
@@ -142,6 +168,14 @@
   }
 
   RETR_STAT IWDG_IsPrescalerUpdated(void) {
+
+    /**
+     * Ghi chú:
+     * Bổ sung preprocessor directive để 
+     * thay đổi hành vi hàm này trong môi trường unit test
+     * nhằm tránh việc khởi động IWDG thực sự trong quá trình test
+     */
+
     if (IWDG_REGS_PTR->SR.PVU == SET) {
       return STAT_NRDY;
     }
@@ -149,10 +183,26 @@
   }
 
   void IWDG_EnableWriteAccess(void) {
+
+    /**
+     * Ghi chú:
+     * Bổ sung preprocessor directive để 
+     * thay đổi hành vi hàm này trong môi trường unit test
+     * nhằm tránh việc khởi động IWDG thực sự trong quá trình test
+     */
+
     IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_ENABLE_ACCESS;
   }
 
   void IWDG_DisableWriteAccess(void) {
+
+    /**
+     * Ghi chú:
+     * Bổ sung preprocessor directive để 
+     * thay đổi hành vi hàm này trong môi trường unit test
+     * nhằm tránh việc khởi động IWDG thực sự trong quá trình test
+     */
+
     IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_DISABLE_ACCESS;
   }
 

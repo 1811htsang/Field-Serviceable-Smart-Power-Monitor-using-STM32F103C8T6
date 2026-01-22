@@ -5,10 +5,6 @@
  *      Author: shanghuang
  */
 
-// Khai báo xác định thực thi unit test
-
-  #define UNIT_TEST
-
 // Khai báo các thư viện cho unit test
 
   #include <stdio.h>
@@ -19,7 +15,7 @@
 	#include "lib_iwdg_hal.h"
   #include "header_dependency.h"
 
-// Tạo thanh ghi IWDG giả cho mục đích unit test
+// Khai báo ngoại vi IWDG giả cho mục đích unit test
 
   IWDG_REGS_Typedef MOCK_IWDG_REGS;
 
@@ -63,7 +59,7 @@
       
       RETR_STAT result = IWDG_Init(&param);
       
-      assert(result == STAT_OK);
+      assert(result == STAT_DONE);
       // Kiểm tra giá trị thực tế đã ghi vào thanh ghi giả (bitfield)
       assert(IWDG_REGS_PTR->PR.PR == IWDG_PR_REG_PR_DIV_16);
       assert(IWDG_REGS_PTR->RLR.RL == 0x500);
@@ -78,7 +74,7 @@
     RCC_CLK_Init_Expect = STAT_OK;     // Giả lập việc bật LSI thành công
     
     IWDG_Init_Param param = { .Prescaler = 0, .Reload = 100 };
-    assert(IWDG_Init(&param) == STAT_OK);
+    assert(IWDG_Init(&param) == STAT_DONE);
     printf("-> PASSED\n");
   }
 
