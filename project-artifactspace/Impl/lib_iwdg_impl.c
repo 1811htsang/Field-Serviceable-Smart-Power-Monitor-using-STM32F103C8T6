@@ -10,11 +10,11 @@
   #include <stdint.h>
   #include <stdio.h>
   #include "lib_keyword_def.h"
-  #include "iwdg/lib_iwdg_def.h"
-  #include "iwdg/lib_iwdg_hal.h"
+  #include "lib_iwdg_def.h"
+  #include "lib_iwdg_hal.h"
 
   #ifndef UNIT_TEST
-    #include "clock/lib_clock_hal.h"
+    #include "lib_clock_hal.h"
   #else
     #include "header_dependency.h"
   #endif
@@ -48,7 +48,7 @@
     assert_param(IS_IWDG_RELOAD(init_param->Reload));
 
     if (DEBUG_MODE == ENABLE) {
-      printf("IWDG_Init, DBG3: Setup procedure starts.\n");
+      printf("IWDG_Init, DBG3: Setup LSI clock.\n");
     }
 
     // Bật LSI nếu chưa được bật
@@ -62,8 +62,16 @@
       }
     }
 
+    if (DEBUG_MODE == ENABLE) {
+      printf("IWDG_Init, DBG4: Enable write access.\n");
+    }
+
     // Kích hoạt quyền ghi vào các thanh ghi cấu hình IWDG
     IWDG_EnableWriteAccess();
+
+    if (DEBUG_MODE == ENABLE) {
+      printf("IWDG_Init, DBG5: Configure prescaler and reload value.\n");
+    }
 
     // Cấu hình bộ chia tần số
     if (IWDG_IsPrescalerUpdated() == STAT_RDY) {
@@ -77,6 +85,10 @@
       IWDG_REGS_PTR->RLR.RL = init_param->Reload;
     } else {
       return STAT_NRDY;
+    }
+
+    if (DEBUG_MODE == ENABLE) {
+      printf("IWDG_Init, DBG6: Finish initialization.\n");
     }
 
     /**

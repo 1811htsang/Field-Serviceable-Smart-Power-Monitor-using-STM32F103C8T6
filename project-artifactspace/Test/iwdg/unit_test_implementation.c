@@ -15,8 +15,8 @@
   #include <assert.h>
 	#include <string.h>
   #include "lib_keyword_def.h"
-  #include "iwdg/lib_iwdg_def.h"
-	#include "iwdg/lib_iwdg_hal.h"
+  #include "lib_iwdg_def.h"
+	#include "lib_iwdg_hal.h"
   #include "header_dependency.h"
 
 // Tạo thanh ghi IWDG giả cho mục đích unit test
@@ -32,15 +32,16 @@
 
 // Định nghĩa các hàm 
 
-/*Ngoài ra, nếu ở header_dependency đã thực hiện khai báo các hàm tương tự với lib_iwdg_hal và lib_clock_hal,
- * các định nghĩa hàm chính thức đã có trong lib_iwdg_impl và lib_clock_impl, khi ở source_dependency thực hiện định nghĩa lại sẽ tạo ra lỗi multiple-define
- * tôi nên xử lý như thế nào*/
-
   void setup() {
     // Hàm thiết lập ban đầu cho mỗi test case
     // Có thể thêm các thao tác khởi tạo biến toàn cục ở đây nếu cần
 
-    memset(&MOCK_IWDG_REGS, 0, sizeof(IWDG_REGS_Typedef));
+    // Reset thanh ghi IWDG giả về các giá trị reset 
+    MOCK_IWDG_REGS.KR.KEY = 0x0000;
+    MOCK_IWDG_REGS.PR.PR = 0x0000;
+    MOCK_IWDG_REGS.RLR.RL = 0x0FFF;
+    MOCK_IWDG_REGS.SR.PVU = 0;
+
     RCC_IsLSIReady_Expect = STAT_RDY;
     RCC_CLK_Init_Expect = STAT_OK;
     IWDG_IsPrescalerUpdated_Expect = STAT_RDY;
@@ -49,14 +50,14 @@
 
   void test_Init_NullPointer_ShouldReturnError() {
     setup();
-    printf("TC1: Check Null Pointer...");
+    printf("TC1: Check Null Pointer...\n");
     assert(IWDG_Init(NULL) == STAT_ERROR);
     printf("-> PASSED\n");
   }
 
   void test_Init_Success_ShouldSetRegisters() {
       setup();
-      printf("TC2: Init Success Happy Path...");
+      printf("TC2: Init Success Happy Path...\n");
       
       IWDG_Init_Param param = { .Prescaler = IWDG_PR_REG_PR_DIV_16, .Reload = 0x500 };
       
@@ -106,7 +107,7 @@
 
 // Thực thi tất cả các test case
 
-int main_test() {
+int main() {
     printf("\n--- IWDG UNIT TEST ---\n");
     
     test_Init_NullPointer_ShouldReturnError();

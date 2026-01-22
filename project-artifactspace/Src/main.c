@@ -16,7 +16,7 @@
  ******************************************************************************
  */
 
-#include <lib_keyword_def.h>
+#include "generic/lib_keyword_def.h"
 #include <stdio.h>
 #include <stdint.h>
 

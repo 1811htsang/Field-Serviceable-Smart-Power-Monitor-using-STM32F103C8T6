@@ -11,7 +11,7 @@
 	// Khai báo các thư viện sử dụng chung
 
 		#include "lib_keyword_def.h"
-		#include "iwdg/lib_iwdg_def.h"
+		#include "lib_iwdg_def.h"
 
 	// Khai báo cấu trúc tham số hàm khởi tạo
 
