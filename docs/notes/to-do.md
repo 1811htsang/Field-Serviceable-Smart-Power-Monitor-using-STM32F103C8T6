@@ -14,7 +14,7 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Tìm hiểu về Unit Testing trong Embedded
 - [x] Viết Unit Test cho Driver IWDG
 - [x] Viết Header & Source Inclusion cho GCC Compiler
-- [ ] Tìm hiểu sử dụng GDB cho Unit Test 
+- [x] Tìm hiểu sử dụng GDB cho Unit Test 
 - [ ] Thiết kế Unit Test Framework cho dự án
 - [ ] Viết Driver RCC (Reset and Clock Control)
 - [ ] Viết Driver IWDG (Independent Watchdog)
