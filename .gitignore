@@ -15,3 +15,9 @@ project-halartifactspace/EWARM/
 project-halartifactspace/.mxproject
 project-halartifactspace/.project
 project-halartifactspace/project-halartifactspace.ioc
+
+# Ignore .vscode settings
+.vscode/
+
+# Ignore compiled object files and binaries
+*.exe
