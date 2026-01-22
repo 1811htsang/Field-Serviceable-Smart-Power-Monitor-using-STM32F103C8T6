@@ -76,4 +76,6 @@ memset(&Mock_IWDG, 0, sizeof(IWDG_REGS_Typedef));
 
 Tuy nhiên cũng cần lưu ý rằng giá trị reset ban đầu của biến giả không phải lúc nào cũng là 0, do đó cần thiết lập các giá trị ban đầu phù hợp với yêu cầu kiểm thử.
 
-
+Ghi chú:
+- Bổ sung các thông tin về khai thác gdb trong quá trình debug mã nguồn và unit test.
+- Bổ sung các thông tin về thiết kế mã nguồn hỗ trợ unit test.
