@@ -5,8 +5,9 @@
  *      Author: shanghuang
  */
 
-#ifndef IWDG_LIB_IWDG_HAL_H_
-	#define IWDG_LIB_IWDG_HAL_H_
+
+#ifndef LIB_IWDG_HAL_H_
+	#define LIB_IWDG_HAL_H_
 
 	// Khai báo các thư viện sử dụng chung
 
@@ -64,4 +65,4 @@
 		// >> Hàm catch IWDG reset event
 		void IWDG_ResetEvent_Catch(void);
 
-#endif /* IWDG_LIB_IWDG_HAL_H_ */
+#endif /* LIB_IWDG_HAL_H_ */
