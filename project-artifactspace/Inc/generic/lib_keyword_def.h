@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file           : lib_keyword_define.h
- * @author         : Shang Huang
+ * @author         : shanghuang
  * @brief          : Header for define keyword
  ******************************************************************************
  * @attention

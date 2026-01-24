@@ -6,7 +6,7 @@
  */
 
 #ifndef IWDG_HEADER_DEPENDENCY_H_
-#define IWDG_HEADER_DEPENDENCY_H_
+  #define IWDG_HEADER_DEPENDENCY_H_
 
   // Khai báo các thư viện chung cho unit test
 

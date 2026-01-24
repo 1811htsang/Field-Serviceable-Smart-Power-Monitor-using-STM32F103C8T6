@@ -1,5 +1,5 @@
 /*
- * source_depenency.c
+ * source_dependency.c
  *
  *  Created on: Jan 21, 2026
  *      Author: shanghuang
