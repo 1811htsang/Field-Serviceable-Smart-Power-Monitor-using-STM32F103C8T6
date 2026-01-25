@@ -566,3 +566,68 @@ Khi thực hiện review mã nguồn, cần chú ý đến các tiêu chí sau:
 5. **Bảo mật:** Đánh giá mã nguồn về các vấn đề bảo mật tiềm ẩn, đảm bảo rằng mã không chứa các lỗ hổng bảo mật hoặc các thực hành không an toàn.
 6. **Kiểm thử:** Đảm bảo rằng mã nguồn đi kèm với các bài kiểm thử phù hợp và các bài kiểm thử này đã được thực hiện và vượt qua thành công.
 
+# Tiêu chuẩn thiết kế CMakeList.txt
+Tiêu chuẩn thiết kế CMakeList.txt này nhằm đảm bảo rằng các tệp CMakeLists.txt trong dự án đều được viết một cách nhất quán, rõ ràng và dễ hiểu. Việc tuân thủ các hướng dẫn này sẽ giúp cải thiện khả năng quản lý dự án, giảm thiểu lỗi và hỗ trợ làm việc nhóm hiệu quả hơn.
+
+## Giới thiệu
+CMake là một công cụ quản lý xây dựng mã nguồn mở, giúp tự động hóa quá trình biên dịch và liên kết mã nguồn thành các tệp thực thi hoặc thư viện. Tệp CMakeLists.txt là nơi chứa các lệnh và cấu hình cần thiết để CMake hiểu cách xây dựng dự án.
+
+## Cấu trúc tệp CMakeLists.txt
+Khi thiết kế tệp CMakeLists.txt, cần tuân thủ cấu trúc sau:
+```txt
+# Cấu trúc các tệp nguồn và thư viện như sau
+<Khai báo các tệp sử dụng trong dự án>
+
+# Cấu trúc lệnh GCC ban đầu:
+<
+  Khai báo lệnh GCC ban đầu sử dụng trong dự án
+  Ví dụ mẫu dưới đây:
+  # gcc 
+  # -DUNIT_TEST 
+  # -I ..\..\Inc\generic\ 
+  # -I ..\..\Inc\iwdg\ 
+  # -I ..\..\Inc\clock\ 
+  # -I ..\iwdg\ 
+  # -g -o .\unit_test_implementation 
+  # -o .\unit_test_implementation.exe 
+  #    .\unit_test_implementation.c 
+  #    .\source_dependency.c 
+  #    ..\..\Impl\lib_iwdg_impl.c
+>
+
+# Khai báo phiên bản CMake tối thiểu
+cmake_minimum_required(VERSION <Phiên_bản_CMake_tối_thiểu>) 
+
+# Khai báo tên dự án và ngôn ngữ lập trình
+project(<Tên dự án> C)
+
+# Định nghĩa các file nguồn .c sử dụng trong dự án
+set(SOURCES
+  <Liệt kê các tệp nguồn .c sử dụng trong dự án>
+)
+
+# Cấu hình để luôn tạo ra file Debug (tương đương flag -g)
+set(CMAKE_BUILD_TYPE Debug)
+
+# Tạo mục tiêu thực thi
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# Định nghĩa các Macro (tương đương flag -D)
+target_compile_definitions(${PROJECT_NAME} PRIVATE <Liệt kê các Macro cần định nghĩa>)
+
+# Cấu hình các đường dẫn Include (tương đương các tham số -I)
+target_include_directories(${PROJECT_NAME} PRIVATE
+  <Liệt kê các đường dẫn Include cần cấu hình>
+)
+```
+
+## Lưu ý bổ sung
+1. Giữa mỗi comment phải cách ra một dòng trống so với khối lệnh bên dưới.
+2. Sử dụng dấu gạch ngang `-` thay vì dấu gạch dưới `_` cho các tham số trong lệnh CMake.
+3. Sử dụng dấu cách hợp lý để tăng tính dễ đọc (ví dụ: sau dấu phẩy, trước và sau toán tử).
+4. Indentation sử dụng 2 spaces cho mỗi cấp độ tuân thủ cấu trúc.
+
+## Cần chú ý
+Ở thời điểm hiện tại CMake được sử dụng trong dự án nhằm phục vụ cho việc biên dịch các file kiểm thử đơn vị (unit test) trong thư mục `project-artifactspace/Test/`. Các tệp CMakeLists.txt được đặt trong từng thư mục con tương ứng với từng ngoại vi cụ thể để quản lý việc biên dịch các bài kiểm thử đơn vị cho ngoại vi đó.
+
+Do đó việc đặt tên, tuân thủ theo nguyên tắc `<Ngoại vi, viết thường toàn bộ>_unit_test`
