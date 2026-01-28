@@ -32,13 +32,5 @@
   }
 
   RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
-    if (init_param->CLK_Source != RCC_IWDG_SOURCE_LSI) {
-      return STAT_ERROR;
-    }
-
-    if (rdy_flg->LSI_RDY_FLG != SET) {
-      return STAT_ERROR;
-    } else {
-      return RCC_CLK_Init_Expect;
-    }
+    return RCC_CLK_Init_Expect;
   }

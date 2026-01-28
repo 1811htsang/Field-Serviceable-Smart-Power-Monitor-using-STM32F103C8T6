@@ -36,7 +36,6 @@
     MOCK_IWDG_REGS.KR.KEY = 0x0000;
     MOCK_IWDG_REGS.PR.PR = 0x0000;
     MOCK_IWDG_REGS.RLR.RL = 0x0FFF;
-    MOCK_IWDG_REGS.SR.PVU = 0;
 
     RCC_IsLSIReady_Expect = STAT_RDY;
     RCC_CLK_Init_Expect = STAT_OK;
@@ -94,6 +93,7 @@
       setup();
       printf("TC5: Prescaler Busy -> Return NRDY...");
       
+      MOCK_IWDG_REGS.SR.PVU = SET; // Giả lập thanh ghi SR đang bận
       IWDG_IsPrescalerUpdated_Expect = STAT_NRDY; // Giả lập thanh ghi PR đang bận
       
       IWDG_Init_Param param = { .Prescaler = 4, .Reload = 100 };
