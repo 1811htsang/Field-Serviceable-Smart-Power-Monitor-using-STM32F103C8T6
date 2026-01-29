@@ -79,3 +79,15 @@ Tuy nhiên cũng cần lưu ý rằng giá trị reset ban đầu của biến g
 Ghi chú:
 - Bổ sung các thông tin về khai thác gdb trong quá trình debug mã nguồn và unit test.
 - Bổ sung các thông tin về thiết kế mã nguồn hỗ trợ unit test.
+
+# Logic thiết kế giữa Reset, Clock và try-catch reset event
+Trong quá trình thiết kế hệ thống nhúng, việc quản lý reset và clock là rất quan trọng để đảm bảo hệ thống hoạt động ổn định. Dưới đây là một số logic thiết kế cơ bản giữa Reset, Clock và việc xử lý sự kiện reset (try-catch reset event):
+- Khi reset event xảy ra, hệ thống sẽ thực hiện reset ngay lập tức để đưa tất cả các module về trạng thái ban đầu (ngoại trừ WWDG) và khởi động lại quá trình khởi tạo hệ thống.
+- Sau khi khởi động lại, các cờ báo reset sẽ được kiểm tra để xác định nguyên nhân gây ra reset. Ở đây cần lưu ý rằng, phần cứng sẽ tự phân biệt được giữa lần hoạt động bình thường và lần hoạt động do reset bằng cách sử dụng tín hiệu từ cấp nguồn (Power-on Reset).
+
+Suy ra, trình tự khi thiết kế là như sau:
+- Kiểm tra các cờ báo reset để xác định hoạt động
+- Khởi tạo clock và watchdog cho hệ thống
+- Thực hiện các chức năng chính của hệ thống
+
+Ở đây, nếu có thể thì bổ sung thêm các thanh ghi BKP (Backup Power) để lưu trữ trạng thái trước khi reset, giúp hệ thống có thể phục hồi nhanh chóng sau khi reset hoặc cung cấp thông tin chi tiết về nguyên nhân reset cũng như ngắt việc phải reset liên tục trong các trường hợp lỗi phần mềm.
