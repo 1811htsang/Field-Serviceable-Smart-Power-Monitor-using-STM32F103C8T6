@@ -11,6 +11,7 @@
   #include <stdio.h>
 	#include <string.h>
   #include "lib_keyword_def.h"
+  #include "lib_condition_def.h"
   #include "clock/lib_clock_def.h"
   #include "clock/lib_clock_hal.h"
   #include "iwdg/lib_iwdg_hal.h"
@@ -40,15 +41,16 @@
    */
   RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
     
-    if (DEBUG_MODE == ENABLE) {
+
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG1: Check Null pointer.\n");
     }
 
-    if (init_param == NULL) {
+    if (__NULL_PTR_CHECK(init_param)) {
       return STAT_ERROR;
     }
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG2: Assert parameter.\n");
     }
 
@@ -57,13 +59,13 @@
       IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
     );
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG3: Refresh Clock ready flags kit.\n");
     }
 
     memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG4: Turn on clock.\n");
     }
 
@@ -88,14 +90,14 @@
 
         RCC_REGS_PTR->CR.HSION = SET; // Bật HSI
 
-        if (DEBUG_MODE == ENABLE) {
+        if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
         }
         
-        while (RCC_REGS_PTR->CR.HSIRDY == RESET) {
+        while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
           // Chờ HSI sẵn sàng
 
-          if (RCC_IsLSIReady() != STAT_RDY) {
+          if (__NRDY_CHECK(RCC_IsLSIReady())) {
             
             /**
              * Ghi chú:
@@ -160,14 +162,14 @@
 
         RCC_REGS_PTR->CR.HSEON = SET; // Bật HSE
 
-        if (DEBUG_MODE == ENABLE) {
+        if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
         }
 
-        while (RCC_REGS_PTR->CR.HSERDY == RESET) {
+        while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
           // Chờ HSE sẵn sàng
 
-          if (RCC_IsLSIReady() != STAT_RDY) {
+          if (__NRDY_CHECK(RCC_IsLSIReady())) {
             
             /**
              * Ghi chú:
@@ -180,7 +182,7 @@
             RCC_CLK_Init_Param rcc_lsi_init;
             rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
             RCC_RDYFLG_Typdef lsi_rdy_flg;
-            if (RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg) != STAT_OK) {
+            if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
               return STAT_ERROR;
             }
 
@@ -210,11 +212,11 @@
 
         rdy_flg->HSE_RDY_FLG = SET;
 
-        if (DEBUG_MODE == ENABLE) {
+        if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5-1: Select SYSCLK.\n");
         }
 
-        if (RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSE) != STAT_DONE) {
+        if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSE))) {
           return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
         }
 
@@ -226,12 +228,12 @@
       
         RCC_REGS_PTR->CSR.LSION = SET; // Bật LSI  
 
-        if (DEBUG_MODE == ENABLE) {
+        if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
         }
 
         // Chờ LSI sẵn sàng
-        while (RCC_REGS_PTR->CSR.LSIRDY == RESET) {}
+        while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {}
 
         /**
          * Ghi chú:
@@ -260,13 +262,12 @@
      * của switch bên trên.
      */
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG6: Setup procedure done.\n");
     }
 
     return STAT_DONE;
   }
-
 
   /*
    * Hàm chuyển đổi nguồn SYSCLK của hệ thống.
@@ -284,25 +285,24 @@
    */
   RETR_STAT RCC_SYSCLK_Switch(ul sysclk_source) {
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_SYSCLK_Switch, DBG1: Assert parameter.\n");
     }
 
     assert_param(IS_RCC_SYSCLK_SOURCE(sysclk_source));
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_SYSCLK_Switch, DBG2: Switch SYSCLK source.\n");
     }
     
     RCC_REGS_PTR->CFGR.SW = sysclk_source; // Chọn HSE làm nguồn SYSCLK
 
-    if (RCC_REGS_PTR->CFGR.SWS != sysclk_source) {
+    if (__DIFF_CHECK(RCC_REGS_PTR->CFGR.SWS, sysclk_source)) {
       return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
     }
 
     return STAT_DONE;
   }
-
 
   /*
    * Hàm de-initialize (tắt) nguồn clock hệ thống.
@@ -331,15 +331,15 @@
      * của switch bên trên.
      */
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG1: Check Null pointer.\n");
     }
 
-    if (init_param == NULL) {
+    if (__NULL_PTR_CHECK(init_param)) {
       return STAT_ERROR;
     }
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG2: Assert parameter.\n");
     }
 
@@ -348,13 +348,13 @@
       IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
     );
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG3: Clear Clock ready flags kit.\n");
     }
 
     memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
 
-    if (DEBUG_MODE == ENABLE) {
+    if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG4: Turn off clock.\n");
     }
 
@@ -367,58 +367,58 @@
      */
 
     switch (init_param->CLK_Source) {
-    case RCC_SYSCLK_SOURCE_HSI:
-      
-      /**
-       * Ghi chú:
-       * Do HSI là nguồn clock mặc định của hệ thống
-       * Nên không thể tắt HSI khi có/không sử dụng làm nguồn SYSCLK
-       * Vì HSI là nguồn clock dự phòng cho hệ thống
-       */
+      case RCC_SYSCLK_SOURCE_HSI:
+        
+        /**
+         * Ghi chú:
+         * Do HSI là nguồn clock mặc định của hệ thống
+         * Nên không thể tắt HSI khi có/không sử dụng làm nguồn SYSCLK
+         * Vì HSI là nguồn clock dự phòng cho hệ thống
+         */
 
-      return STAT_BUSY;
-      break;
-    
-    case RCC_SYSCLK_SOURCE_HSE:
+        return STAT_BUSY;
+        break;
       
-      /**
-       * Ghi chú:
-       * Trước khi tắt HSE cần chuyển SYSCLK về HSI
-       * Kiểm tra trạng thái của HSI
-       * Nếu HSI chưa được bật thì tiến hành bật HSI trước
-       */
+      case RCC_SYSCLK_SOURCE_HSE:
+        
+        /**
+         * Ghi chú:
+         * Trước khi tắt HSE cần chuyển SYSCLK về HSI
+         * Kiểm tra trạng thái của HSI
+         * Nếu HSI chưa được bật thì tiến hành bật HSI trước
+         */
 
-      if (RCC_IsHSIReady() != STAT_RDY) {
-        RCC_CLK_Init_Param rcc_hsi_init;
-        rcc_hsi_init.CLK_Source = RCC_SYSCLK_SOURCE_HSI;
-        RCC_RDYFLG_Typdef hsi_rdy_flg;
-        if (RCC_CLK_Init(&rcc_hsi_init, &hsi_rdy_flg) != STAT_OK) {
-          return STAT_ERROR;
+        if (__NRDY_CHECK(RCC_IsHSIReady())) {
+          RCC_CLK_Init_Param rcc_hsi_init;
+          rcc_hsi_init.CLK_Source = RCC_SYSCLK_SOURCE_HSI;
+          RCC_RDYFLG_Typdef hsi_rdy_flg;
+          if (RCC_CLK_Init(&rcc_hsi_init, &hsi_rdy_flg) != STAT_OK) {
+            return STAT_ERROR;
+          }
         }
-      }
 
-      if (RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSI) != STAT_DONE) {
-        return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
-      }
+        if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSI))) {
+          return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
+        }
 
-      RCC_REGS_PTR->CR.HSEON = RESET; // Tắt HSE
-      break;
-    
-    case RCC_IWDG_SOURCE_LSI:
+        RCC_REGS_PTR->CR.HSEON = RESET; // Tắt HSE
+        break;
+      
+      case RCC_IWDG_SOURCE_LSI:
 
-      /**
-       * Ghi chú:
-       * Không thể tắt LSI sau khi đã khởi động IWDG
-       * Do đó, nếu LSI đang được sử dụng làm nguồn clock cho IWDG
-       * IWDG cũng không thể tắt
-       */
+        /**
+         * Ghi chú:
+         * Không thể tắt LSI sau khi đã khởi động IWDG
+         * Do đó, nếu LSI đang được sử dụng làm nguồn clock cho IWDG
+         * IWDG cũng không thể tắt
+         */
 
-      return STAT_ERROR;
-      break;
+        return STAT_ERROR;
+        break;
 
-    default:
-      return STAT_ERROR;
-      break;
+      default:
+        return STAT_ERROR;
+        break;
     }
 
     return STAT_DONE;
@@ -471,7 +471,7 @@
    *   RETR_STAT - STAT_RDY nếu HSI đã sẵn sàng, STAT_NRDY nếu chưa.
    */
   RETR_STAT RCC_IsHSIReady(void) {
-    if (RCC_REGS_PTR->CR.HSIRDY == SET) {
+    if (__SET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
       return STAT_RDY;
     } else {
       return STAT_NRDY;
@@ -485,7 +485,7 @@
    *   RETR_STAT - STAT_RDY nếu HSE đã sẵn sàng, STAT_NRDY nếu chưa.
    */
   RETR_STAT RCC_IsHSEReady(void) {
-    if (RCC_REGS_PTR->CR.HSERDY == SET) {
+    if (__SET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
       return STAT_RDY;
     } else {
       return STAT_NRDY;
@@ -499,7 +499,7 @@
    *   RETR_STAT - STAT_RDY nếu LSI đã sẵn sàng, STAT_NRDY nếu chưa.
    */
   RETR_STAT RCC_IsLSIReady(void) {
-    if (RCC_REGS_PTR->CSR.LSIRDY == SET) {
+    if (__SET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {
       return STAT_RDY;
     } else {
       return STAT_NRDY;
