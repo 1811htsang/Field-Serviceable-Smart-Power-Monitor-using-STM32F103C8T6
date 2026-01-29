@@ -18,9 +18,11 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Hoàn thiện ghi chú về thiết kế mã nguồn hỗ trợ Unit Test
 - [x] Viết Driver Clock (Clock Control)
 - [x] Viết Driver IWDG (Independent Watchdog)
+- [x] Viết Driver Reset (Reset Control)
 - [x] Viết Unit Test cho Driver IWDG
 - [ ] Viết Unit Test cho Driver Clock
-- [ ] Viết Driver Reset (Reset Control)
+- [ ] Viết Unit Test cho Driver Reset
+- [ ] Triển khai Driver lên mạch thực tế
 - [ ] Thiết kế Unit Test Framework cho dự án
 - [ ] Viết Driver GPIO
 - [ ] Viết Driver USART (Polling Mode)
