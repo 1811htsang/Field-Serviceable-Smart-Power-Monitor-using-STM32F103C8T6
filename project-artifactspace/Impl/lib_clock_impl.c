@@ -10,8 +10,8 @@
   #include <stdint.h>
   #include <stdio.h>
 	#include <string.h>
-  #include "lib_keyword_def.h"
-  #include "lib_condition_def.h"
+  #include "generic/lib_keyword_def.h"
+  #include "generic/lib_condition_def.h"
   #include "clock/lib_clock_def.h"
   #include "clock/lib_clock_hal.h"
   #include "iwdg/lib_iwdg_hal.h"

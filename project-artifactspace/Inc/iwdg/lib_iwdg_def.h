@@ -10,7 +10,7 @@
 
 	// Khai báo các thư viện sử dụng chung
 
-		#include "lib_keyword_def.h"
+		#include "generic/lib_keyword_def.h"
 
 	// Khai báo địa chỉ ngoại vi
 

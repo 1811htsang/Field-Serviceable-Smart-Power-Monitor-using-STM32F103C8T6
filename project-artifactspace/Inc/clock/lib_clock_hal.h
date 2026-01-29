@@ -10,8 +10,8 @@
 
   // Khai báo các thư viện sử dụng chung
 
-  	#include "lib_keyword_def.h"
-		#include "lib_clock_def.h"
+  	#include "generic/lib_keyword_def.h"
+		#include "clock/lib_clock_def.h"
 
   // Khai báo cấu trúc tham số hàm khởi tạo
 
