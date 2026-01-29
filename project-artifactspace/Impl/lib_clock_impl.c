@@ -19,15 +19,14 @@
 // Định nghĩa các hàm thành phần
 
   /*
-   * Hàm khởi tạo nguồn clock hệ thống (HSI, HSE, LSI).
+   * Hàm khởi tạo và cấu hình nguồn clock hệ thống (HSI, HSE, LSI).
    *
    * Tham số:
-   *   init_param - Con trỏ tới cấu trúc tham số khởi tạo clock (chọn nguồn clock).
+   *   init_param - Con trỏ tới cấu trúc tham số khởi tạo (chọn nguồn clock).
    *   rdy_flg    - Con trỏ tới biến lưu trạng thái sẵn sàng của từng nguồn clock.
    *
-   * Logic chính:
-   *   - Kiểm tra con trỏ đầu vào hợp lệ.
-   *   - Kiểm tra giá trị nguồn clock hợp lệ (HSI, HSE, LSI).
+   * Logic:
+   *   - Kiểm tra con trỏ và giá trị tham số đầu vào.
    *   - Làm mới biến cờ trạng thái sẵn sàng.
    *   - Bật nguồn clock tương ứng, chờ sẵn sàng, xử lý watchdog nếu cần.
    *   - Lưu trạng thái sẵn sàng vào biến trả về.
@@ -37,38 +36,42 @@
    *   - Trong quá trình chờ HSI/HSE, nếu LSI chưa sẵn sàng thì khởi tạo LSI và IWDG để tránh treo hệ thống.
    *
    * Trả về:
-   *   RETR_STAT - STAT_OK nếu thành công, STAT_ERROR nếu lỗi tham số hoặc khởi tạo, STAT_DONE nếu hoàn tất quy trình.
+   *   RETR_STAT - STAT_OK nếu thành công, STAT_ERROR nếu lỗi, STAT_DONE nếu hoàn tất quy trình.
    */
   RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
     
-
+    // Kiểm tra con trỏ đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG1: Check Null pointer.\n");
     }
-
     if (__NULL_PTR_CHECK(init_param)) {
       return STAT_ERROR;
     }
 
+
+    // Kiểm tra giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG2: Assert parameter.\n");
     }
-
     assert_param(
       IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source) || 
       IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
     );
 
+
+    // Làm mới biến cờ trạng thái
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG3: Refresh Clock ready flags kit.\n");
     }
-
     memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
 
+
+    // Bật nguồn clock tương ứng
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG4: Turn on clock.\n");
     }
 
+    
     /**
      * Ghi chú:
      * Trong thiết phần cứng, việc kiểm tra hoạt động của HSI/HSE/LSI
@@ -76,7 +79,6 @@
      * Do đó, trong hàm khởi tạo này, ta chỉ cần thiết lập
      * và kiểm tra các flag tương ứng để đảm bảo nguồn clock được bật đúng cách.
      */
-
     switch (init_param->CLK_Source) {
 
       case 0x00ul: // HSI
@@ -88,15 +90,16 @@
          * Do đó, khởi tạo HSI chỉ cần đảm bảo HSI được bật đúng cách.
          */
 
-        RCC_REGS_PTR->CR.HSION = SET; // Bật HSI
+        // Bật HSI
+        RCC_REGS_PTR->CR.HSION = SET;
 
         if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
         }
         
+        // Chờ HSI sẵn sàng
         while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
-          // Chờ HSI sẵn sàng
-
+          // Nếu LSI chưa sẵn sàng thì khởi tạo LSI và IWDG
           if (__NRDY_CHECK(RCC_IsLSIReady())) {
             
             /**
@@ -107,18 +110,18 @@
              * được bật thì IWDG cũng được cấu hình đúng cách
              */
 
+            // Khởi tạo LSI
             RCC_CLK_Init_Param rcc_lsi_init;
             rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
             RCC_RDYFLG_Typdef lsi_rdy_flg;
             if (RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg) != STAT_OK) {
               return STAT_ERROR;
             }
-
+            // Khởi tạo và start IWDG
             IWDG_Init_Param iwdg_init = {
-              .Prescaler = IWDG_PR_REG_PR_DIV_4, // Giá trị prescaler là 4
-              .Reload = IWDG_RLR_REG_RL_MAX      // Giá trị reload là max
+              .Prescaler = IWDG_PR_REG_PR_DIV_4,
+              .Reload = IWDG_RLR_REG_RL_MAX
             };
-
             IWDG_Init(&iwdg_init);
             IWDG_Start();
           }
@@ -129,6 +132,7 @@
            * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSI ổn định.
            */
 
+          // Feed IWDG định kỳ trong vòng chờ
           IWDG_Reload();
         }
 
@@ -138,6 +142,7 @@
          * Thực hiện lưu cờ trạng thái vào biến trả về
          */ 
 
+        // Lưu trạng thái sẵn sàng HSI
         rdy_flg->HSI_RDY_FLG = SET;
 
         /**
@@ -158,17 +163,18 @@
          * khi HSE được kích hoạt
          */
         
+        // Bật CSS trước khi bật HSE
         RCC_CSS_Enable();
-
-        RCC_REGS_PTR->CR.HSEON = SET; // Bật HSE
+        // Bật HSE
+        RCC_REGS_PTR->CR.HSEON = SET;
 
         if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
         }
 
+        // Chờ HSE sẵn sàng
         while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
-          // Chờ HSE sẵn sàng
-
+          // Nếu LSI chưa sẵn sàng thì khởi tạo LSI và IWDG
           if (__NRDY_CHECK(RCC_IsLSIReady())) {
             
             /**
@@ -179,18 +185,18 @@
              * được bật thì IWDG cũng được cấu hình đúng cách
              */
 
+            // Khởi tạo LSI
             RCC_CLK_Init_Param rcc_lsi_init;
             rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
             RCC_RDYFLG_Typdef lsi_rdy_flg;
             if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
               return STAT_ERROR;
             }
-
+            // Khởi tạo và start IWDG
             IWDG_Init_Param iwdg_init = {
-              .Prescaler = IWDG_PR_REG_PR_DIV_4, // Giá trị prescaler là 4
-              .Reload = IWDG_RLR_REG_RL_MAX      // Giá trị reload là max
+              .Prescaler = IWDG_PR_REG_PR_DIV_4,
+              .Reload = IWDG_RLR_REG_RL_MAX
             };
-
             IWDG_Init(&iwdg_init);
             IWDG_Start();
           }
@@ -201,6 +207,7 @@
            * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSI ổn định.
            */
 
+          // Feed IWDG định kỳ trong vòng chờ
           IWDG_Reload();
         }
 
@@ -210,6 +217,7 @@
          * Thực hiện lưu cờ trạng thái vào biến trả về
          */
 
+        // Lưu trạng thái sẵn sàng HSE
         rdy_flg->HSE_RDY_FLG = SET;
 
         if (__DEBUG_GET_MODE(ENABLE)) {
@@ -226,12 +234,14 @@
 
       case 0x0Ful: // LSI
       
-        RCC_REGS_PTR->CSR.LSION = SET; // Bật LSI  
+        // Bật LSI
+        RCC_REGS_PTR->CSR.LSION = SET;
 
         if (__DEBUG_GET_MODE(ENABLE)) {
           printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
         }
 
+        // Chờ LSI sẵn sàng
         // Chờ LSI sẵn sàng
         while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {}
 
@@ -241,6 +251,7 @@
          * Thực hiện lưu cờ trạng thái vào biến trả về
          */
 
+        // Lưu trạng thái sẵn sàng LSI
         rdy_flg->LSI_RDY_FLG = SET;
 
         return STAT_OK;
@@ -262,6 +273,7 @@
      * của switch bên trên.
      */
 
+    // Kết thúc quy trình khởi tạo
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG6: Setup procedure done.\n");
     }
@@ -275,7 +287,7 @@
    * Tham số:
    *   sysclk_source - Nguồn clock muốn chuyển sang (HSI hoặc HSE).
    *
-   * Logic chính:
+   * Logic:
    *   - Kiểm tra tham số đầu vào hợp lệ.
    *   - Gán giá trị chọn nguồn SYSCLK vào thanh ghi cấu hình.
    *   - Kiểm tra lại trạng thái đã chuyển đổi thành công chưa.
@@ -285,20 +297,21 @@
    */
   RETR_STAT RCC_SYSCLK_Switch(ul sysclk_source) {
 
+    // Kiểm tra tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_SYSCLK_Switch, DBG1: Assert parameter.\n");
     }
-
     assert_param(IS_RCC_SYSCLK_SOURCE(sysclk_source));
 
+    // Gán giá trị chọn nguồn SYSCLK
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_SYSCLK_Switch, DBG2: Switch SYSCLK source.\n");
     }
-    
-    RCC_REGS_PTR->CFGR.SW = sysclk_source; // Chọn HSE làm nguồn SYSCLK
+    RCC_REGS_PTR->CFGR.SW = sysclk_source;
 
+    // Kiểm tra lại trạng thái đã chuyển đổi
     if (__DIFF_CHECK(RCC_REGS_PTR->CFGR.SWS, sysclk_source)) {
-      return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
+      return STAT_ERROR;
     }
 
     return STAT_DONE;
@@ -311,7 +324,7 @@
    *   init_param - Con trỏ tới cấu trúc tham số nguồn clock cần deinit.
    *   rdy_flg    - Con trỏ tới biến lưu trạng thái sẵn sàng (được clear).
    *
-   * Logic chính:
+   * Logic:
    *   - Kiểm tra con trỏ đầu vào hợp lệ.
    *   - Làm mới biến cờ trạng thái.
    *   - Với HSE: chuyển SYSCLK về HSI trước khi tắt HSE.
@@ -331,29 +344,30 @@
      * của switch bên trên.
      */
 
+    // Kiểm tra con trỏ đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG1: Check Null pointer.\n");
     }
-
     if (__NULL_PTR_CHECK(init_param)) {
       return STAT_ERROR;
     }
 
+    // Kiểm tra giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG2: Assert parameter.\n");
     }
-
     assert_param(
       IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source) || 
       IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
     );
 
+    // Làm mới biến cờ trạng thái
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG3: Clear Clock ready flags kit.\n");
     }
-
     memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
 
+    // Tắt nguồn clock tương ứng
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG4: Turn off clock.\n");
     }
@@ -376,6 +390,7 @@
          * Vì HSI là nguồn clock dự phòng cho hệ thống
          */
 
+        // Không thể tắt HSI (nguồn dự phòng)
         return STAT_BUSY;
         break;
       
@@ -388,6 +403,7 @@
          * Nếu HSI chưa được bật thì tiến hành bật HSI trước
          */
 
+        // Nếu HSI chưa sẵn sàng thì khởi tạo HSI trước khi tắt HSE
         if (__NRDY_CHECK(RCC_IsHSIReady())) {
           RCC_CLK_Init_Param rcc_hsi_init;
           rcc_hsi_init.CLK_Source = RCC_SYSCLK_SOURCE_HSI;
@@ -396,12 +412,12 @@
             return STAT_ERROR;
           }
         }
-
+        // Chuyển SYSCLK về HSI
         if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSI))) {
-          return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
+          return STAT_ERROR;
         }
-
-        RCC_REGS_PTR->CR.HSEON = RESET; // Tắt HSE
+        // Tắt HSE
+        RCC_REGS_PTR->CR.HSEON = RESET;
         break;
       
       case RCC_IWDG_SOURCE_LSI:
@@ -413,14 +429,17 @@
          * IWDG cũng không thể tắt
          */
 
+        // Không thể tắt LSI nếu đang dùng cho IWDG
         return STAT_ERROR;
         break;
 
       default:
+        // Tham số không hợp lệ
         return STAT_ERROR;
         break;
     }
 
+    // Kết thúc quy trình deinit
     return STAT_DONE;
   }
 
@@ -441,18 +460,24 @@
   }
 
   /*
-   * Hàm xử lý ngắt NMI do CSS (chưa triển khai, placeholder cho mở rộng).
+   * Hàm xử lý ngắt NMI do Clock Security System (CSS).
+   *
+   * Logic:
+   *   - Kiểm tra cờ CSSF (Clock Security System Failure).
+   *   - Nếu có lỗi clock (CSSF == SET):
+   *       + Gọi callback RCC_CSS_Callback() để user xử lý lỗi.
+   *       + Xóa cờ CSSF bằng cách ghi vào trường CSSC.
+   *
    * Không có tham số và không trả về giá trị.
    */
   void RCC_NMI_IRQ_Handler(void) {
 
-  }
-
-  /*
-   * Hàm xử lý ngắt chung RCC (chưa triển khai, placeholder cho mở rộng).
-   * Không có tham số và không trả về giá trị.
-   */
-  void RCC_GNR_IRQ_Handler(void) {
+    if (__SET_FLAG_CHECK(RCC_REGS_PTR->CIR.CSSF)) {
+      // Xử lý sự kiện lỗi clock (CSS Failure)
+      RCC_CSS_Callback();
+      // Xóa cờ CSSF với CSSC
+      RCC_REGS_PTR->CIR.CSSC = SET;
+    }
 
   }
 
@@ -461,7 +486,12 @@
    * Không có tham số và không trả về giá trị.
    */
   __weak void RCC_CSS_Callback(void) {
-
+    /**
+     * Ghi chú:
+     * Ở đây chỉ là hàm callback yếu,
+     * Người dùng có thể override hàm này trong code của họ
+     * để xử lý sự kiện lỗi clock theo nhu cầu cụ thể.
+     */
   }
 
   /*

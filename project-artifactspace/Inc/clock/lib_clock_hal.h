@@ -66,9 +66,6 @@
 		// >> Hàm xử lý ngắt NMI do CSS
 		void RCC_NMI_IRQ_Handler(void);
 
-		// >> Hàm xử lý ngắt chung RCC
-		void RCC_GNR_IRQ_Handler(void);
-
 		// >> Hàm callback CSS weak
 		__weak void RCC_CSS_Callback(void);
 
