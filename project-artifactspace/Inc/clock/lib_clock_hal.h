@@ -51,8 +51,11 @@
 		// >> Hàm khởi tạo clock hệ thống
 		RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg);
 
+		// >> Hàm chuyển đổi SYSCLK
+		RETR_STAT RCC_SYSCLK_Switch(ul sysclk_source);
+
 		// >> Hàm de-initialize clock hệ thống
-		RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param);
+		RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg);
 
 		// >> Hàm bật CSS
 		void RCC_CSS_Enable(void);
