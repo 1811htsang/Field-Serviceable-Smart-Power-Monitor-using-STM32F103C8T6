@@ -214,7 +214,7 @@ Cấu trúc của 1 file gitignore tiêu chuẩn cho dự án này như sau:
 <Liệt các file hoặc thư mục hoặc kiểu file cần ignore theo quy tắc đã nêu ở trên>
 ```
 
----
+
 # Cấu trúc làm việc với project-artifactspace
 Dưới đây là hướng dẫn về cách tổ chức và làm việc với không gian dự án `project-artifactspace/`, nơi chứa mã nguồn và tài nguyên chính của dự án.
 
