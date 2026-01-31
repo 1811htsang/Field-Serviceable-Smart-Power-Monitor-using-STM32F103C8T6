@@ -1,4 +1,24 @@
-project-obsidianspace/.obsidian/app.json
-project-obsidianspace/.obsidian/appearance.json
-project-obsidianspace/.obsidian/core-plugins.json
-project-obsidianspace/.obsidian/workspace.json
+# Ignore Obsidian configuration files
+project-obsidianspace/.obsidian/
+
+# Ignore project-artifactspace build and IDE files
+project-artifactspace/.settings/
+project-artifactspace/Debug/
+project-artifactspace/Startup/
+project-artifactspace/Test/*/build/
+project-artifactspace/.cproject
+project-artifactspace/.project
+project-artifactspace/STM32F103C8TX_FLASH.ld
+
+# Ignore project-halartifactspace build and IDE files
+project-halartifactspace/Drivers/
+project-halartifactspace/EWARM/
+project-halartifactspace/.mxproject
+project-halartifactspace/.project
+project-halartifactspace/project-halartifactspace.ioc
+
+# Ignore .vscode settings
+.vscode/
+
+# Ignore compiled object files and binaries
+*.exe
