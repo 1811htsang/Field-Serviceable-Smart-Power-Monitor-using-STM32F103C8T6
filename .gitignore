@@ -5,7 +5,6 @@ project-obsidianspace/.obsidian/
 project-artifactspace/.settings/
 project-artifactspace/Debug/
 project-artifactspace/Startup/
-project-artifactspace/Test/*/build/
 project-artifactspace/.cproject
 project-artifactspace/.project
 project-artifactspace/STM32F103C8TX_FLASH.ld
@@ -22,3 +21,6 @@ project-halartifactspace/project-halartifactspace.ioc
 
 # Ignore compiled object files and binaries
 *.exe
+
+# Ignore build directories
+*build/
