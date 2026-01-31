@@ -28,3 +28,20 @@ This project focuses on creating a smart power monitor using the STM32F103C8T6 m
   - ADC for voltage and current sensing
   - UART for communication and firmware updates
   - GPIO for status indicators and control signals
+  - RCC for reset & clock management
+  - IWDG for watchdog functionality
+- **Firmware Update**: XMODEM protocol with CRC checks for reliable updates.
+- **Power Monitoring**: Real-time measurement and reporting of power consumption.
+
+---
+
+# Hardware Components
+Note that this sections can be expand with new requirements in the future.
+- STM32F103C8T6 Microcontroller
+- ADE7757 Energy Metering IC
+- LCD 16x2 Display (Optional for user interface)
+- Relay 5V for load control
+- L7805CV Voltage Regulator
+- BC547 Transistor
+- MCT2E Optocoupler
+- Various resistors, capacitors, diodes, and connectors as per the schematic or PCB design.
