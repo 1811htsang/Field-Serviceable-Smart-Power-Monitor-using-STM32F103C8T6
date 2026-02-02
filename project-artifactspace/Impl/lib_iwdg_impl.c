@@ -13,13 +13,13 @@
 
   #include <stdint.h>
   #include <stdio.h>
-  #include "generic/lib_keyword_def.h"
-  #include "generic/lib_condition_def.h"
-  #include "iwdg/lib_iwdg_def.h"
-  #include "iwdg/lib_iwdg_hal.h"
+  #include "lib_keyword_def.h"
+  #include "lib_condition_def.h"
+  #include "lib_iwdg_def.h"
+  #include "lib_iwdg_hal.h"
 
   #ifndef UNIT_TEST
-  #include "clock/lib_clock_hal.h"
+  #include "lib_clock_hal.h"
   #endif
 
 // Định nghĩa các hàm thành phần

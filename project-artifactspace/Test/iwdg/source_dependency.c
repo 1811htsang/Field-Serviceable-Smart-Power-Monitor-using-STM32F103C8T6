@@ -15,8 +15,8 @@
 
 // Khai báo các thư viện cho unit test
 
-  #include "generic/lib_keyword_def.h"
-  #include "iwdg/header_dependency.h"
+  #include "lib_keyword_def.h"
+  #include "header_dependency.h"
 
 // Khai báo các dependency variables của các hàm IWDG_Init
 

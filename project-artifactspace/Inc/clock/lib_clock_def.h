@@ -18,7 +18,7 @@
   // Khai báo các thư viện sử dụng chung
 
 		#include <stdint.h>
-		#include "generic/lib_keyword_def.h"
+		#include "lib_keyword_def.h"
 
   // Khai báo địa chỉ ngoại vi
 

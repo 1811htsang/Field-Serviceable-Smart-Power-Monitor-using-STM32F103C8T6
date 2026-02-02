@@ -7,14 +7,21 @@
 
 // Khai báo các thư viện sử dụng chung
 
+  #ifdef UNIT_TEST
+    #include "header_dependency.h"
+  #endif
+
   #include <stdint.h>
   #include <stdio.h>
 	#include <string.h>
-  #include "generic/lib_keyword_def.h"
-  #include "generic/lib_condition_def.h"
-  #include "clock/lib_clock_def.h"
-  #include "clock/lib_clock_hal.h"
-  #include "iwdg/lib_iwdg_hal.h"
+  #include "lib_keyword_def.h"
+  #include "lib_condition_def.h"
+  #include "lib_clock_def.h"
+  #include "lib_clock_hal.h"
+
+  #ifndef UNIT_TEST
+    #include "lib_iwdg_hal.h"
+  #endif
 
 // Định nghĩa các hàm thành phần
 
@@ -98,6 +105,37 @@
          * Do đó, khởi tạo HSI chỉ cần đảm bảo HSI được bật đúng cách.
          */
 
+        // Khởi tạo IWDG trước để đảm bảo hệ thống không bị treo trong quá trình chờ
+        if (__NRDY_CHECK(RCC_IsLSIReady())) {
+            
+          /**
+           * Ghi chú:
+           * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
+           * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
+           * Bật IWDG init trong RCC_CLK_Init để đảm bảo khi LSI
+           * được bật thì IWDG cũng được cấu hình đúng cách
+           */
+
+          // Khởi tạo LSI
+          RCC_CLK_Init_Param rcc_lsi_init;
+          rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
+          RCC_RDYFLG_Typdef lsi_rdy_flg;
+          if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
+            return STAT_ERROR;
+          }
+
+
+          // Khởi tạo và start IWDG
+          IWDG_Init_Param iwdg_init = {
+            .Prescaler = IWDG_PR_REG_PR_DIV_4,
+            .Reload = IWDG_RLR_REG_RL_MAX
+          };
+          if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
+            return STAT_ERROR;
+          }
+          IWDG_Start();            
+        }
+
         // Bật HSI
         RCC_REGS_PTR->CR.HSION = SET;
 
@@ -107,37 +145,7 @@
         
         // Chờ HSI sẵn sàng
         while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
-          // Nếu LSI chưa sẵn sàng thì khởi tạo LSI và IWDG
-          if (__NRDY_CHECK(RCC_IsLSIReady())) {
-            
-            /**
-             * Ghi chú:
-             * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
-             * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
-             * Bật IWDG init trong RCC_CLK_Init để đảm bảo khi LSI
-             * được bật thì IWDG cũng được cấu hình đúng cách
-             */
-
-            // Khởi tạo LSI
-            RCC_CLK_Init_Param rcc_lsi_init;
-            rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-            RCC_RDYFLG_Typdef lsi_rdy_flg;
-            if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
-              return STAT_ERROR;
-            }
-
-
-            // Khởi tạo và start IWDG
-            IWDG_Init_Param iwdg_init = {
-              .Prescaler = IWDG_PR_REG_PR_DIV_4,
-              .Reload = IWDG_RLR_REG_RL_MAX
-            };
-            if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
-              return STAT_ERROR;
-            }
-            IWDG_Start();            
-          }
-
+          
           /**
            * Ghi chú:
            * Ở đây, đã đảm bảo LSI sẵn sàng để IWDG hoạt động, 
@@ -174,6 +182,37 @@
          * Bật CSS trước để đảm bảo hệ thống được bảo vệ ngay 
          * khi HSE được kích hoạt
          */
+
+        // Khởi tạo IWDG trước để đảm bảo hệ thống không bị treo trong quá trình chờ
+        if (__NRDY_CHECK(RCC_IsLSIReady())) {
+            
+          /**
+           * Ghi chú:
+           * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
+           * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
+           * Bật IWDG init trong RCC_CLK_Init để đảm bảo khi LSI
+           * được bật thì IWDG cũng được cấu hình đúng cách
+           */
+
+          // Khởi tạo LSI
+          RCC_CLK_Init_Param rcc_lsi_init;
+          rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
+          RCC_RDYFLG_Typdef lsi_rdy_flg;
+          if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
+            return STAT_ERROR;
+          }
+
+
+          // Khởi tạo và start IWDG
+          IWDG_Init_Param iwdg_init = {
+            .Prescaler = IWDG_PR_REG_PR_DIV_4,
+            .Reload = IWDG_RLR_REG_RL_MAX
+          };
+          if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
+            return STAT_ERROR;
+          }
+          IWDG_Start();
+        }
         
         // Bật CSS trước khi bật HSE
         RCC_CSS_Enable();
@@ -186,41 +225,17 @@
 
         // Chờ HSE sẵn sàng
         while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
-          // Nếu LSI chưa sẵn sàng thì khởi tạo LSI và IWDG
-          if (__NRDY_CHECK(RCC_IsLSIReady())) {
-            
-            /**
-             * Ghi chú:
-             * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
-             * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
-             * Bật IWDG init trong RCC_CLK_Init để đảm bảo khi LSI
-             * được bật thì IWDG cũng được cấu hình đúng cách
-             */
-
-            // Khởi tạo LSI
-            RCC_CLK_Init_Param rcc_lsi_init;
-            rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-            RCC_RDYFLG_Typdef lsi_rdy_flg;
-            if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
-              return STAT_ERROR;
-            }
-
-
-            // Khởi tạo và start IWDG
-            IWDG_Init_Param iwdg_init = {
-              .Prescaler = IWDG_PR_REG_PR_DIV_4,
-              .Reload = IWDG_RLR_REG_RL_MAX
-            };
-            if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
-              return STAT_ERROR;
-            }
-            IWDG_Start();
-          }
 
           /**
            * Ghi chú:
            * Ở đây, đã đảm bảo LSI sẵn sàng để IWDG hoạt động, 
-           * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSI ổn định.
+           * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSE ổn định.
+           * Lưu ý rằng, ở các thiết kế trước IWDG được khởi động trong vòng chờ HSE,
+           * tuy nhiên sau khi xem xét thì có thể xảy ra trường hợp 
+           * HSE sẵn sàng rất nhanh trước khi IWDG kịp khởi động,
+           * dẫn đến việc hệ thống vẫn có thể bị treo nếu HSE gặp sự cố sau đó.
+           * Do đó, việc khởi động IWDG trước khi chờ HSE sẵn sàng
+           * sẽ giúp hệ thống an toàn hơn.
            */
 
           // Feed IWDG định kỳ trong vòng chờ
