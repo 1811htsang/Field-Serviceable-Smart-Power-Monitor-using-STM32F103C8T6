@@ -20,8 +20,6 @@
 		#include <stdint.h>
 		#include "generic/lib_keyword_def.h"
 
-  
-
   // Khai báo địa chỉ ngoại vi
 
   	#define RCC_REGS_BASEADDR 0x40021000ul
@@ -121,7 +119,12 @@
 
   // >> Tạo con trỏ tới ngoại vi
 
-  	#define RCC_REGS_PTR ((RCC_REGS_Typedef *)RCC_REGS_BASEADDR)
+  	#ifndef UNIT_TEST
+			#define RCC_REGS_PTR ((RCC_REGS_Typedef *) RCC_REGS_BASEADDR)
+		#else
+			extern RCC_REGS_Typedef MOCK_RCC_REGS;
+			#define RCC_REGS_PTR (&MOCK_RCC_REGS)
+		#endif
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CR_REG
 

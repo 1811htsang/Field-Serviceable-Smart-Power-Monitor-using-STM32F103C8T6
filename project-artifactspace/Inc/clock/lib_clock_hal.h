@@ -15,17 +15,23 @@
 
   // Khai báo cấu trúc tham số hàm khởi tạo
 
-		tdf_strc RCC_CLK_Init_Param{
-			ul CLK_Source; // Chọn nguồn clock hệ thống
-		} RCC_CLK_Init_Param;
+		#ifndef RCC_CLK_INIT_PARAM_TYPE
+			#define RCC_CLK_INIT_PARAM_TYPE
+			tdf_strc RCC_CLK_Init_Param{
+				ul CLK_Source; // Chọn nguồn clock hệ thống
+			} RCC_CLK_Init_Param;
+		#endif
 
 	// Khai báo các cờ trả về có thời hạn 
 
-		tdf_strc RCC_RDYFLG_Typdef {
-			ui HSI_RDY_FLG : 1;
-			ui HSE_RDY_FLG : 1;
-			ui LSI_RDY_FLG : 1;
-		} RCC_RDYFLG_Typdef;
+		#ifndef RCC_RDYFLG_TYPEDEF
+			#define RCC_RDYFLG_TYPEDEF
+			tdf_strc RCC_RDYFLG_Typdef {
+				__vo ui HSI_RDY_FLG : 1;
+				__vo ui HSE_RDY_FLG : 1;
+				__vo ui LSI_RDY_FLG : 1;
+			} RCC_RDYFLG_Typdef;
+		#endif
 
 		/**
 		 * Ghi chú:

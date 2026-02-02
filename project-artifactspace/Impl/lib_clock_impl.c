@@ -37,6 +37,14 @@
    *
    * Trả về:
    *   RETR_STAT - STAT_OK nếu thành công, STAT_ERROR nếu lỗi, STAT_DONE nếu hoàn tất quy trình.
+   * 
+   * Phụ thuộc ngoài module Clock:
+   *   - IWDG_Init_Param
+   *   - IWDG_Init()
+   *   - IWDG_Start()
+   *   - IWDG_Reload()
+   *   - IWDG_PR_REG_PR_DIV_4
+   *   - IWDG_RLR_REG_RL_MAX
    */
   RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
     
@@ -114,16 +122,20 @@
             RCC_CLK_Init_Param rcc_lsi_init;
             rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
             RCC_RDYFLG_Typdef lsi_rdy_flg;
-            if (RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg) != STAT_OK) {
+            if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
               return STAT_ERROR;
             }
+
+
             // Khởi tạo và start IWDG
             IWDG_Init_Param iwdg_init = {
               .Prescaler = IWDG_PR_REG_PR_DIV_4,
               .Reload = IWDG_RLR_REG_RL_MAX
             };
-            IWDG_Init(&iwdg_init);
-            IWDG_Start();
+            if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
+              return STAT_ERROR;
+            }
+            IWDG_Start();            
           }
 
           /**
@@ -192,12 +204,16 @@
             if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
               return STAT_ERROR;
             }
+
+
             // Khởi tạo và start IWDG
             IWDG_Init_Param iwdg_init = {
               .Prescaler = IWDG_PR_REG_PR_DIV_4,
               .Reload = IWDG_RLR_REG_RL_MAX
             };
-            IWDG_Init(&iwdg_init);
+            if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
+              return STAT_ERROR;
+            }
             IWDG_Start();
           }
 
@@ -294,6 +310,8 @@
    *
    * Trả về:
    *   RETR_STAT - STAT_DONE nếu thành công, STAT_ERROR nếu chuyển đổi thất bại.
+   * 
+   * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_SYSCLK_Switch(ul sysclk_source) {
 
@@ -333,6 +351,8 @@
    *
    * Trả về:
    *   RETR_STAT - STAT_DONE nếu thành công, STAT_ERROR nếu lỗi, STAT_BUSY nếu không thể tắt HSI.
+   * 
+   * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
 
@@ -356,10 +376,7 @@
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_DeInit, DBG2: Assert parameter.\n");
     }
-    assert_param(
-      IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source) || 
-      IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
-    );
+    assert_param(IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source));
 
     // Làm mới biến cờ trạng thái
     if (__DEBUG_GET_MODE(ENABLE)) {
@@ -408,7 +425,7 @@
           RCC_CLK_Init_Param rcc_hsi_init;
           rcc_hsi_init.CLK_Source = RCC_SYSCLK_SOURCE_HSI;
           RCC_RDYFLG_Typdef hsi_rdy_flg;
-          if (RCC_CLK_Init(&rcc_hsi_init, &hsi_rdy_flg) != STAT_OK) {
+          if (!__OK_CHECK(RCC_CLK_Init(&rcc_hsi_init, &hsi_rdy_flg))) {
             return STAT_ERROR;
           }
         }
@@ -446,6 +463,7 @@
   /*
    * Hàm bật Clock Security System (CSS) để bảo vệ khi HSE lỗi.
    * Không có tham số và không trả về giá trị.
+   * Phụ thuộc ngoài module Clock: Không có
    */
   void RCC_CSS_Enable(void) {
     RCC_REGS_PTR->CR.CSSON = SET;
@@ -454,6 +472,7 @@
   /*
    * Hàm tắt Clock Security System (CSS).
    * Không có tham số và không trả về giá trị.
+   * Phụ thuộc ngoài module Clock: Không có
    */
   void RCC_CSS_Disable(void) {
     RCC_REGS_PTR->CR.CSSON = RESET;
@@ -469,6 +488,8 @@
    *       + Xóa cờ CSSF bằng cách ghi vào trường CSSC.
    *
    * Không có tham số và không trả về giá trị.
+   * 
+   * Phụ thuộc ngoài module Clock: Không có
    */
   void RCC_NMI_IRQ_Handler(void) {
 
@@ -484,6 +505,8 @@
   /*
    * Hàm callback yếu cho CSS (có thể override ở user code).
    * Không có tham số và không trả về giá trị.
+   * 
+   * Phụ thuộc ngoài module Clock: Không có
    */
   __weak void RCC_CSS_Callback(void) {
     /**
@@ -499,6 +522,8 @@
    *
    * Trả về:
    *   RETR_STAT - STAT_RDY nếu HSI đã sẵn sàng, STAT_NRDY nếu chưa.
+   * 
+   * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_IsHSIReady(void) {
     if (__SET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
@@ -513,6 +538,8 @@
    *
    * Trả về:
    *   RETR_STAT - STAT_RDY nếu HSE đã sẵn sàng, STAT_NRDY nếu chưa.
+   * 
+   * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_IsHSEReady(void) {
     if (__SET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
@@ -527,6 +554,7 @@
    *
    * Trả về:
    *   RETR_STAT - STAT_RDY nếu LSI đã sẵn sàng, STAT_NRDY nếu chưa.
+   * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_IsLSIReady(void) {
     if (__SET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {

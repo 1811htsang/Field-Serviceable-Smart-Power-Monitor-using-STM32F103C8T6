@@ -15,10 +15,10 @@
 
 // Khai báo các thư viện cho unit test
 
-  #include "lib_keyword_def.h"
-  #include "header_dependency.h"
+  #include "generic/lib_keyword_def.h"
+  #include "iwdg/header_dependency.h"
 
-// Khai báo các dependency của các hàm IWDG_Init
+// Khai báo các dependency variables của các hàm IWDG_Init
 
   RETR_STAT RCC_IsLSIReady_Expect = STAT_RDY;
   RETR_STAT RCC_CLK_Init_Expect = STAT_OK;
