@@ -12,14 +12,18 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Tìm hiểu về reset và khởi động STM32
 - [x] Tìm hiểu về Watchdog Timer
 - [x] Tìm hiểu về Unit Testing trong Embedded
-- [x] Viết Unit Test cho Driver IWDG
 - [x] Viết Header & Source Inclusion cho GCC Compiler
 - [x] Tìm hiểu sử dụng GDB cho Unit Test 
-- [ ] Hoàn thiện ghi chú về sử dụng GDB cho Unit Test
-- [ ] Hoàn thiện ghi chú về thiết kế mã nguồn hỗ trợ Unit Test
+- [x] Hoàn thiện ghi chú về sử dụng GDB cho Unit Test
+- [x] Hoàn thiện ghi chú về thiết kế mã nguồn hỗ trợ Unit Test
+- [x] Viết Driver Clock (Clock Control)
+- [x] Viết Driver IWDG (Independent Watchdog)
+- [x] Viết Driver Reset (Reset Control)
+- [x] Viết Unit Test cho Driver IWDG
+- [ ] Viết Unit Test cho Driver Clock
+- [ ] Viết Unit Test cho Driver Reset
+- [ ] Triển khai Driver lên mạch thực tế
 - [ ] Thiết kế Unit Test Framework cho dự án
-- [ ] Viết Driver RCC (Reset and Clock Control)
-- [ ] Viết Driver IWDG (Independent Watchdog)
 - [ ] Viết Driver GPIO
 - [ ] Viết Driver USART (Polling Mode)
 
