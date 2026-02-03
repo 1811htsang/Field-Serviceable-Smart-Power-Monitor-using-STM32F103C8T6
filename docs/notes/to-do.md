@@ -20,7 +20,7 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Viết Driver IWDG (Independent Watchdog)
 - [x] Viết Driver Reset (Reset Control)
 - [x] Viết Unit Test cho Driver IWDG
-- [ ] Viết Unit Test cho Driver Clock
+- [x] Viết Unit Test cho Driver Clock
 - [ ] Viết Unit Test cho Driver Reset
 - [ ] Triển khai Driver lên mạch thực tế
 - [ ] Thiết kế Unit Test Framework cho dự án
