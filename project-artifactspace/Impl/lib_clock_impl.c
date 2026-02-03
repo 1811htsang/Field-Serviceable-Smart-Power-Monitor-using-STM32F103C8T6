@@ -62,7 +62,9 @@
     if (__NULL_PTR_CHECK(init_param)) {
       return STAT_ERROR;
     }
-
+    if (__NULL_PTR_CHECK(rdy_flg)) {
+      return STAT_ERROR;
+    }
 
     // Kiểm tra giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
@@ -72,8 +74,7 @@
       IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source) || 
       IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
     );
-
-
+    
     // Làm mới biến cờ trạng thái
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_CLK_Init, DBG3: Refresh Clock ready flags kit.\n");
@@ -152,8 +153,29 @@
            * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSI ổn định.
            */
 
+          #ifdef UNIT_TEST
+            
+            /**
+             * Ghi chú:
+             * Ở đây khu vực này sẽ giả lập việc HSI không thể sẵn sàng thì sẽ dừng lại
+             * Do trong unit sẽ có các hàm giả lập việc HSI sẵn sàng nên trường hợp HSI sẵn sàng sẽ bỏ qua vòng lặp này
+             */
+
+            for (int i = 10; i >= 0; i--) {
+              // Feed IWDG định kỳ trong vòng chờ
+              printf("RCC_CLK_Init, DBG-UNIT TEST: Simulate waiting for HSI ready... %d\n", i);
+              IWDG_Reload();
+            }
+            break;
+            
+          #endif
+
           // Feed IWDG định kỳ trong vòng chờ
           IWDG_Reload();
+        }
+
+        if (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
+          return STAT_ERROR; // HSI không thể sẵn sàng
         }
 
         /**
@@ -238,8 +260,30 @@
            * sẽ giúp hệ thống an toàn hơn.
            */
 
+          #ifdef UNIT_TEST
+            
+            /**
+             * Ghi chú:
+             * Ở đây khu vực này sẽ giả lập việc HSE không thể sẵn sàng thì sẽ dừng lại,
+             * Do trong unit sẽ có các hàm giả lập việc HSE sẵn sàng nên 
+             * trường hợp HSE sẵn sàng sẽ bỏ qua vòng lặp này
+             */
+
+            for (int i = 10; i >= 0; i--) {
+              // Feed IWDG định kỳ trong vòng chờ
+              printf("RCC_CLK_Init, DBG-UNIT TEST: Simulate waiting for HSE ready... %d\n", i);
+              IWDG_Reload();
+            }
+            break;
+            
+          #endif
+
           // Feed IWDG định kỳ trong vòng chờ
           IWDG_Reload();
+        }
+
+        if (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
+          return STAT_ERROR; // HSE không thể sẵn sàng
         }
 
         /**
@@ -273,8 +317,30 @@
         }
 
         // Chờ LSI sẵn sàng
-        // Chờ LSI sẵn sàng
-        while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {}
+        while (__RESET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {
+
+          #ifdef UNIT_TEST
+            
+            /**
+             * Ghi chú:
+             * Ở đây khu vực này sẽ giả lập việc LSI không thể sẵn sàng thì sẽ dừng lại,
+             * Do trong unit sẽ có các hàm giả lập việc LSI sẵn sàng nên 
+             * trường hợp LSI sẵn sàng sẽ bỏ qua vòng lặp này
+             */
+
+            for (int i = 10; i >= 0; i--) {
+              // Feed IWDG định kỳ trong vòng chờ
+              printf("RCC_CLK_Init, DBG-UNIT TEST: Simulate waiting for LSI ready... %d\n", i);
+            }
+            break;
+            
+          #endif
+
+        }
+
+        if (__RESET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {
+          return STAT_ERROR; // LSI không thể sẵn sàng
+        }
 
         /**
          * Ghi chú:
@@ -386,6 +452,9 @@
     if (__NULL_PTR_CHECK(init_param)) {
       return STAT_ERROR;
     }
+    if (__NULL_PTR_CHECK(rdy_flg)) {
+      return STAT_ERROR;
+    }
 
     // Kiểm tra giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
@@ -444,10 +513,14 @@
             return STAT_ERROR;
           }
         }
+
+
         // Chuyển SYSCLK về HSI
         if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSI))) {
           return STAT_ERROR;
         }
+
+        
         // Tắt HSE
         RCC_REGS_PTR->CR.HSEON = RESET;
         break;

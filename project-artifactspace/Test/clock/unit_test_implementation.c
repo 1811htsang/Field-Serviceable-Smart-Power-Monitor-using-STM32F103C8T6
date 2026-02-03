@@ -71,6 +71,20 @@
     MOCK_RCC_REGS.CSR.LSIRDY = SET;
   }
 
+  void SYSCLK_HSE_switched() {
+    /*
+      Hàm này mô phỏng việc chuyển đổi SYSCLK sang HSE bằng cách thiết lập trường SWS trong thanh ghi RCC giả
+    */
+    MOCK_RCC_REGS.CFGR.SWS = RCC_SYSCLK_SOURCE_HSE;
+  }
+
+  void SYSCLK_HSI_switched() {
+    /*
+      Hàm này mô phỏng việc chuyển đổi SYSCLK sang HSI bằng cách thiết lập trường SWS trong thanh ghi RCC giả
+    */
+    MOCK_RCC_REGS.CFGR.SWS = RCC_SYSCLK_SOURCE_HSI;
+  }
+
   void test_Init_NullPointer_ShouldReturnError() {
     setup();
     printf("TC1: Check Null Pointer...\n");
@@ -110,10 +124,16 @@
 
     // Mô phỏng LSI sẵn sàng ngay lập tức
     LSI_ready_set();
+
+    // Mô phỏng HSI sẵn sàng ngay lập tức
+    HSIRDY_ready_set();
+
+    // Mô phỏng việc chuyển đổi SYSCLK sang HSE thành công
+    SYSCLK_HSE_switched();
     
     RETR_STAT result = RCC_CLK_Init(&param, &rdy_flg);
     
-    assert(__DONE_CHECK(result));
+    assert(__OK_CHECK(result));
     assert(__SET_FLAG_CHECK(rdy_flg.HSE_RDY_FLG));
     printf("-> PASSED\n");
   }
@@ -130,7 +150,7 @@
     
     RETR_STAT result = RCC_CLK_Init(&param, &rdy_flg);
     
-    assert(__DONE_CHECK(result));
+    assert(__OK_CHECK(result));
     assert(__SET_FLAG_CHECK(rdy_flg.LSI_RDY_FLG));
     printf("-> PASSED\n");
   }
@@ -214,10 +234,13 @@
 
     // Mô phỏng HSI sẵn sàng để chuyển SYSCLK về HSI trước khi tắt HSE
     HSIRDY_ready_set();
+
+    // Mô phỏng việc chuyển đổi SYSCLK sang HSI thành công
+    SYSCLK_HSI_switched();
     
     RETR_STAT result = RCC_CLK_DeInit(&param, &rdy_flg);
     
-    assert(__OK_CHECK(result));
+    assert(__DONE_CHECK(result));
     assert(MOCK_RCC_REGS.CR.HSEON == RESET); // Kiểm tra HSE đã tắt
     printf("-> PASSED\n");
   }
