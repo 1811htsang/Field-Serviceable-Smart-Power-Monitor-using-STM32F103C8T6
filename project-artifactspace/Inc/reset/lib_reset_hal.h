@@ -18,21 +18,21 @@
 
 	// Khai báo cấu trúc catch reset
 
-		tdf_strc RESET_Catch_Reset {
+		tdf_strc RST_FLG_Typdef {
 			ui IsPinReset;  // Cờ đánh dấu reset bởi tín hiệu bên ngoài (PIN NRST)
 			ui IsPorReset;  // Cờ đánh dấu reset bởi nguồn điện (POR)
 			ui IsSftReset;  // Cờ đánh dấu reset bởi phần mềm (SFT)
 			ui IsIwdgReset; // Cờ đánh dấu reset bởi watchdog độc lập (IWDG)
 			ui IsWwdgReset; // Cờ đánh dấu reset bởi watchdog cửa sổ (WWDG)
 			ui IsLowPwrReset; // Cờ đánh dấu reset bởi chế độ điện áp thấp (Low Power)
-		} RESET_Catch_Reset;
+		} RST_FLG_Typdef;
 
 	// Khai báo các hàm thành phần
 
 		// >> Hàm thực hiện reset phần mềm hệ thống
-		void RESET_SystemSoftwareReset(void);
+		void RST_SYS_SW_Reset(void);
 
 		// >> Hàm catch reset event sau khi khởi động lại hệ thống
-		void RESET_CaptureResetSource(RESET_Catch_Reset *reset_source);
+		void RST_SRC_Capture(RST_FLG_Typdef *reset_source);
 
 #endif /* LIB_RESET_HAL_H_ */

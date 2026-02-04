@@ -25,7 +25,7 @@
 
 // Định nghĩa các hàm thành phần
 
-  void RESET_SystemSoftwareReset(void) {
+  void RST_SYS_SW_Reset(void) {
     // Ghi giá trị VECTKEY và SYSRESETREQ vào thanh ghi AIRCR để thực hiện reset phần mềm
     SCB_AIRCR_REG_PTR->VECTKEY = 0x5FA; // Giá trị khóa
     SCB_AIRCR_REG_PTR->SYSRESETREQ = SET; // Yêu cầu reset hệ thống
@@ -37,7 +37,7 @@
   }
 
   // >> Hàm catch reset event sau khi khởi động lại hệ thống
-  void RESET_CaptureResetSource(RESET_Catch_Reset *reset_source) {
+  void RST_SRC_Capture(RST_FLG_Typdef *reset_source) {
     // Kiểm tra con trỏ đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RESET_CaptureResetSource, DBG1: Check Null pointer.\n");
