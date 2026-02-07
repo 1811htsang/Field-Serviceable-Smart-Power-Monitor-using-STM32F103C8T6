@@ -16,20 +16,29 @@
  ******************************************************************************
  */
 
-#include "generic/lib_keyword_def.h"
-#include <stdio.h>
-#include <stdint.h>
+// Khai báo các thư viện bổ sung
 
+	#include <stdio.h>
+	#include <stdint.h>
+	#include "generic/lib_keyword_def.h"
+	#include "generic/lib_condition_def.h"
+	#include "clock/lib_clock_def.h"
+	#include "clock/lib_clock_hal.h"
+	#include "reset/lib_reset_def.h"
+	#include "reset/lib_reset_hal.h"
+	#include "iwdg/lib_iwdg_def.h"
+	#include "iwdg/lib_iwdg_hal.h"
 
-#if !defined(__SOFT_FP__) && defined(__ARM_FP)
-  #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
-#endif
+	#if !defined(__SOFT_FP__) && defined(__ARM_FP)
+		#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
+	#endif
 
+// Thực thi chương trình
 
-
-int main(void)
+int main()
 {
     /* Loop forever */
 	printf("Hello world\n");
 	for(;;);
+	return 0;
 }
