@@ -10,8 +10,8 @@
 
   // Khai báo các thư viện sử dụng chung
 
-    #include "generic/lib_keyword_def.h"
-    #include "clock/lib_clock_def.h"
+    #include "lib_keyword_def.h"
+    #include "lib_clock_def.h"
 
   // Khai báo địa chỉ ngoại vi
 
@@ -40,8 +40,8 @@
     #ifndef UNIT_TEST
       #define SCB_AIRCR_REG_PTR ((SCB_AIRCR_REG *) SCB_AIRCR_REG_ADDR)
     #else
-      extern SCB_AIRCR_REG SCB_AIRCR_REG_Mock;
-      #define SCB_AIRCR_REG_PTR (&SCB_AIRCR_REG_Mock)
+      extern SCB_AIRCR_REG MOCK_SCB_AIRCR_REG;
+      #define SCB_AIRCR_REG_PTR (&MOCK_SCB_AIRCR_REG)
     #endif
 
     /**

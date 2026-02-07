@@ -248,7 +248,7 @@
 // Thực thi tất cả các test case
 
 int main() {
-    printf("\n--- <PERIPHERAL> UNIT TEST ---\n");
+    printf("\n--- CLOCK UNIT TEST ---\n");
     
     test_Init_NullPointer_ShouldReturnError();
     test_Init_HSI_Success_ShouldSetReadyFlag();

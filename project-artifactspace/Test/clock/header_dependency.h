@@ -31,18 +31,18 @@
 			
 			#ifndef RCC_CLK_INIT_PARAM_TYPE
 				#define RCC_CLK_INIT_PARAM_TYPE
-				tdf_strc RCC_CLK_Init_Param{
-					ul CLK_Source; // Chọn nguồn clock hệ thống
-				} RCC_CLK_Init_Param;
+					tdf_strc RCC_CLK_Init_Param{
+						ul CLK_Source; // Chọn nguồn clock hệ thống
+					} RCC_CLK_Init_Param;
 			#endif
 
 			#ifndef RCC_RDYFLG_TYPEDEF
 				#define RCC_RDYFLG_TYPEDEF
-				tdf_strc RCC_RDYFLG_Typdef {
-					__vo ui HSI_RDY_FLG : 1; // Cờ trạng thái sẵn sàng HSI
-					__vo ui HSE_RDY_FLG : 1; // Cờ trạng thái sẵn sàng HSE
-					__vo ui LSI_RDY_FLG : 1; // Cờ trạng thái sẵn sàng LSI
-				} RCC_RDYFLG_Typdef;
+					tdf_strc RCC_RDYFLG_Typedef {
+						__vo ui HSI_RDY_FLG : 1; // Cờ trạng thái sẵn sàng HSI
+						__vo ui HSE_RDY_FLG : 1; // Cờ trạng thái sẵn sàng HSE
+						__vo ui LSI_RDY_FLG : 1; // Cờ trạng thái sẵn sàng LSI
+					} RCC_RDYFLG_Typedef;
 			#endif
 
   // Khai báo các dependency function từ các file header cần thiết ngoài module đang test

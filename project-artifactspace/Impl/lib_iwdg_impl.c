@@ -8,7 +8,7 @@
 // Khai báo các thư viện sử dụng chung
 
   #ifdef UNIT_TEST
-  #include "header_dependency.h"
+    #include "header_dependency.h"
   #endif
 
   #include <stdint.h>
@@ -19,7 +19,7 @@
   #include "lib_iwdg_hal.h"
 
   #ifndef UNIT_TEST
-  #include "lib_clock_hal.h"
+    #include "lib_clock_hal.h"
   #endif
 
 // Định nghĩa các hàm thành phần
