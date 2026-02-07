@@ -7,19 +7,28 @@
 
 // Khai báo các thư viện sử dụng chung
 
-#ifdef UNIT_TEST
-#include "header_dependency.h"
-#endif
+  #ifdef UNIT_TEST
+		#include "lib_keyword_def.h"
+		#include "lib_condition_def.h"
+		#include "lib_clock_def.h"
+		#include "lib_clock_hal.h"
+    #include "header_dependency.h"
+  #endif
 
-#include <stdint.h>
-#include <stdio.h>
-#include "lib_keyword_def.h"
-#include "lib_iwdg_def.h"
-#include "lib_iwdg_hal.h"
+  #include <stdint.h>
+  #include <stdio.h>
+ 	#include <string.h>
 
-#ifndef UNIT_TEST
-#include "lib_clock_hal.h"
-#endif
+  #ifndef UNIT_TEST
+		#include "generic/lib_keyword_def.h"
+  	#include "generic/lib_condition_def.h"
+  	#include "clock/lib_clock_def.h"
+  	#include "clock/lib_clock_hal.h"
+		#include "iwdg/lib_iwdg_def.h"
+		#include "iwdg/lib_iwdg_hal.h"
+  #endif
+
+// Định nghĩa các hàm thành phần
 
 /*
  * Hàm khởi tạo ngoại vi IWDG.
