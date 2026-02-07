@@ -35,10 +35,61 @@
 
 // Thực thi chương trình
 
-int main()
-{
-    /* Loop forever */
-	printf("Hello world\n");
-	for(;;);
-	return 0;
-}
+	int main() {
+
+		if (__DEBUG_GET_MODE(ENABLE)) {
+			printf("Main, DBG1: Check reset flag.\n");
+		}
+
+		// Kiểm tra reset flag
+			RCC_RSTFLG_Typedef reset_source;
+			RST_SRC_Capture(&reset_source);
+
+			if (__DEBUG_GET_MODE(ENABLE)) {
+				printf("Main, DBG2: Reset source - PinReset: %u, PorReset: %u, SftReset: %u, IwdgReset: %u, WwdgReset: %u, LowPwrReset: %u.\n",
+					reset_source.IsPinReset,
+					reset_source.IsPorReset,
+					reset_source.IsSftReset,
+					reset_source.IsIwdgReset,
+					reset_source.IsWwdgReset,
+					reset_source.IsLowPwrReset
+				);
+			}
+
+			if (reset_source.IsIwdgReset == SET) {
+				printf("System reset caused by Independent Watchdog (IWDG).\n");
+			} else if (reset_source.IsWwdgReset == SET) {
+				printf("System reset caused by Window Watchdog (WWDG).\n");
+			} else if (reset_source.IsSftReset == SET) {
+				printf("System reset caused by Software Reset (SFT).\n");
+			} else if (reset_source.IsPorReset == SET) {
+				printf("System reset caused by Power-On Reset (POR).\n");
+			} else if (reset_source.IsPinReset == SET) {
+				printf("System reset caused by External Pin Reset (NRST pin).\n");
+			} else if (reset_source.IsLowPwrReset == SET) {
+				printf("System reset caused by Low Power Reset.\n");
+			} else {
+				printf("System reset source is unknown.\n");
+			}
+
+		// Khởi động clock
+
+			RCC_CLK_Init_Param clk_init_param = {
+				.CLK_Source = RCC_SYSCLK_SOURCE_HSE
+			};
+
+			RCC_RDYFLG_Typdef clk_rdy_flg;
+
+			if (!__OK_CHECK(RCC_CLK_Init(&clk_init_param, &clk_rdy_flg))) {
+				printf("Clock initialization failed.\n");
+				return -1;
+			}
+
+		// Vòng lặp chính
+
+			while (1) {
+				// Thực thi các tác vụ chính của ứng dụng tại đây
+			}
+
+		return 0;
+	}
