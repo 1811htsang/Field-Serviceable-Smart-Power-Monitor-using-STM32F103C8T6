@@ -5,6 +5,8 @@ Lộ trình triển khai chi tiết, đi từ
   3. **Giao thức** (Protocol) 
   4. **Công cụ** (Host Tool)
 
+Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để viết Unit Test cho các Driver thuận tiện hơn.
+
 # Giai đoạn Nền tảng
 - [x] Thiết kế khung dự án (Project Structure)
 - [x] Bổ sung các tài liệu căn bản của dự án
@@ -21,11 +23,12 @@ Lộ trình triển khai chi tiết, đi từ
 - [x] Viết Driver Reset (Reset Control)
 - [x] Viết Unit Test cho Driver IWDG
 - [x] Viết Unit Test cho Driver Clock
-- [ ] Viết Unit Test cho Driver Reset
+- [x] Viết Unit Test cho Driver Reset
 - [ ] Triển khai Driver lên mạch thực tế
-- [ ] Thiết kế Unit Test Framework cho dự án
 - [ ] Viết Driver GPIO
-- [ ] Viết Driver USART (Polling Mode)
+- [ ] Viết Driver SPI
+- [ ] Viết Driver I2C
+- [ ] Viết Driver USART (Polling/Interrupt Mode)
 
 # Giai đoạn Cốt lõi
 - [ ] Phân vùng bộ nhớ
