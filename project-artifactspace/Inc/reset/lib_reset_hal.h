@@ -10,11 +10,15 @@
 
 	// Khai báo các thư viện sử dụng chung
 
-		#include <stdint.h>
-		#include <stdio.h>
-		#include "lib_keyword_def.h"
-		#include "lib_condition_def.h"
-		#include "lib_reset_def.h"
+		#ifndef UNIT_TEST
+			#include "generic/lib_keyword_def.h"
+			#include "generic/lib_condition_def.h"
+			#include "reset/lib_reset_def.h"
+		#else
+			#include "lib_keyword_def.h"
+			#include "lib_condition_def.h"
+			#include "lib_reset_def.h"
+		#endif
 
 	// Khai báo cấu trúc catch reset
 

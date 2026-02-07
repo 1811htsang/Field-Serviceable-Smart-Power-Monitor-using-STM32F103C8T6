@@ -10,8 +10,13 @@
 
   // Khai báo các thư viện sử dụng chung
 
-    #include "lib_keyword_def.h"
-    #include "lib_clock_def.h"
+		#ifndef UNIT_TEST
+			#include "generic/lib_keyword_def.h"
+			#include "clock/lib_clock_def.h"
+		#else
+			#include "lib_keyword_def.h"
+			#include "lib_clock_def.h"
+		#endif
 
   // Khai báo địa chỉ ngoại vi
 

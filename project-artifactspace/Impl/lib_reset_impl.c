@@ -8,19 +8,24 @@
 // Khai báo các thư viện sử dụng chung
 
   #ifdef UNIT_TEST
+		#include "lib_keyword_def.h"
+		#include "lib_condition_def.h"
+		#include "lib_reset_def.h"
+		#include "lib_reset_hal.h"
     #include "header_dependency.h"
   #endif
 
   #include <stdint.h>
   #include <stdio.h>
-  #include "lib_keyword_def.h"
-  #include "lib_condition_def.h"
-  #include "lib_reset_def.h"
-  #include "lib_reset_hal.h"
+	#include <string.h>
 
   #ifndef UNIT_TEST
-    #include "lib_clock_def.h"
-    #include "lib_clock_hal.h"
+    #include "clock/lib_clock_def.h"
+    #include "clock/lib_clock_hal.h"
+		#include "generic/lib_keyword_def.h"
+		#include "generic/lib_condition_def.h"
+		#include "reset/lib_reset_def.h"
+		#include "reset/lib_reset_hal.h"
   #endif
 
 // Định nghĩa các hàm thành phần

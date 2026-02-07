@@ -8,47 +8,42 @@
 // Khai báo các thư viện sử dụng chung
 
   #ifdef UNIT_TEST
+		#include "lib_keyword_def.h"
+		#include "lib_condition_def.h"
+		#include "lib_clock_def.h"
+		#include "lib_clock_hal.h"
     #include "header_dependency.h"
   #endif
 
   #include <stdint.h>
   #include <stdio.h>
-  #include "lib_keyword_def.h"
-  #include "lib_condition_def.h"
-  #include "lib_iwdg_def.h"
-  #include "lib_iwdg_hal.h"
+ 	#include <string.h>
 
   #ifndef UNIT_TEST
-    #include "lib_clock_hal.h"
+		#include "generic/lib_keyword_def.h"
+  	#include "generic/lib_condition_def.h"
+  	#include "clock/lib_clock_def.h"
+  	#include "clock/lib_clock_hal.h"
+		#include "iwdg/lib_iwdg_def.h"
+		#include "iwdg/lib_iwdg_hal.h"
   #endif
 
 // Định nghĩa các hàm thành phần
 
-  /*
-   * Hàm khởi tạo và cấu hình watchdog độc lập (IWDG).
-   *
-   * Tham số:
-   *   init_param - Con trỏ tới cấu trúc tham số khởi tạo (Prescaler, Reload).
-   *
-   * Logic:
-   *   - Kiểm tra con trỏ và giá trị tham số đầu vào.
-   *   - Đảm bảo LSI đã sẵn sàng (bật nếu cần).
-   *   - Bật quyền ghi, cấu hình prescaler và reload, kiểm tra trạng thái cập nhật.
-   *   - Tắt quyền ghi sau khi cấu hình.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_DONE nếu thành công, STAT_ERROR nếu lỗi, STAT_NRDY nếu chưa cập nhật xong.
-   */
-  RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
-
-    // Kiểm tra con trỏ đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG1: Check Null pointer.\n");
-    }
-    if (__NULL_PTR_CHECK(init_param)) {
-      return STAT_ERROR;
-    }
-
+/*
+ * Hàm khởi tạo ngoại vi IWDG.
+ *
+ * Tham số:
+ *   init_param - Con trỏ tới cấu trúc tham số khởi tạo IWDG.
+ *
+ * Trả về:
+ *   RETR_STAT - Trạng thái thực thi (STAT_DONE, STAT_ERROR, STAT_NRDY).
+ */
+RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
+  // Kiểm tra con trỏ đầu vào
+  if (init_param == NULL) {
+    return STAT_ERROR;
+  }
 
     // Kiểm tra giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
