@@ -24,11 +24,11 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Unit Test cho Driver IWDG
 - [x] Viết Unit Test cho Driver Clock
 - [x] Viết Unit Test cho Driver Reset
-- [ ] Triển khai Driver lên mạch thực tế
 - [ ] Viết Driver GPIO
 - [ ] Viết Driver SPI
 - [ ] Viết Driver I2C
 - [ ] Viết Driver USART (Polling/Interrupt Mode)
+- [ ] Triển khai Driver lên mạch thực tế
 
 # Giai đoạn Cốt lõi
 - [ ] Phân vùng bộ nhớ
