@@ -30,7 +30,6 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [ ] Viết Driver GPIO
 - [ ] Viết Driver SPI
 - [ ] Viết Driver I2C
-- [ ] Viết Driver USART (Polling/Interrupt Mode)
 - [ ] Triển khai Driver lên mạch thực tế
 
 ## Giai đoạn Cốt lõi
