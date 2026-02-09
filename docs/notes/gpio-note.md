@@ -16,3 +16,10 @@ Việc thao tác chân này được cấu hình thông qua các thanh ghi:
 - `GPIOx_IDR` (Input Data Register): Đọc trạng thái của các chân vào.
 - `GPIOx_ODR` (Output Data Register): Ghi trạng thái của các chân ra.
 
+Kiểm chứng thông tin trong [rm0008](../references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 159.
+
+# Phân biệt giữa Push-Pull và Open-Drain
+- Push-Pull: Chân có thể xuất tín hiệu cao hoặc thấp một cách trực tiếp.
+- Open-Drain: Chân chỉ có thể kéo xuống mức thấp, cần một điện trở kéo lên (pull-up resistor) để đạt mức cao.
+
+Trong thiết kế phần cứng (Fig 13 trang 160), từ bộ output-control sẽ có 2 đầu nối, 1 nối P-MOS, 1 nối N-MOS. 
