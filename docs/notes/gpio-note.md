@@ -114,3 +114,17 @@ Kiểm chứng thông tin trong [rm0008](../references/rm0008-stm32-f101-f102-f1
 Kiểm chứng trong [rm0008](../references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) từ trang 166 đến trang 170 để biết cấu hình GPIO cho từng ngoại vi cụ thể như USART, SPI, I2C, TIM, ADC, DAC, CAN, USB, v.v.
 
 Tập trung vào phần SPI, I2C ở trang 181.
+
+## Quy trình cấu hình GPIO
+
+1. Bật xung clock cho cổng GPIOx tương ứng với Clock control.
+2. Cấu hình tham số chân bao gồm
+
+    - Chế độ (Mode): Input, Output, Alternate function, Analog.
+    - Cấu hình (CNF): Floating, Pull-up/Pull-down, Push-Pull, Open-Drain.
+    - Tốc độ (Speed): Chỉ áp dụng cho chế độ Output (10MHz, 2MHz, 50MHz).
+    - GPIOx: x từ A đến G tùy thuộc vào vi điều khiển cụ thể.
+    - Chân (Pin): Chọn chân từ 0 đến 15.
+
+3. Cấu hình thanh ghi `GPIOx_CRL` hoặc `GPIOx_CRH` dựa trên chân được chọn.
+4. Cấu hình ngắt ngoại nếu cần thiết.
