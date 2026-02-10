@@ -562,6 +562,7 @@
    * Phụ thuộc ngoài module Clock: Không có
    */
   void RCC_CSS_Enable(void) {
+    
     RCC_REGS_PTR->CR.CSSON = SET;
   }
 
@@ -571,6 +572,7 @@
    * Phụ thuộc ngoài module Clock: Không có
    */
   void RCC_CSS_Disable(void) {
+
     RCC_REGS_PTR->CR.CSSON = RESET;
   }
 
@@ -641,6 +643,7 @@
    * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_IsHSEReady(void) {
+
     if (__SET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
       return STAT_RDY;
     } else {
@@ -656,6 +659,7 @@
    * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_IsLSIReady(void) {
+
     if (__SET_FLAG_CHECK(RCC_REGS_PTR->CSR.LSIRDY)) {
       return STAT_RDY;
     } else {
@@ -668,12 +672,126 @@
    */
 
   RETR_STAT RCC_PCLK_Enable(ul periph) {
+
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("RCC_PCLK_Enable, DBG1: Assert parameter.\n");
+    }
+
+      assert_param(IS_RCC_PERIPH(periph));
+
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("RCC_PCLK_Enable, DBG2: Enable peripheral clock.\n");
+    }
     
+    switch (periph) {
+      case AFIO:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 0;
+        return STAT_OK;
+        break;
+
+      case GPIOA:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 2;
+        return STAT_OK;
+        break;
+      
+      case GPIOB:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 3;
+        return STAT_OK;
+        break;
+      
+      case GPIOC:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 4;
+        return STAT_OK;
+        break;
+      
+      case GPIOD:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 5;
+        return STAT_OK;
+        break;
+
+      case GPIOE:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 6;
+        return STAT_OK;
+        break;
+
+      case GPIOF:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 7;
+        return STAT_OK;
+        break;
+
+      case GPIOG:
+        RCC_REGS_PTR->RCC_APB2ENR |= 1 << 8;
+        return STAT_OK;
+        break;
+
+      default:
+        return STAT_ERROR;
+        break;
+    }
+
+    return STAT_DONE;
   }
 
 	/**
    *  
    */	
 	RETR_STAT RCC_PCLK_Disable(ul periph) {
-    
+
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("RCC_PCLK_Disable, DBG1: Assert parameter.\n");
+    }
+
+      assert_param(IS_RCC_PERIPH(periph));
+
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("RCC_PCLK_Disable, DBG2: Disable peripheral clock.\n");
+    }
+
+    switch (periph) {
+      case AFIO:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 0);
+        return STAT_OK;
+        break;
+
+      case GPIOA:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 2);
+        return STAT_OK;
+        break;
+      
+      case GPIOB:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 3);
+        return STAT_OK;
+        break;
+      
+      case GPIOC:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 4);
+        return STAT_OK;
+        break;
+      
+      case GPIOD:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 5);
+        return STAT_OK;
+        break;
+
+      case GPIOE:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 6);
+        return STAT_OK;
+        break;
+
+      case GPIOF:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 7);
+        return STAT_OK;
+        break;
+
+      case GPIOG:
+        RCC_REGS_PTR->RCC_APB2ENR &= ~(1 << 8);
+        return STAT_OK;
+        break;
+
+      default:
+        return STAT_ERROR;
+        break;
+    }
+
+    return STAT_DONE;
   }

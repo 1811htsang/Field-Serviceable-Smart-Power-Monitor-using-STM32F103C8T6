@@ -52,6 +52,15 @@
 																					((SOURCE) == RCC_SYSCLK_SOURCE_HSE))
 		#define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
 
+	  #define IS_RCC_PERIPH(PERIPH) (((PERIPH) == AFIO) || \
+																						((PERIPH) == GPIOA) || \
+																						((PERIPH) == GPIOB) || \
+																						((PERIPH) == GPIOC) || \
+																						((PERIPH) == GPIOD) || \
+																						((PERIPH) == GPIOE) || \
+																						((PERIPH) == GPIOF) || \
+																						((PERIPH) == GPIOG))
+
   // Khai báo các hàm thành phần
 
 		// >> Hàm khởi tạo clock hệ thống
