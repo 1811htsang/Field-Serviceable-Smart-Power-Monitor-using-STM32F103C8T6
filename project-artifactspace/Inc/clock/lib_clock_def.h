@@ -17,6 +17,8 @@
 
   // Khai báo các thư viện sử dụng chung
 
+		#include <stdint.h>
+
 		#ifndef UNIT_TEST
 			#include "generic/lib_keyword_def.h"
 		#else
@@ -116,7 +118,10 @@
 			__vo RCC_CR_REG_Typedef CR;
 			__vo RCC_CFGR_REG_Typedef CFGR;
 			__vo RCC_CIR_REG_Typedef CIR;
-			__vo BLANK_REG RESERVED[6];
+			__vo BLANK_REG RCC_APB2RSTR;
+			__vo BLANK_REG RESERVED[2];
+			__vo BLANK_REG RCC_APB2ENR;
+			__vo BLANK_REG RESERVED[2];
 			__vo RCC_CSR_REG_Typedef CSR;
 		} RCC_REGS_Typedef;
 
@@ -198,6 +203,58 @@
 		#define RCC_CSR_REG_LSIRDY_NOT_READY RESET
 		#define RCC_CSR_REG_LSIRDY_READY SET
 
+	// Khai báo các định nghĩa bit cần sử dụng trên RCC_APB2RSTR
+
+		#define IOPGRST_RESET SET
+		#define IOPGRST_NO_EFFECT RESET
+
+		#define IOPFRST_RESET SET
+		#define IOPFRST_NO_EFFECT RESET
+
+		#define IOPERST_RESET SET
+		#define IOPERST_NO_EFFECT RESET
+
+		#define IOPDRST_RESET SET
+		#define IOPDRST_NO_EFFECT RESET
+
+		#define IOPCRST_RESET SET
+		#define IOPCRST_NO_EFFECT RESET
+
+		#define IOPBRST_RESET SET
+		#define IOPBRST_NO_EFFECT RESET
+
+		#define IOPAERST_RESET SET
+		#define IOPAERST_NO_EFFECT RESET
+
+		#define AFIORST_RESET SET
+		#define AFIORST_NO_EFFECT RESET
+
+	// Khai báo các định nghĩa bit cần sử dụng trên RCC_APB2ENR
+
+		#define IOPGEN_ENABLE SET
+		#define IOPGEN_NO_EFFECT RESET
+
+		#define IOPFEN_ENABLE SET
+		#define IOPFEN_NO_EFFECT RESET
+
+		#define IOPEN_ENABLE SET
+		#define IOPEN_NO_EFFECT RESET
+
+		#define IOPDEN_ENABLE SET
+		#define IOPDEN_NO_EFFECT RESET
+
+		#define IOPCEN_ENABLE SET
+		#define IOPCEN_NO_EFFECT RESET
+
+		#define IOPBEN_ENABLE SET
+		#define IOPBEN_NO_EFFECT RESET
+
+		#define IOPAEN_ENABLE SET
+		#define IOPAEN_NO_EFFECT RESET
+
+		#define AFIOEN_ENABLE SET
+		#define AFIOEN_NO_EFFECT RESET
+
   // Khai báo các nguồn clock khởi tạo
 
 		# define RCC_SYSCLK_SOURCE_HSI RCC_CFGR_REG_SW_SET_HSI
@@ -210,4 +267,15 @@
 		 * LSI không được sử dụng làm SYSCLK select nên không có định nghĩa tương ứng
 		 */
 
+	// Khai báo các ngoại vi cần mở nguồn
+
+		#define AFIO  0x00ul
+		#define GPIOA 0x02ul
+		#define GPIOB 0x03ul
+		#define GPIOC 0x04ul
+		#define GPIOD 0x05ul
+		#define GPIOE 0x06ul
+		#define GPIOF 0x07ul
+		#define GPIOG 0x08ul
+		
 #endif /* LIB_CLOCK_DEF_H_ */

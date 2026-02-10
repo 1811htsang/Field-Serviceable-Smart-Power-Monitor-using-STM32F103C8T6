@@ -596,6 +596,9 @@
       RCC_REGS_PTR->CIR.CSSC = SET;
     }
 
+    while (1) {
+      // Vòng lặp vô hạn để tránh thoát khỏi hàm IRQ
+    }
   }
 
   /*
@@ -658,4 +661,19 @@
     } else {
       return STAT_NRDY;
     }
+  }
+
+  /**
+   * 
+   */
+
+  RETR_STAT RCC_PCLK_Enable(ul periph) {
+    
+  }
+
+	/**
+   *  
+   */	
+	RETR_STAT RCC_PCLK_Disable(ul periph) {
+    
   }

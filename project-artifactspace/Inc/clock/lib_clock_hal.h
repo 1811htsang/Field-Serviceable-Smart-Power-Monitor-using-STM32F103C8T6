@@ -52,11 +52,6 @@
 																					((SOURCE) == RCC_SYSCLK_SOURCE_HSE))
 		#define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
 
-  // Khai báo IQRHandler
-
-		#define RCC_NMI_IRQ_Handler NMI_Handler
-		#define RCC_GNR_IRQ_Handler RCC_IRQHandler
-
   // Khai báo các hàm thành phần
 
 		// >> Hàm khởi tạo clock hệ thống
@@ -88,5 +83,11 @@
 
 		// >> Hàm kiểm tra clock LSI sẵn sàng
 		RETR_STAT RCC_IsLSIReady(void);
+
+		// >> Hàm hoạt hóa ngoại vi 
+		RETR_STAT RCC_PCLK_Enable(ul periph);
+
+		// >> Hàm vô hiệu hóa ngoại vi
+		RETR_STAT RCC_PCLK_Disable(ul periph);
 
 #endif /* LIB_CLOCK_HAL_H_ */
