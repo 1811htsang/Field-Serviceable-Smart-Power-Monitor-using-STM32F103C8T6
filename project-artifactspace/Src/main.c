@@ -42,6 +42,7 @@
 		}
 
 		// Kiểm tra reset flag
+
 			RCC_RSTFLG_Typedef reset_source;
 			RST_SRC_Capture(&reset_source);
 
@@ -83,6 +84,14 @@
 				return -1;
 			}
 			IWDG_Start();
+
+			/**
+			 * Ghi chú:
+			 * Mặc dù trong RCC_CLK_Init() có bổ sung một execution path
+			 * trong trường hợp IWDG chưa được khởi động, tuy nhiên
+			 * để đảm bảo an toàn, ta vẫn nên khởi động IWDG trước khi
+			 * cấu hình clock hệ thống.
+			 */
 
 		// Khởi động clock
 

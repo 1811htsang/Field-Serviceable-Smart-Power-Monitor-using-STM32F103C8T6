@@ -119,9 +119,9 @@
 			__vo RCC_CFGR_REG_Typedef CFGR;
 			__vo RCC_CIR_REG_Typedef CIR;
 			__vo BLANK_REG RCC_APB2RSTR;
-			__vo BLANK_REG RESERVED[2];
+			__vo BLANK_REG RESERVED0[2];
 			__vo BLANK_REG RCC_APB2ENR;
-			__vo BLANK_REG RESERVED[2];
+			__vo BLANK_REG RESERVED1[2];
 			__vo RCC_CSR_REG_Typedef CSR;
 		} RCC_REGS_Typedef;
 
