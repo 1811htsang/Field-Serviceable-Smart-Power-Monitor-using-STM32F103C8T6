@@ -57,20 +57,32 @@
 			}
 
 			if (reset_source.IsIwdgReset == SET) {
-				printf("System reset caused by Independent Watchdog (IWDG).\n");
+				printf("Main: System reset caused by Independent Watchdog (IWDG).\n");
 			} else if (reset_source.IsWwdgReset == SET) {
-				printf("System reset caused by Window Watchdog (WWDG).\n");
+				printf("Main: System reset caused by Window Watchdog (WWDG).\n");
 			} else if (reset_source.IsSftReset == SET) {
-				printf("System reset caused by Software Reset (SFT).\n");
+				printf("Main: System reset caused by Software Reset (SFT).\n");
 			} else if (reset_source.IsPorReset == SET) {
-				printf("System reset caused by Power-On Reset (POR).\n");
+				printf("Main: System reset caused by Power-On Reset (POR).\n");
 			} else if (reset_source.IsPinReset == SET) {
-				printf("System reset caused by External Pin Reset (NRST pin).\n");
+				printf("Main: System reset caused by External Pin Reset (NRST pin).\n");
 			} else if (reset_source.IsLowPwrReset == SET) {
-				printf("System reset caused by Low Power Reset.\n");
+				printf("Main: System reset caused by Low Power Reset.\n");
 			} else {
-				printf("System reset source is unknown.\n");
+				printf("Main: System reset source is unknown.\n");
 			}
+
+		// Khởi động watchdog độc lập (IWDG) để bảo vệ hệ thống
+
+			IWDG_Init_Param iwdg_init = {
+				.Prescaler = IWDG_PR_REG_PR_DIV_4,
+				.Reload = IWDG_RLR_REG_RL_MAX
+			};
+			if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
+				printf("Main: IWDG initialization failed.\n");
+				return -1;
+			}
+			IWDG_Start();
 
 		// Khởi động clock
 
@@ -81,7 +93,7 @@
 			RCC_RDYFLG_Typdef clk_rdy_flg;
 
 			if (!__OK_CHECK(RCC_CLK_Init(&clk_init_param, &clk_rdy_flg))) {
-				printf("Clock initialization failed.\n");
+				printf("Main: Clock initialization failed.\n");
 				return -1;
 			}
 
@@ -89,6 +101,7 @@
 
 			while (1) {
 				// Thực thi các tác vụ chính của ứng dụng tại đây
+				IWDG_Reload(); // Nạp lại IWDG để tránh reset hệ thống
 			}
 
 		return 0;

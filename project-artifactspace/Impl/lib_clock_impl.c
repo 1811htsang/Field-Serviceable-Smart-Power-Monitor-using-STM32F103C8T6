@@ -112,13 +112,15 @@
 
         // Khởi tạo IWDG trước để đảm bảo hệ thống không bị treo trong quá trình chờ
         if (__NRDY_CHECK(RCC_IsLSIReady())) {
+
+          printf("RCC_CLK_Init, DBG4-1: Init LSI for IWDG before HSI ready wait.\n");
             
           /**
            * Ghi chú:
            * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
            * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
-           * Bật IWDG init trong RCC_CLK_Init để đảm bảo khi LSI
-           * được bật thì IWDG cũng được cấu hình đúng cách
+           * Bật IWDG init trong RCC_CLK_Init để đảm bảo nếu không có 
+           * khởi tạo IWDG trước đó thì hệ thống vẫn an toàn
            */
 
           // Khởi tạo LSI
@@ -211,13 +213,15 @@
 
         // Khởi tạo IWDG trước để đảm bảo hệ thống không bị treo trong quá trình chờ
         if (__NRDY_CHECK(RCC_IsLSIReady())) {
+          
+          printf("RCC_CLK_Init, DBG4-1: Init LSI for IWDG before HSE ready wait.\n");
             
           /**
            * Ghi chú:
            * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
-           * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
-           * Bật IWDG init trong RCC_CLK_Init để đảm bảo khi LSI
-           * được bật thì IWDG cũng được cấu hình đúng cách
+           * để IWDG có thể hoạt động trong vòng chờ HSE ổn định
+           * Bật IWDG init trong RCC_CLK_Init để đảm bảo nếu không có 
+           * khởi tạo IWDG trước đó thì hệ thống vẫn an toàn
            */
 
           // Khởi tạo LSI
@@ -286,7 +290,7 @@
           IWDG_Reload();
         }
 
-        if (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSIRDY)) {
+        if (__RESET_FLAG_CHECK(RCC_REGS_PTR->CR.HSERDY)) {
           return STAT_ERROR; // HSE không thể sẵn sàng
         }
 
