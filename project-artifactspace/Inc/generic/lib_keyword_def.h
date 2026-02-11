@@ -41,6 +41,7 @@
 		#define ui16 uint16_t
 		#define ui32 uint32_t
 		#define tdf_strc typedef struct
+		#define tdf_enum typedef enum
 		#define BLANK_REG uint32_t
 		#define __weak __attribute__((weak))
 		#define DEBUG_MODE ENABLE

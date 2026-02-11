@@ -125,7 +125,7 @@
 			__vo RCC_CSR_REG_Typedef CSR;
 		} RCC_REGS_Typedef;
 
-  // >> Tạo con trỏ tới ngoại vi
+  // >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
 
   	#ifndef UNIT_TEST
 			#define RCC_REGS_PTR ((RCC_REGS_Typedef *) RCC_REGS_BASEADDR)
@@ -138,10 +138,13 @@
 
 		#define RCC_CR_REG_HSION_RESET RESET
 		#define RCC_CR_REG_HSION_SET SET
+
 		#define RCC_CR_REG_HSEON_RESET RESET
 		#define RCC_CR_REG_HSEON_SET SET
+
 		#define RCC_CR_REG_CSSON_RESET RESET
 		#define RCC_CR_REG_CSSON_SET SET
+		
 		#define RCC_CR_REG_PLLON_RESET RESET
 		#define RCC_CR_REG_PLLON_SET SET
 
