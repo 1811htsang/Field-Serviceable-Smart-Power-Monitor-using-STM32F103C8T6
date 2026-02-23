@@ -18,15 +18,18 @@
       #include "lib_gpio_def.h"
     #endif
 
+    #include <stdint.h>
+    #include <stdbool.h>
+
   // Khai báo cấu trúc tham số hàm khởi tạo
 
     #ifndef GPIO_INIT_PARAM_TYPE
       #define GPIO_INIT_PARAM_TYPE
       tdf_strc GPIO_Init_Param{
         ui8 Pin;       // Chọn chân GPIO cần cấu hình
-        ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO
-        ui8 Pull;      // Chọn chế độ kéo lên / kéo xuống cho chân GPIO
-        ui8 Speed;     // Chọn tốc độ cho chân GPIO
+        ui8 Config;    // Chọn cấu hình cho chân GPIO (input analog, input floating, input pull-up/pull-down, output push-pull, output open-drain)
+        ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO là input hay output
+        bool Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
       } GPIO_Init_Param;
     #endif
 
@@ -36,7 +39,8 @@
       #define PIN_RETR
         tdf_enum PIN_RETR_Enum {
           GPIO_PIN_RESET = 0u,
-          GPIO_PIN_SET = 1u
+          GPIO_PIN_SET = 1u,
+          GPIO_PIN_UNF = 0xFFu
         } PIN_RETR_Enum;
     #endif
 
@@ -60,17 +64,25 @@
                               ((PIN) == GPIO_PIN_15)  || \
                               ((PIN) == GPIO_PIN_ALL))
     
-    #define IS_GPIO_INPUT(INPUT) (((INPUT) == GPIO_CNF_INPUT_ANALOG)    || \
+    #define IS_GPIO_CONFIG(INPUT) (((INPUT) == GPIO_CNF_INPUT_ANALOG)    || \
                                   ((INPUT) == GPIO_CNF_INPUT_FLOATING)    || \
-                                  ((INPUT) == GPIO_CNF_INPUT_PU_PD))
-
-    #define IS_GPIO_OUTPUT(OUTPUT) (((OUTPUT) == GPIO_CNF_OUTPUT_PP)   || \
-                                    ((OUTPUT) == GPIO_CNF_OUTPUT_OD))
+                                  ((INPUT) == GPIO_CNF_INPUT_PU_PD) || \
+                                  ((INPUT) == GPIO_CNF_OUTPUT_PP)   || \
+                                  ((INPUT) == GPIO_CNF_OUTPUT_OD)   || \
+                                  ((INPUT) == AFIO_OUTPUT_PP)       || \
+                                  ((INPUT) == AFIO_OUTPUT_OD))
                                     
     #define IS_GPIO_MODE(MODE) (((MODE) == GPIO_MODE_INPUT)        || \
                                 ((MODE) == GPIO_MODE_OUTPUT_10MHz)   || \
                                 ((MODE) == GPIO_MODE_OUTPUT_2MHz)   || \
                                 ((MODE) == GPIO_MODE_OUTPUT_50MHz))
+
+    #define IS_AFIO_GPIO_SUPPORT(GPIOx) (((GPIOx) == GPIOA_REGS_PTR) || \
+                                  ((GPIOx) == GPIOB_REGS_PTR) || \
+                                  ((GPIOx) == GPIOC_REGS_PTR) || \
+                                  ((GPIOx) == GPIOD_REGS_PTR) || \
+                                  ((GPIOx) == GPIOE_REGS_PTR) || \
+                                  ((GPIOx) == GPIOF_REGS_PTR))
 
   // Khai báo các hàm thành phần
 

@@ -136,23 +136,23 @@
 
   // Khi báo các chân GPIO
 
-    #define GPIO_PIN_0                   0x0001u  /* Pin 0 selected    */
-    #define GPIO_PIN_1                   0x0002u  /* Pin 1 selected    */
-    #define GPIO_PIN_2                   0x0004u  /* Pin 2 selected    */
-    #define GPIO_PIN_3                   0x0008u  /* Pin 3 selected    */
-    #define GPIO_PIN_4                   0x0010u  /* Pin 4 selected    */
-    #define GPIO_PIN_5                   0x0020u  /* Pin 5 selected    */
-    #define GPIO_PIN_6                   0x0040u  /* Pin 6 selected    */
-    #define GPIO_PIN_7                   0x0080u  /* Pin 7 selected    */
-    #define GPIO_PIN_8                   0x0100u  /* Pin 8 selected    */
-    #define GPIO_PIN_9                   0x0200u  /* Pin 9 selected    */
-    #define GPIO_PIN_10                  0x0400u  /* Pin 10 selected   */
-    #define GPIO_PIN_11                  0x0800u  /* Pin 11 selected   */
-    #define GPIO_PIN_12                  0x1000u  /* Pin 12 selected   */
-    #define GPIO_PIN_13                  0x2000u  /* Pin 13 selected   */
-    #define GPIO_PIN_14                  0x4000u  /* Pin 14 selected   */
-    #define GPIO_PIN_15                  0x8000u  /* Pin 15 selected   */
-    #define GPIO_PIN_ALL                 0xFFFFu  /* All pins selected */
+    #define GPIO_PIN_0                   ((ui16)0x0001u)  /* Pin 0 selected    */
+    #define GPIO_PIN_1                   ((ui16)0x0002u)  /* Pin 1 selected    */
+    #define GPIO_PIN_2                   ((ui16)0x0004u)  /* Pin 2 selected    */
+    #define GPIO_PIN_3                   ((ui16)0x0008u)  /* Pin 3 selected    */
+    #define GPIO_PIN_4                   ((ui16)0x0010u)  /* Pin 4 selected    */
+    #define GPIO_PIN_5                   ((ui16)0x0020u)  /* Pin 5 selected    */
+    #define GPIO_PIN_6                   ((ui16)0x0040u)  /* Pin 6 selected    */
+    #define GPIO_PIN_7                   ((ui16)0x0080u)  /* Pin 7 selected    */
+    #define GPIO_PIN_8                   ((ui16)0x0100u)  /* Pin 8 selected    */
+    #define GPIO_PIN_9                   ((ui16)0x0200u)  /* Pin 9 selected    */
+    #define GPIO_PIN_10                  ((ui16)0x0400u)  /* Pin 10 selected   */
+    #define GPIO_PIN_11                  ((ui16)0x0800u)  /* Pin 11 selected   */
+    #define GPIO_PIN_12                  ((ui16)0x1000u)  /* Pin 12 selected   */
+    #define GPIO_PIN_13                  ((ui16)0x2000u)  /* Pin 13 selected   */
+    #define GPIO_PIN_14                  ((ui16)0x4000u)  /* Pin 14 selected   */
+    #define GPIO_PIN_15                  ((ui16)0x8000u)  /* Pin 15 selected   */
+    #define GPIO_PIN_ALL                 ((ui16)0xFFFFu)  /* All pins selected */
 
     #define GPIO_PIN_MASK                0xFFFFu  /* PIN mask for assert test */
 
