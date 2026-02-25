@@ -28,8 +28,11 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Unit Test cho Driver Clock
 - [x] Viết Unit Test cho Driver Reset
 - [ ] Viết Driver GPIO
+- [ ] Viết Unit Test cho Driver GPIO
 - [ ] Viết Driver SPI
+- [ ] Viết Unit Test cho Driver SPI
 - [ ] Viết Driver I2C
+- [ ] Viết Unit Test cho Driver I2C
 - [ ] Triển khai Driver lên mạch thực tế
 
 ## Giai đoạn Cốt lõi
