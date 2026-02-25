@@ -46,26 +46,30 @@
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("GPIO_Init, DBG2: Assert parameter.\n");
     }
-
+      
+      assert_param(IS_GPIO_INSTANCE(GPIOx));
       assert_param(IS_GPIO_PIN(init_param->Pin));
-      assert_param(IS_GPIO_CONFIG(init_param->Config));
-      assert_param(IS_GPIO_MODE(init_param->Mode));
+      assert_param(IS_GPIO_AFIO_MODE(init_param->Mode));
+      assert_param(IS_GPIO_PULL(init_param->Pull));
     
-    // Cấu hình chân GPIO theo tham số đầu vào
+    // Cấu hình hoạt hóa chân GPIO theo tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("GPIO_Init, DBG3: Configure GPIO variable.\n");
     }
     
       // Bộ biến giám sát chân
-      ui16 pos = 0x0000u;
-      ui16 io_pos;
-      ui16 io_current;
+        ui16 pos = 0x0000u;
+        ui16 io_pos;
+        ui16 io_current;
 
       // Bộ biến tạm để lưu giá trị tham số
-      ui8 pin_num = init_param->Pin;
-      ui8 pin_cnf = init_param->Config;
-      ui8 pin_mode = init_param->Mode;
-      bool pin_pull = init_param->Pull;
+        ui8 pin_num = init_param->Pin;
+        ui8 pin_mode = init_param->Mode;
+        ui8 pin_pull = init_param->Pull;
+
+      // Bộ biến tạm thanh ghi để select cấu hình
+        BLANK_REG* config_register;
+        ui32 config_offset;
 
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("GPIO_Init, DBG4: Start configuring GPIO.\n");
@@ -83,7 +87,6 @@
           }
 
         // Nếu chân GPIO hiện tại được chọn thì cấu hình
-
           if (io_current == io_pos) {
             // Kiểm tra xem GPIO có hỗ trợ cấu hình AFIO hay không;
               if (__DEBUG_GET_MODE(ENABLE)) {
@@ -96,30 +99,45 @@
               if (__DEBUG_GET_MODE(ENABLE)) {
                 printf("GPIO_Init, DBG4-%u: Configuring pin mode and config.\n", pos);
               }
+                assert_param(IS_GPIO_AFIO_MODE(pin_mode));
 
                 switch (pin_mode) {
-                  case GPIO_MODE_INPUT:
-                    // Cấu hình chân GPIO ở chế độ input
-                    // Cấu hình pull-up/pull-down nếu cần
-                    // (Cấu hình cụ thể sẽ phụ thuộc vào phần cứng và yêu cầu thiết kế)
-                    break;
-                  
-                  case GPIO_MODE_OUTPUT_10MHz:
+                  case GPIO_MODE_INPUT_ANALOG:                  
+                  case GPIO_MODE_INPUT_FLOATING:
                     break;
 
-                  case GPIO_MODE_OUTPUT_2MHz:
+                  case GPIO_MODE_INPUT_PU_PD:
+                    assert_param(IS_GPIO_PULL(pin_pull));
+                    if (pin_pull == GPIO_PULLUP) {
+                      GPIOx->GPIO_BSRR = io_pos; // Kích hoạt pull-up bằng cách set bit tương ứng trong ODR
+                    } else if (pin_pull == GPIO_PULLDOWN) {
+                      GPIOx->GPIO_BRR = io_pos; // Kích hoạt pull-down bằng cách reset bit tương ứng trong ODR
+                    }
+
                     break;
 
-                  case GPIO_MODE_OUTPUT_50MHz:
+                  case GPIO_MODE_OUTPUT_10MHz_PP:
+                  case GPIO_MODE_OUTPUT_10MHz_OD:
+                  case GPIO_MODE_OUTPUT_2MHz_PP:
+                  case GPIO_MODE_OUTPUT_2MHz_OD:
+                  case GPIO_MODE_OUTPUT_50MHz_PP:
+                  case GPIO_MODE_OUTPUT_50MHz_OD:
                     break;
-                  
+
                   default:
-                    // Trường hợp không hợp lệ, có thể thêm xử lý lỗi nếu cần
                     break;
                 }
-          }
 
+                config_register = (io_pos < GPIO_PIN_8) ? &GPIOx->GPIO_CRL : &GPIOx->GPIO_CRH;
+                config_offset = (io_pos < GPIO_PIN_8) ? (pos << 2u) : ((pos - 8u) << 2u);
+
+                MODIFY_REG(*config_register, (GPIO_CNF_MODE_MASK << config_offset), (pin_mode << config_offset));
+          }
+        
         // Tiếp tục với chân GPIO tiếp theo
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_Init, DBG4-%u: Finished configuring pin %u.\n", pos, pos);
+          }
           pos++;
       }
       
@@ -127,26 +145,217 @@
   }
 
   RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+    // Kiểm tra con trỏ và giá trị tham số đầu vào
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("GPIO_DeInit, DBG1: Check Null pointer.\n");
+    }
+
+      if (GPIOx == NULL) {
+        if (__DEBUG_GET_MODE(ENABLE)) {
+          printf("GPIO_DeInit, ERR: Null pointer detected.\n");
+        }
+        return STAT_ERROR;
+      }
+
+    // Kiểm tra giá trị tham số đầu vào
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("GPIO_DeInit, DBG2: Assert parameter.\n");
+    }
+
+      assert_param(IS_GPIO_INSTANCE(GPIOx));
+      assert_param(IS_GPIO_PIN(Pin));
+    
+    // Cấu hình vô hiệu hóa chân GPIO theo tham số đầu vào
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("GPIO_DeInit, DBG3: Deinitialize GPIO pin %u.\n", Pin);
+    }
+
+      // Bộ biến giám sát chân
+        ui16 pos = 0x0000u;
+        ui16 io_pos;
+        ui16 io_current;
+
+      // Bộ biến tạm thanh ghi để select cấu hình
+        BLANK_REG* config_register;
+        ui32 config_offset;
+
+      while ((Pin >> pos) != 0x0000u) {
+        // Lấy vị trí chân GPIO hiện tại
+        io_pos = (0x0001u << pos);
+        io_current = Pin & io_pos;
+
+        if (__DEBUG_GET_MODE(ENABLE)) {
+          printf("GPIO_DeInit, DBG3-%u: Checking pin %u.\n", pos, pos);
+        }
+
+          if (io_current == io_pos) {
+            config_register = (io_pos < GPIO_PIN_8) ? &GPIOx->GPIO_CRL : &GPIOx->GPIO_CRH;
+            config_offset = (io_pos < GPIO_PIN_8) ? (pos << 2u) : ((pos - 8u) << 2u);
+
+            MODIFY_REG(*config_register, (GPIO_CNF_MODE_MASK << config_offset), (GPIO_CNF_MODE_RESET << config_offset));
+            CLEAR_BIT(GPIOx->GPIO_ODR, io_current); // Reset ODR bit tương ứng để đưa chân về trạng thái mặc định
+          }
+
+        // Tiếp tục với chân GPIO tiếp theo
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_DeInit, DBG3-%u: Finished deinitializing pin %u.\n", pos, pos);
+          }
+            pos++;
+      }
+
     return STAT_DONE;
   }
 
   PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
-    return GPIO_PIN_UNF;
+    // Kiểm tra con trỏ và giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_ReadPin, DBG1: Check Null pointer.\n");
+      }
+
+        if (GPIOx == NULL) {
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_ReadPin, ERR: Null pointer detected.\n");
+          }
+          return GPIO_PIN_UNF;
+        }
+      
+    // Kiểm tra giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_ReadPin, DBG2: Assert parameter.\n");
+      }
+
+        assert_param(IS_GPIO_INSTANCE(GPIOx));
+        assert_param(IS_GPIO_PIN(Pin));
+
+    // Đọc trạng thái chân GPIO theo tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_ReadPin, DBG3: Reading pin %u state.\n", Pin);
+      }
+  
+        if ((GPIOx->GPIO_IDR & Pin) != (ui32)0x00000000u) {
+          return GPIO_PIN_SET;
+        } else {
+          return GPIO_PIN_RESET;
+        }
   }
 
   void GPIO_WritePin(
     GPIO_REGS_Typedef *GPIOx, 
-    ui8 Pin, 
+    ui16 Pin, 
     PIN_RETR_Enum PinState
   ) {
+    // Kiểm tra con trỏ và giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_WritePin, DBG1: Check Null pointer.\n");
+      }
 
+        if (GPIOx == NULL) {
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_WritePin, ERR: Null pointer detected.\n");
+          }
+          return;
+        }
+      
+    // Kiểm tra giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_WritePin, DBG2: Assert parameter.\n");
+      }
+
+        assert_param(IS_GPIO_INSTANCE(GPIOx));
+        assert_param(IS_GPIO_PIN(Pin));
+        assert_param(IS_PINRETR_ENUM(PinState));
+
+    // Ghi trạng thái chân GPIO theo tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_WritePin, DBG3: Writing pin %u state to %s.\n", Pin, (PinState == GPIO_PIN_SET) ? "SET" : "RESET");
+      }
+
+        if (PinState != GPIO_PIN_RESET) {
+          GPIOx->GPIO_BSRR = Pin; // Set bit tương ứng trong BSRR để đưa chân lên mức cao
+        } else {
+          GPIOx->GPIO_BSRR = (ui32)Pin << 16u; // Reset bit tương ứng trong BSRR để đưa chân về mức thấp
+        }
   }
 
   void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+    // Kiểm tra con trỏ và giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_TogglePin, DBG1: Check Null pointer.\n");
+      }
 
+        if (GPIOx == NULL) {
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_TogglePin, ERR: Null pointer detected.\n");
+          }
+          return;
+        }
+      
+    // Kiểm tra giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_TogglePin, DBG2: Assert parameter.\n");
+      }
+
+        assert_param(IS_GPIO_INSTANCE(GPIOx));
+        assert_param(IS_GPIO_PIN(Pin));
+
+    // Đảo trạng thái chân GPIO theo tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_TogglePin, DBG3: Toggling pin %u state.\n", Pin);
+      }
+
+        ui32 odr = GPIOx->GPIO_ODR;
+        ui32 toggle_mask = Pin;
+
+        GPIOx->GPIO_BSRR = ((odr & toggle_mask) << 16u) | (~odr & toggle_mask); // Set bit tương ứng trong BSRR để đưa chân lên mức cao, reset bit tương ứng trong BSRR để đưa chân về mức thấp
   }
 
   RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+    // Kiểm tra con trỏ và giá trị tham số đầu vào
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_LockPin, DBG1: Check Null pointer.\n");
+      }
+
+        if (GPIOx == NULL) {
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_LockPin, ERR: Null pointer detected.\n");
+          }
+          return STAT_ERROR;
+        }
+    
+    // Kiểm tra giá trị tham số đầu vào
+
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_LockPin, DBG2: Assert parameter.\n");
+      }
+
+        assert_param(IS_GPIO_INSTANCE(GPIOx));
+        assert_param(IS_GPIO_PIN(Pin));
+
+    // Khóa cấu hình chân GPIO theo tham số đầu vào
+
+      if (__DEBUG_GET_MODE(ENABLE)) {
+        printf("GPIO_LockPin, DBG3: Locking pin %u configuration.\n", Pin);
+      }
+  
+        BLANK_REG tmp = GPIO_LCKR_LCKK_MASK;
+        SET_BIT(tmp, Pin); // Set bit tương ứng trong biến tạm để chuẩn bị cho chuỗi khóa
+
+        GPIOx->GPIO_LCKR = tmp; // Viết giá trị biến tạm vào thanh ghi LCKR để bắt đầu chuỗi khóa
+        GPIOx->GPIO_LCKR = Pin; // Viết giá trị chân GPIO vào thanh ghi LCKR để tiếp tục chuỗi khóa
+        GPIOx->GPIO_LCKR = tmp; // Viết lại giá trị biến tạm vào thanh ghi LCKR để hoàn tất chuỗi khóa
+        (void)GPIOx->GPIO_LCKR; // Đọc lại thanh ghi LCKR để đảm bảo chuỗi khóa đã hoàn tất
+
+        if ((ui32)(GPIOx->GPIO_LCKR & GPIO_LCKR_LCKK_MASK)) {
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_LockPin, DBG3: Pin %u locked successfully.\n", Pin);
+          }
+        } else {
+          if (__DEBUG_GET_MODE(ENABLE)) {
+            printf("GPIO_LockPin, ERR: Failed to lock pin %u.\n", Pin);
+          }
+          return STAT_ERROR;
+        }
+
     return STAT_DONE;
   }
 

@@ -108,6 +108,9 @@
     #define GPIO_MODE_OUTPUT_2MHz        0x02ul
     #define GPIO_MODE_OUTPUT_50MHz       0x03ul
 
+    #define GPIO_CNF_MODE_MASK           0x0Ful // 11 for CNF + 11 for MODE = 1111 = 15
+    #define GPIO_CNF_MODE_RESET          0x04ul // 01 for CNF + 00 for MODE = 0100 = 4
+
   // Khai báo các định nghĩa bit cần sử dụng trên thanh ghi GPIOx_ODR
 
     #define GPIO_DATA_RESET              RESET
@@ -134,6 +137,9 @@
     #define GPIO_LCKR_LCKK_ENABLE        SET
     #define GPIO_LCKR_LCKK_DISABLE       RESET
 
+    #define GPIO_LCKR_LCKK_POSITION      16u
+    #define GPIO_LCKR_LCKK_MASK          (1u << GPIO_LCKR_LCKK_POSITION)
+
   // Khi báo các chân GPIO
 
     #define GPIO_PIN_0                   ((ui16)0x0001u)  /* Pin 0 selected    */
@@ -155,5 +161,32 @@
     #define GPIO_PIN_ALL                 ((ui16)0xFFFFu)  /* All pins selected */
 
     #define GPIO_PIN_MASK                0xFFFFu  /* PIN mask for assert test */
+
+  // Khai báo các chế độ GPIO 
+
+    #define GPIO_MODE_INPUT_ANALOG       0x0000u // equivalent to 00 CNF + 00 MODE = 0000 = 0
+    #define GPIO_MODE_INPUT_FLOATING     0x0004u // equivalent to 01 CNF + 00 MODE = 0100 = 4
+    #define GPIO_MODE_INPUT_PU_PD        0x0008u // equivalent to 10 CNF + 00 MODE = 1000 = 8
+    #define GPIO_MODE_OUTPUT_10MHz_PP    0x0001u // equivalent to 00 CNF + 01 MODE = 0001 = 1
+    #define GPIO_MODE_OUTPUT_10MHz_OD    0x0005u // equivalent to 01 CNF + 01 MODE = 0101 = 5
+    #define GPIO_MODE_OUTPUT_2MHz_PP     0x0002u // equivalent to 00 CNF + 10 MODE = 0010 = 2
+    #define GPIO_MODE_OUTPUT_2MHz_OD     0x0006u // equivalent to 01 CNF + 10 MODE = 0110 = 6
+    #define GPIO_MODE_OUTPUT_50MHz_PP    0x0003u // equivalent to 00 CNF + 11 MODE = 0011 = 3
+    #define GPIO_MODE_OUTPUT_50MHz_OD    0x0007u // equivalent to 01 CNF + 11 MODE = 0111 = 7
+
+  // Khai baos các chế độ AFIO
+
+    #define AFIO_MODE_OUTPUT_10MHz_PP    0x0009u // equivalent to 10 CNF + 01 MODE = 1001 = 9
+    #define AFIO_MODE_OUTPUT_10MHz_OD    0x000Du // equivalent to 11 CNF + 01 MODE = 1101 = 13
+    #define AFIO_MODE_OUTPUT_2MHz_PP     0x000Au // equivalent to 10 CNF + 10 MODE = 1010 = 10
+    #define AFIO_MODE_OUTPUT_2MHz_OD     0x000Eu // equivalent to 11 CNF + 10 MODE = 1110 = 14
+    #define AFIO_MODE_OUTPUT_50MHz_PP    0x000Bu // equivalent to 10 CNF + 11 MODE = 1011 = 11
+    #define AFIO_MODE_OUTPUT_50MHz_OD    0x000Fu // equivalent to 11 CNF + 11 MODE = 1111 = 15
+
+  // Khai báo cấu hình chế độ PULL 
+
+    #define GPIO_NOPULL                  0xF0u
+    #define GPIO_PULLUP                  0xF1u
+    #define GPIO_PULLDOWN                0xF2u
 
 #endif /* LIB_GPIO_DEF_H_ */

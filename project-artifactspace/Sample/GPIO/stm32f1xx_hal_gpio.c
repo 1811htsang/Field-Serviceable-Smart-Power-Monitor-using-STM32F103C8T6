@@ -518,10 +518,13 @@ HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 
   /* Apply lock key write sequence */
   SET_BIT(tmp, GPIO_Pin);
+   
   /* Set LCKx bit(s): LCKK='1' + LCK[15-0] */
   GPIOx->LCKR = tmp;
+
   /* Reset LCKx bit(s): LCKK='0' + LCK[15-0] */
   GPIOx->LCKR = GPIO_Pin;
+  
   /* Set LCKx bit(s): LCKK='1' + LCK[15-0] */
   GPIOx->LCKR = tmp;
   /* Read LCKK register. This read is mandatory to complete key lock sequence */

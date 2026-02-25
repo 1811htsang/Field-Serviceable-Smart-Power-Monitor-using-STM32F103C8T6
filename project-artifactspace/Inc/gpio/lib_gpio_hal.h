@@ -27,8 +27,7 @@
       #define GPIO_INIT_PARAM_TYPE
       tdf_strc GPIO_Init_Param{
         ui8 Pin;       // Chọn chân GPIO cần cấu hình
-        ui8 Config;    // Chọn cấu hình cho chân GPIO (input analog, input floating, input pull-up/pull-down, output push-pull, output open-drain)
-        ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO là input hay output
+        ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO
         bool Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
       } GPIO_Init_Param;
     #endif
@@ -45,6 +44,14 @@
     #endif
 
   // Khai báo các kiểm tra tham số đầu vào nội bộ
+
+    #define IS_GPIO_INSTANCE(GPIOx) (((GPIOx) == GPIOA_REGS_PTR) || \
+                                  ((GPIOx) == GPIOB_REGS_PTR) || \
+                                  ((GPIOx) == GPIOC_REGS_PTR) || \
+                                  ((GPIOx) == GPIOD_REGS_PTR) || \
+                                  ((GPIOx) == GPIOE_REGS_PTR) || \
+                                  ((GPIOx) == GPIOF_REGS_PTR) || \
+                                  ((GPIOx) == GPIOG_REGS_PTR))
 
     #define IS_GPIO_PIN(PIN) (((PIN) == GPIO_PIN_0)   || \
                               ((PIN) == GPIO_PIN_1)   || \
@@ -65,24 +72,46 @@
                               ((PIN) == GPIO_PIN_ALL))
     
     #define IS_GPIO_CONFIG(INPUT) (((INPUT) == GPIO_CNF_INPUT_ANALOG)    || \
-                                  ((INPUT) == GPIO_CNF_INPUT_FLOATING)    || \
-                                  ((INPUT) == GPIO_CNF_INPUT_PU_PD) || \
-                                  ((INPUT) == GPIO_CNF_OUTPUT_PP)   || \
-                                  ((INPUT) == GPIO_CNF_OUTPUT_OD)   || \
-                                  ((INPUT) == AFIO_OUTPUT_PP)       || \
+                                  ((INPUT) == GPIO_CNF_INPUT_FLOATING)   || \
+                                  ((INPUT) == GPIO_CNF_INPUT_PU_PD)      || \
+                                  ((INPUT) == GPIO_CNF_OUTPUT_PP)        || \
+                                  ((INPUT) == GPIO_CNF_OUTPUT_OD)        || \
+                                  ((INPUT) == AFIO_OUTPUT_PP)            || \
                                   ((INPUT) == AFIO_OUTPUT_OD))
                                     
-    #define IS_GPIO_MODE(MODE) (((MODE) == GPIO_MODE_INPUT)        || \
-                                ((MODE) == GPIO_MODE_OUTPUT_10MHz)   || \
-                                ((MODE) == GPIO_MODE_OUTPUT_2MHz)   || \
-                                ((MODE) == GPIO_MODE_OUTPUT_50MHz))
+    #define IS_GPIO_AFIO_MODE(MODE) (((MODE) == GPIO_MODE_INPUT_ANALOG)     || \
+                              ((MODE) == GPIO_MODE_INPUT_FLOATING)          || \
+                              ((MODE) == GPIO_MODE_INPUT_PU_PD)             || \
+                              ((MODE) == GPIO_MODE_OUTPUT_10MHz_PP)         || \
+                              ((MODE) == GPIO_MODE_OUTPUT_10MHz_OD)         || \
+                              ((MODE) == GPIO_MODE_OUTPUT_2MHz_PP)          || \
+                              ((MODE) == GPIO_MODE_OUTPUT_2MHz_OD)          || \
+                              ((MODE) == GPIO_MODE_OUTPUT_50MHz_PP)         || \
+                              ((MODE) == GPIO_MODE_OUTPUT_50MHz_OD)         || \
+                              ((MODE) == AFIO_MODE_OUTPUT_10MHz_PP)         || \
+                              ((MODE) == AFIO_MODE_OUTPUT_2MHz_PP)          || \
+                              ((MODE) == AFIO_MODE_OUTPUT_50MHz_PP)         || \
+                              ((MODE) == AFIO_MODE_OUTPUT_10MHz_OD)         || \
+                              ((MODE) == AFIO_MODE_OUTPUT_2MHz_OD)          || \
+                              ((MODE) == AFIO_MODE_OUTPUT_50MHz_OD))
+                              
+
+    
 
     #define IS_AFIO_GPIO_SUPPORT(GPIOx) (((GPIOx) == GPIOA_REGS_PTR) || \
-                                  ((GPIOx) == GPIOB_REGS_PTR) || \
-                                  ((GPIOx) == GPIOC_REGS_PTR) || \
-                                  ((GPIOx) == GPIOD_REGS_PTR) || \
-                                  ((GPIOx) == GPIOE_REGS_PTR) || \
+                                  ((GPIOx) == GPIOB_REGS_PTR)        || \
+                                  ((GPIOx) == GPIOC_REGS_PTR)        || \
+                                  ((GPIOx) == GPIOD_REGS_PTR)        || \
+                                  ((GPIOx) == GPIOE_REGS_PTR)        || \
                                   ((GPIOx) == GPIOF_REGS_PTR))
+    
+    #define IS_GPIO_PULL(PULL) (((PULL) == GPIO_NOPULL) || \
+                                ((PULL) == GPIO_PULLUP) || \
+                                ((PULL) == GPIO_PULLDOWN))
+
+    #define IS_PINRETR_ENUM(STATE) (((STATE) == GPIO_PIN_RESET) || \
+                                  ((STATE) == GPIO_PIN_SET)   || \
+                                  ((STATE) == GPIO_PIN_UNF))
 
   // Khai báo các hàm thành phần
 
@@ -98,7 +127,7 @@
     // >> Hàm ghi trạng thái chân GPIO
     void GPIO_WritePin(
       GPIO_REGS_Typedef *GPIOx, 
-      ui8 Pin, 
+      ui16 Pin, 
       PIN_RETR_Enum PinState
     );
 
