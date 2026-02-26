@@ -18,7 +18,7 @@
       #include "lib_keyword_def.h"
     #endif
 
-  // Khai báo địa chỉ ngoại vi AFIO
+  // Khai báo địa chỉ ngoại vi AFIO (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
 
     #define AFIO_REGS_BASEADDR  0x40010000ul
 
@@ -32,15 +32,12 @@
     #define GPIOF_REGS_BASEADDR 0x40011C00ul
     #define GPIOG_REGS_BASEADDR 0x40012000ul    
 
-	// Khai báo bộ thanh ghi của ngoại vi AFIO
+	// Khai báo bộ thanh ghi của ngoại vi AFIO (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
 
     tdf_strc AFIO_REGS_Typedef {
       __vo BLANK_REG AFIO_EVCR;       // Offset 0x00
       __vo BLANK_REG AFIO_MAPR;       // Offset 0x04
-      __vo BLANK_REG AFIO_EXTICR1;    // Offset 0x08
-      __vo BLANK_REG AFIO_EXTICR2;    // Offset 0x0C
-      __vo BLANK_REG AFIO_EXTICR3;    // Offset 0x10
-      __vo BLANK_REG AFIO_EXTICR4;    // Offset 0x14
+      __vo BLANK_REG AFIO_EXTICR[4];  // Offset 0x08 - 0x14
       __vo BLANK_REG RESERVED0;       // Offset 0x18
       __vo BLANK_REG AFIO_MAPR2;      // Offset 0x1c
     } AFIO_REGS_Typedef;
@@ -48,19 +45,19 @@
   // Khai báo bộ thanh ghi của ngoại vi GPIO
 
     tdf_strc GPIO_REGS_Typedef {
-      __vo BLANK_REG GPIO_CRL;        // Offset 0x00
-      __vo BLANK_REG GPIO_CRH;        // Offset 0x04
-      __vo BLANK_REG GPIO_IDR;        // Offset 0x08
-      __vo BLANK_REG GPIO_ODR;        // Offset 0x0C
-      __vo BLANK_REG GPIO_BSRR;       // Offset 0x10
-      __vo BLANK_REG GPIO_BRR;        // Offset 0x14
-      __vo BLANK_REG GPIO_LCKR;       // Offset 0x18
+      __vo BLANK_REG GPIO_CRL;        // Offset 0x00, reset 0x4444 4444
+      __vo BLANK_REG GPIO_CRH;        // Offset 0x04, reset 0x4444 4444
+      __vo BLANK_REG GPIO_IDR;        // Offset 0x08, reset 0x0000 XXXX
+      __vo BLANK_REG GPIO_ODR;        // Offset 0x0C, reset 0x0000 0000
+      __vo BLANK_REG GPIO_BSRR;       // Offset 0x10, reset 0x0000 0000
+      __vo BLANK_REG GPIO_BRR;        // Offset 0x14, reset 0x0000 0000
+      __vo BLANK_REG GPIO_LCKR;       // Offset 0x18, reset 0x0000 0000
     } GPIO_REGS_Typedef;
 
 	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
 
     #ifndef UNIT_TEST
-      #define AFIO_REGS_PTR ((AFIO_REGS_Typedef *) AFIO_REGS_BASEADDR)
+      #define AFIO_REGS_PTR ((AFIO_REGS_Typedef *) AFIO_REGS_BASEADDR) // (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
 
       #define GPIOA_REGS_PTR ((GPIO_REGS_Typedef *) GPIOA_REGS_BASEADDR)
       #define GPIOB_REGS_PTR ((GPIO_REGS_Typedef *) GPIOB_REGS_BASEADDR)
@@ -71,7 +68,7 @@
       #define GPIOG_REGS_PTR ((GPIO_REGS_Typedef *) GPIOG_REGS_BASEADDR)
     #else
       extern AFIO_REGS_Typedef MOCK_AFIO_REGS;
-      #define AFIO_REGS_PTR (&MOCK_AFIO_REGS)
+      #define AFIO_REGS_PTR (&MOCK_AFIO_REGS) // (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
 
       extern GPIO_REGS_Typedef MOCK_GPIOA_REGS;
       extern GPIO_REGS_Typedef MOCK_GPIOB_REGS;

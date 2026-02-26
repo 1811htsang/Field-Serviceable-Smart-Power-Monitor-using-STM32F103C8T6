@@ -1,7 +1,7 @@
 /*
  * source_dependency.c
  *
- *  Created on: Feb 7, 2026
+ *  Created on: Feb 26, 2026
  *      Author: shanghuang
  */
 
@@ -16,5 +16,5 @@
 
   /**
    * Ghi chú:
-   * Module reset không có hàm nào phụ thuộc ngoài module nên không cần định nghĩa hàm mock.
+   * Module gpio không có hàm nào phụ thuộc ngoài module nên không cần định nghĩa hàm mock.
    */
