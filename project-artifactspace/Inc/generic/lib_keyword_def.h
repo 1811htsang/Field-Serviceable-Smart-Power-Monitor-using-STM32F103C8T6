@@ -22,28 +22,39 @@
   // Khai báo các định nghĩa dùng chung
 
 		#define __vo volatile
+
 		#define HIGH 1
 		#define LOW 0
+
 		#define SET HIGH
 		#define RESET LOW
+
 		#define ENABLE HIGH
 		#define DISABLE LOW
+
 		#define SUCCESS HIGH
 		#define ERROR LOW
+
 		#define ON HIGH
 		#define OFF LOW
+
 		#define TRUE HIGH
 		#define FALSE LOW
+
 		#define u unsigned
 		#define ul unsigned long
 		#define ui unsigned int
 		#define ui8 uint8_t
 		#define ui16 uint16_t
 		#define ui32 uint32_t
+		
 		#define tdf_strc typedef struct
 		#define tdf_enum typedef enum
+
 		#define BLANK_REG uint32_t
+
 		#define __weak __attribute__((weak))
+		
 		#define DEBUG_MODE ENABLE
 
 		#ifdef  USE_FULL_ASSERT

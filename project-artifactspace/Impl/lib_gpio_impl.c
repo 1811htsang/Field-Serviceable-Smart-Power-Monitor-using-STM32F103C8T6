@@ -102,6 +102,7 @@
                 assert_param(IS_GPIO_AFIO_MODE(pin_mode));
 
                 switch (pin_mode) {
+                  // Đối với 2 chế độ input analog và input floating thì không cần cấu hình thêm gì
                   case GPIO_MODE_INPUT_ANALOG:                  
                   case GPIO_MODE_INPUT_FLOATING:
                     break;
@@ -116,6 +117,7 @@
 
                     break;
 
+                  // Đối với các chế độ output thì không cần cấu hình thêm gì
                   case GPIO_MODE_OUTPUT_10MHz_PP:
                   case GPIO_MODE_OUTPUT_10MHz_OD:
                   case GPIO_MODE_OUTPUT_2MHz_PP:
@@ -131,7 +133,11 @@
                 config_register = (io_pos < GPIO_PIN_8) ? &GPIOx->GPIO_CRL : &GPIOx->GPIO_CRH;
                 config_offset = (io_pos < GPIO_PIN_8) ? (pos << 2u) : ((pos - 8u) << 2u);
 
-                MODIFY_REG(*config_register, (GPIO_CNF_MODE_MASK << config_offset), (pin_mode << config_offset));
+                MODIFY_REG(
+                  *config_register, 
+                  (GPIO_CNF_MODE_MASK << config_offset), 
+                  (pin_mode << config_offset)
+                );
           }
         
         // Tiếp tục với chân GPIO tiếp theo
@@ -192,7 +198,11 @@
             config_register = (io_pos < GPIO_PIN_8) ? &GPIOx->GPIO_CRL : &GPIOx->GPIO_CRH;
             config_offset = (io_pos < GPIO_PIN_8) ? (pos << 2u) : ((pos - 8u) << 2u);
 
-            MODIFY_REG(*config_register, (GPIO_CNF_MODE_MASK << config_offset), (GPIO_CNF_MODE_RESET << config_offset));
+            MODIFY_REG(
+              *config_register, 
+              (GPIO_CNF_MODE_MASK << config_offset), 
+              (GPIO_CNF_MODE_RESET << config_offset)
+            );
             CLEAR_BIT(GPIOx->GPIO_ODR, io_current); // Reset ODR bit tương ứng để đưa chân về trạng thái mặc định
           }
 
