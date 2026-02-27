@@ -53,5 +53,5 @@ Note that this sections can be expand with new requirements in the future.
 - Relay 5V for load control
 - L7805CV Voltage Regulator
 - BC547 Transistor
-- MCT2E Optocoupler
+- 4N35SM Optocoupler
 - Various resistors, capacitors, diodes, and connectors as per the schematic or PCB design.
