@@ -26,22 +26,32 @@
   	#include "gpio/lib_gpio_hal.h"
   #endif
 
-// Định nghĩa assert fail catching
-
-  #ifndef UNIT_TEST
-    void assert_failed(uint8_t* file, uint32_t line) {
-      printf("Assertion failed in file %s on line %u.\n", file, line);
-      while(1) { }
-    }
-  #endif
-
-  /**
-   * Ghi chú:
-   * Bọc phần assert catching trong điều kiện #ifndef UNIT_TEST để tránh xung đột với hàm assert_failed được định nghĩa trong unit test.
-   */
-
 // Định nghĩa các hàm thành phần
 
+  /*
+   * Hàm khởi tạo và cấu hình chân GPIO theo tham số đầu vào.
+   *
+   * Tham số:
+   *   GPIOx - Con trỏ tới cấu trúc thanh ghi GPIO.
+   *   init_param - Con trỏ tới cấu trúc tham số khởi tạo (Pin, Mode, Pull).
+   *
+   * Logic:
+   *   - Kiểm tra con trỏ đầu vào hợp lệ.
+   *   - Kiểm tra giá trị tham số (Pin, Mode, Pull).
+   *   - Duyệt qua từng chân GPIO được chọn trong bitmask Pin.
+   *   - Đối với mỗi chân, cấu hình chế độ hoạt động và pull-up/pull-down nếu cần.
+   *   - Sử dụng thanh ghi CRL hoặc CRH tùy vào vị trí chân (0-7 hoặc 8-15).
+   *   - Cập nhật ODR khi ở chế độ unit test để mô phỏng hiệu ứng BSRR.
+   *
+   * Trả về:
+   *   RETR_STAT - STAT_DONE nếu cấu hình thành công, STAT_ERROR nếu có lỗi kiểm tra.
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - assert_param() - Macro kiểm tra điều kiện (định nghĩa trong lib_condition_def.h)
+   *   - MODIFY_REG() - Macro sửa đổi bit thanh ghi
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   *   - assert_failed() - Hàm xử lý lỗi assert
+   */
   RETR_STAT GPIO_Init(GPIO_REGS_Typedef *GPIOx, GPIO_Init_Param *init_param) {
     
     // Kiểm tra con trỏ và giá trị tham số đầu vào
@@ -169,6 +179,30 @@
     return STAT_DONE;
   }
 
+  /*
+   * Hàm vô hiệu hóa và đặt lại cấu hình chân GPIO về trạng thái mặc định.
+   *
+   * Tham số:
+   *   GPIOx - Con trỏ tới cấu trúc thanh ghi GPIO.
+   *   Pin - Bitmask chọn các chân GPIO cần vô hiệu hóa.
+   *
+   * Logic:
+   *   - Kiểm tra con trỏ đầu vào hợp lệ.
+   *   - Kiểm tra giá trị tham số Pin.
+   *   - Duyệt qua từng chân GPIO được chọn trong bitmask Pin.
+   *   - Đối với mỗi chân, đặt lại cấu hình về giá trị mặc định (GPIO_CNF_MODE_RESET).
+   *   - Xóa bit ODR tương ứng để đưa chân về trạng thái mặc định.
+   *   - Sử dụng thanh ghi CRL hoặc CRH tùy vào vị trí chân (0-7 hoặc 8-15).
+   *
+   * Trả về:
+   *   RETR_STAT - STAT_DONE nếu vô hiệu hóa thành công, STAT_ERROR nếu có lỗi kiểm tra.
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - MODIFY_REG() - Macro sửa đổi bit thanh ghi
+   *   - CLEAR_BIT() - Macro xóa bit
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   */
   RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
@@ -241,6 +275,28 @@
     return STAT_DONE;
   }
 
+  /*
+   * Hàm đọc trạng thái logic của một chân GPIO cụ thể.
+   *
+   * Tham số:
+   *   GPIOx - Con trỏ tới cấu trúc thanh ghi GPIO.
+   *   Pin - Bitmask chọn chân GPIO cần đọc (chỉ hỗ trợ 1 chân).
+   *
+   * Logic:
+   *   - Kiểm tra con trỏ đầu vào hợp lệ, trả về GPIO_PIN_UNF nếu null.
+   *   - Kiểm tra giá trị tham số Pin.
+   *   - Đọc giá trị từ thanh ghi IDR (Input Data Register).
+   *   - Nếu bit tương ứng được set (≠ 0) trả về GPIO_PIN_SET.
+   *   - Nếu bit tương ứng được reset (= 0) trả về GPIO_PIN_RESET.
+   *
+   * Trả về:
+   *   PIN_RETR_Enum - GPIO_PIN_SET nếu chân ở mức cao, GPIO_PIN_RESET nếu ở mức thấp,
+   *                  GPIO_PIN_UNF nếu có lỗi (null pointer).
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   */
   PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
       if (__DEBUG_GET_MODE(ENABLE)) {
@@ -274,6 +330,28 @@
         }
   }
 
+  /*
+   * Hàm ghi trạng thái logic cho một chân GPIO cụ thể.
+   *
+   * Tham số:
+   *   GPIOx - Con trỏ tới cấu trúc thanh ghi GPIO.
+   *   Pin - Bitmask chọn chân GPIO cần ghi (chỉ hỗ trợ 1 chân).
+   *   PinState - Trạng thái muốn ghi (GPIO_PIN_SET hoặc GPIO_PIN_RESET).
+   *
+   * Logic:
+   *   - Kiểm tra con trỏ đầu vào hợp lệ, trả về nếu null.
+   *   - Kiểm tra giá trị tham số Pin và PinState.
+   *   - Nếu PinState == GPIO_PIN_SET: ghi giá trị vào nửa dưới BSRR (Bit Set).
+   *   - Nếu PinState == GPIO_PIN_RESET: ghi giá trị vào nửa trên BSRR (Bit Reset, dịch trái 16 bit).
+   *   - Trong chế độ unit test, cập nhật ODR để mô phỏng hiệu ứng BSRR.
+   *
+   * Trả về:
+   *   Không có (void).
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   */
   void GPIO_WritePin(
     GPIO_REGS_Typedef *GPIOx, 
     ui16 Pin, 
@@ -330,6 +408,28 @@
         }
   }
 
+  /*
+   * Hàm đảo trạng thái logic của một chân GPIO cụ thể (SET → RESET, RESET → SET).
+   *
+   * Tham số:
+   *   GPIOx - Con trỏ tới cấu trúc thanh ghi GPIO.
+   *   Pin - Bitmask chọn chân GPIO cần đảo.
+   *
+   * Logic:
+   *   - Kiểm tra con trỏ đầu vào hợp lệ, trả về nếu null.
+   *   - Kiểm tra giá trị tham số Pin.
+   *   - Đọc giá trị hiện tại từ thanh ghi ODR.
+   *   - Tính toán mặt nạ đảo: các bit được set sẽ được reset, bit reset sẽ được set.
+   *   - Ghi giá trị vào BSRR để thực hiện đảo (nửa dưới set bit được set, nửa trên reset bit được reset).
+   *   - Trong chế độ unit test, cập nhật ODR bằng XOR để mô phỏng đảo.
+   *
+   * Trả về:
+   *   Không có (void).
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   */
   void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
       if (__DEBUG_GET_MODE(ENABLE)) {
@@ -377,6 +477,30 @@
         #endif
   }
 
+  /*
+   * Hàm khóa cấu hình của các chân GPIO để tránh thay đổi không mong muốn.
+   *
+   * Tham số:
+   *   GPIOx - Con trỏ tới cấu trúc thanh ghi GPIO.
+   *   Pin - Bitmask chọn các chân GPIO cần khóa.
+   *
+   * Logic:
+   *   - Kiểm tra con trỏ đầu vào hợp lệ.
+   *   - Kiểm tra giá trị tham số Pin.
+   *   - Thực hiện chuỗi khóa bằng cách:
+   *       1. Tạo biến tạm với bit LCKK được set cùng các bit Pin.
+   *       2. Ghi chuỗi: LCKK|Pin → Pin → LCKK|Pin → đọc lại LCKR.
+   *   - Kiểm tra lại bit LCKK để xác nhận khóa thành công.
+   *   - Trả về STAT_ERROR nếu khóa thất bại, STAT_DONE nếu thành công.
+   *
+   * Trả về:
+   *   RETR_STAT - STAT_DONE nếu khóa thành công, STAT_ERROR nếu khóa thất bại hoặc lỗi kiểm tra.
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - SET_BIT() - Macro set bit
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   */
   RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
       if (__DEBUG_GET_MODE(ENABLE)) {
@@ -427,6 +551,23 @@
     return STAT_DONE;
   }
 
+  /*
+   * Hàm xử lý ngắt ngoại vi GPIO/EXTI cho các chân được chỉ định.
+   *
+   * Tham số:
+   *   Pin - Bitmask chọn chân GPIO gây ra ngắt.
+   *
+   * Logic:
+   *   - Gọi hàm callback weak GPIO_EXTI_Callback() để user xử lý ngắt.
+   *   - Callback này có thể được override trong user code theo nhu cầu.
+   *   - Hàm này thường được gọi từ các handler ngắt ngoài (EXTI0_IRQHandler, v.v.).
+   *
+   * Trả về:
+   *   Không có (void).
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - GPIO_EXTI_Callback() - Hàm callback weak (định nghĩa trong lib_gpio_hal.h)
+   */
   void GPIO_EXTI_IRQHandler(ui16 Pin) {
-    
+    GPIO_EXTI_Callback(Pin);
   }

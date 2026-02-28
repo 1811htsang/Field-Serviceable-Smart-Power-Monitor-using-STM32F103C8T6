@@ -24,11 +24,11 @@
 
     #ifndef GPIO_INIT_PARAM_TYPE
       #define GPIO_INIT_PARAM_TYPE
-      tdf_strc GPIO_Init_Param{
-        ui16 Pin;       // Chọn chân GPIO cần cấu hình
-        ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO
-        ui8 Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
-      } GPIO_Init_Param;
+        tdf_strc GPIO_Init_Param{
+          ui16 Pin;       // Chọn chân GPIO cần cấu hình
+          ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO
+          ui8 Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
+        } GPIO_Init_Param;
     #endif
 
   // Khai báo kiểu dữ liệu trả về

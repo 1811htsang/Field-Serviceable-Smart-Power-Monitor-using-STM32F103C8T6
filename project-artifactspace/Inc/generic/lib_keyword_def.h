@@ -62,8 +62,16 @@
 		#define DEBUG_MODE ENABLE
 
 		#ifdef  USE_FULL_ASSERT
+			#ifndef UNIT_TEST
+        void assert_failed(ui8* file, ui32 line) {
+          printf("Assertion failed in file %s on line %lu.\n", file, line);
+          while(1) { }
+        }
+      #endif
 			#define assert_param(expr) ((expr) ? (void)1u : assert_failed((ui8*)__FILE__, __LINE__))
-			void assert_failed(ui8* file, ui8 line);
+			#ifdef UNIT_TEST
+				void assert_failed(ui8* file, ui8 line);
+			#endif
 		#else
 			#define assert_param(expr) ((void)0u)
 		#endif /* USE_FULL_ASSERT */

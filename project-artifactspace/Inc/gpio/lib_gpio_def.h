@@ -18,10 +18,6 @@
       #include "lib_keyword_def.h"
     #endif
 
-  // Khai báo địa chỉ ngoại vi AFIO (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
-
-    #define AFIO_REGS_BASEADDR  0x40010000ul
-
   // Khai báo địa chỉ ngoại vi GPIO
 
     #define GPIOA_REGS_BASEADDR 0x40010800ul
@@ -31,16 +27,6 @@
     #define GPIOE_REGS_BASEADDR 0x40011800ul
     #define GPIOF_REGS_BASEADDR 0x40011C00ul
     #define GPIOG_REGS_BASEADDR 0x40012000ul    
-
-	// Khai báo bộ thanh ghi của ngoại vi AFIO (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
-
-    tdf_strc AFIO_REGS_Typedef {
-      __vo BLANK_REG AFIO_EVCR;       // Offset 0x00
-      __vo BLANK_REG AFIO_MAPR;       // Offset 0x04
-      __vo BLANK_REG AFIO_EXTICR[4];  // Offset 0x08 - 0x14
-      __vo BLANK_REG RESERVED0;       // Offset 0x18
-      __vo BLANK_REG AFIO_MAPR2;      // Offset 0x1c
-    } AFIO_REGS_Typedef;
 
   // Khai báo bộ thanh ghi của ngoại vi GPIO
 
@@ -57,8 +43,6 @@
 	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
 
     #ifndef UNIT_TEST
-      #define AFIO_REGS_PTR ((AFIO_REGS_Typedef *) AFIO_REGS_BASEADDR) // (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
-
       #define GPIOA_REGS_PTR ((GPIO_REGS_Typedef *) GPIOA_REGS_BASEADDR)
       #define GPIOB_REGS_PTR ((GPIO_REGS_Typedef *) GPIOB_REGS_BASEADDR)
       #define GPIOC_REGS_PTR ((GPIO_REGS_Typedef *) GPIOC_REGS_BASEADDR)
@@ -67,9 +51,6 @@
       #define GPIOF_REGS_PTR ((GPIO_REGS_Typedef *) GPIOF_REGS_BASEADDR)
       #define GPIOG_REGS_PTR ((GPIO_REGS_Typedef *) GPIOG_REGS_BASEADDR)
     #else
-      extern AFIO_REGS_Typedef MOCK_AFIO_REGS;
-      #define AFIO_REGS_PTR (&MOCK_AFIO_REGS) // (tách ra khỏi driver sau để tránh phụ thuộc không cần thiết)
-
       extern GPIO_REGS_Typedef MOCK_GPIOA_REGS;
       extern GPIO_REGS_Typedef MOCK_GPIOB_REGS;
       extern GPIO_REGS_Typedef MOCK_GPIOC_REGS;
@@ -155,8 +136,8 @@
     #define GPIO_PIN_13                  ((ui16)0x2000u)  /* Pin 13 selected   */
     #define GPIO_PIN_14                  ((ui16)0x4000u)  /* Pin 14 selected   */
     #define GPIO_PIN_15                  ((ui16)0x8000u)  /* Pin 15 selected   */
+    
     #define GPIO_PIN_ALL                 ((ui16)0xFFFFu)  /* All pins selected */
-
     #define GPIO_PIN_MASK                0xFFFFu  /* PIN mask for assert test */
 
   // Khai báo các chế độ GPIO 
@@ -171,7 +152,7 @@
     #define GPIO_MODE_OUTPUT_50MHz_PP    0x0003u // equivalent to 00 CNF + 11 MODE = 0011 = 3
     #define GPIO_MODE_OUTPUT_50MHz_OD    0x0007u // equivalent to 01 CNF + 11 MODE = 0111 = 7
 
-  // Khai baos các chế độ AFIO
+  // Khai báo các chế độ AFIO
 
     #define AFIO_MODE_OUTPUT_10MHz_PP    0x0009u // equivalent to 10 CNF + 01 MODE = 1001 = 9
     #define AFIO_MODE_OUTPUT_10MHz_OD    0x000Du // equivalent to 11 CNF + 01 MODE = 1101 = 13
