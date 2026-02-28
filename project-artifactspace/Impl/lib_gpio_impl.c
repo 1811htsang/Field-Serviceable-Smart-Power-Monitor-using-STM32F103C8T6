@@ -26,6 +26,20 @@
   	#include "gpio/lib_gpio_hal.h"
   #endif
 
+// Định nghĩa assert fail catching
+
+  #ifndef UNIT_TEST
+    void assert_failed(uint8_t* file, uint32_t line) {
+      printf("Assertion failed in file %s on line %u.\n", file, line);
+      while(1) { }
+    }
+  #endif
+
+  /**
+   * Ghi chú:
+   * Bọc phần assert catching trong điều kiện #ifndef UNIT_TEST để tránh xung đột với hàm assert_failed được định nghĩa trong unit test.
+   */
+
 // Định nghĩa các hàm thành phần
 
   RETR_STAT GPIO_Init(GPIO_REGS_Typedef *GPIOx, GPIO_Init_Param *init_param) {
@@ -46,7 +60,7 @@
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("GPIO_Init, DBG2: Assert parameter.\n");
     }
-      
+
       assert_param(IS_GPIO_INSTANCE(GPIOx));
       assert_param(IS_GPIO_PIN(init_param->Pin));
       assert_param(IS_GPIO_AFIO_MODE(init_param->Mode));
@@ -68,7 +82,7 @@
         ui8 pin_pull = init_param->Pull;
 
       // Bộ biến tạm thanh ghi để select cấu hình
-        BLANK_REG* config_register;
+        __vo BLANK_REG* config_register;
         ui32 config_offset;
 
     if (__DEBUG_GET_MODE(ENABLE)) {
@@ -182,7 +196,7 @@
         ui16 io_current;
 
       // Bộ biến tạm thanh ghi để select cấu hình
-        BLANK_REG* config_register;
+        __vo BLANK_REG* config_register;
         ui32 config_offset;
 
       while ((Pin >> pos) != 0x0000u) {

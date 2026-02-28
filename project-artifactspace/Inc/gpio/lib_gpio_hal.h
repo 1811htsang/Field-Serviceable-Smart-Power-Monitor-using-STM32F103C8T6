@@ -19,16 +19,15 @@
     #endif
 
     #include <stdint.h>
-    #include <stdbool.h>
 
   // Khai báo cấu trúc tham số hàm khởi tạo
 
     #ifndef GPIO_INIT_PARAM_TYPE
       #define GPIO_INIT_PARAM_TYPE
       tdf_strc GPIO_Init_Param{
-        ui8 Pin;       // Chọn chân GPIO cần cấu hình
+        ui16 Pin;       // Chọn chân GPIO cần cấu hình
         ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO
-        bool Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
+        ui8 Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
       } GPIO_Init_Param;
     #endif
 
@@ -94,10 +93,7 @@
                               ((MODE) == AFIO_MODE_OUTPUT_10MHz_OD)         || \
                               ((MODE) == AFIO_MODE_OUTPUT_2MHz_OD)          || \
                               ((MODE) == AFIO_MODE_OUTPUT_50MHz_OD))
-                              
-
     
-
     #define IS_AFIO_GPIO_SUPPORT(GPIOx) (((GPIOx) == GPIOA_REGS_PTR) || \
                                   ((GPIOx) == GPIOB_REGS_PTR)        || \
                                   ((GPIOx) == GPIOC_REGS_PTR)        || \

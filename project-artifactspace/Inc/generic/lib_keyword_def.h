@@ -19,6 +19,10 @@
 #ifndef LIB_KEYWORD_DEF_H_
   #define LIB_KEYWORD_DEF_H_
 
+	// Khai báo thư viện phụ thuộc
+
+		#include <stdint.h>
+
   // Khai báo các định nghĩa dùng chung
 
 		#define __vo volatile
@@ -58,8 +62,8 @@
 		#define DEBUG_MODE ENABLE
 
 		#ifdef  USE_FULL_ASSERT
-			#define assert_param(expr) ((expr) ? (void)1u : assert_failed((uint8_t *)__FILE__, __LINE__))
-			void assert_failed(uint8_t* file, uint32_t line);
+			#define assert_param(expr) ((expr) ? (void)1u : assert_failed((ui8*)__FILE__, __LINE__))
+			void assert_failed(ui8* file, ui8 line);
 		#else
 			#define assert_param(expr) ((void)0u)
 		#endif /* USE_FULL_ASSERT */

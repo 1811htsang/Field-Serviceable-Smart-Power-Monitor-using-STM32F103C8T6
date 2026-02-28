@@ -10,10 +10,12 @@
   #include <stdio.h>
   #include <assert.h>
 	#include <string.h>
+  #include <setjmp.h>
   #include "lib_keyword_def.h"
   #include "lib_condition_def.h"
   #include "lib_gpio_def.h"
   #include "lib_gpio_hal.h"
+  #include "lib_test_util.h"
   #include "header_dependency.h"
 
 // Khai báo ngoại vi giả cho mục đích unit test
@@ -33,7 +35,18 @@
    * Module gpio không có hàm nào phụ thuộc ngoài module nên không cần ủy quyền biến hay hàm mock.
    */
 
+// Khai báo cờ ngữ cảnh cho việc bắt assert trong unit test
+
+  jmp_buf assert_env;
+  ui8 assert_caught = FALSE; // Cờ để theo dõi xem assert fail đã được bắt hay chưa
+
 // Định nghĩa các hàm
+
+  void assert_failed(ui8* file, ui8 line) {
+    printf("Assertion failed in file %s on line %u.\n", file, line);
+    assert_caught = TRUE;
+    longjmp(assert_env, 1);
+  }
 
   void setup() {
     /*
@@ -99,10 +112,7 @@
     // Gọi hàm GPIO_Init với tham số không hợp lệ và kiểm tra assert
     // Lưu ý: Trong môi trường unit test, assert sẽ dừng chương trình nếu điều kiện
     // không thỏa mãn, nên ta sẽ gọi hàm này trong một test case riêng biệt để kiểm tra assert.
-    GPIO_Init(GPIOx, &init_param);
-
-    // Nếu chương trình không bị dừng bởi assert thì test case đã thất bại
-    printf("-> FAILED (Expected assert failure)\n");
+    ASSERT_EXPECT_FAIL(GPIO_Init(GPIOx, &init_param));
   }
 
   void test_GPIO_Init_ValidParameter_ShouldConfigureGPIO(GPIO_REGS_Typedef *GPIOx, u Mode) {
@@ -111,9 +121,28 @@
     
     // Chuẩn bị tham số hợp lệ cho GPIO_Init
     GPIO_Init_Param init_param;
-    init_param.Pin = 0x0001; // Chọn chân 0
+    init_param.Pin = GPIO_PIN_10; // Chọn chân 0
     init_param.Mode = Mode; // Chế độ output push-pull 10MHz
     init_param.Pull = GPIO_NOPULL; // Không kéo lên hay xuống
+
+    // Gọi hàm GPIO_Init với tham số hợp lệ
+    RETR_STAT result = GPIO_Init(GPIOx, &init_param);
+
+    // Kiểm tra kết quả trả về là thành công
+    assert(result == STAT_DONE);
+
+    printf("-> PASSED\n");
+  }
+
+  void test_GPIO_Init_MultiplePins_ShouldConfigureAllSelectedPins(GPIO_REGS_Typedef *GPIOx, u Mode) {
+    setup();
+    printf("TC3.1: Check Multiple Pins...\n");
+    
+    // Chuẩn bị tham số hợp lệ cho GPIO_Init với nhiều chân được chọn
+    GPIO_Init_Param init_param;
+    init_param.Pin = GPIO_PIN_10 | GPIO_PIN_6 | GPIO_PIN_2; // Chọn chân 10, 6 và 2
+    init_param.Mode = Mode; // Chế độ Input pull-up
+    init_param.Pull = GPIO_PULLUP; // Kéo lên
 
     // Gọi hàm GPIO_Init với tham số hợp lệ
     RETR_STAT result = GPIO_Init(GPIOx, &init_param);
@@ -144,10 +173,7 @@
     // Gọi hàm GPIO_DeInit với tham số không hợp lệ và kiểm tra assert
     // Lưu ý: Trong môi trường unit test, assert sẽ dừng chương trình nếu điều kiện
     // không thỏa mãn, nên ta sẽ gọi hàm này trong một test case riêng biệt để kiểm tra assert.
-    GPIO_DeInit(GPIOx, 0x0000); // Không chọn chân nào
-
-    // Nếu chương trình không bị dừng bởi assert thì test case đã thất bại
-    printf("-> FAILED (Expected assert failure)\n");
+    ASSERT_EXPECT_FAIL(GPIO_DeInit(GPIOx, 0x0000)); // Không chọn chân nào
   }
 
   void test_GPIO_DeInit_ValidParameter_ShouldResetGPIO(GPIO_REGS_Typedef *GPIOx) {
@@ -174,7 +200,7 @@
     RETR_STAT result = GPIO_ReadPin(NULL, 0x0001);
 
     // Kiểm tra kết quả trả về là lỗi do con trỏ NULL
-    assert(result == STAT_ERROR);
+    assert(result == GPIO_PIN_UNF);
 
     printf("-> PASSED\n");
   }
@@ -186,10 +212,7 @@
     // Gọi hàm GPIO_ReadPin với tham số không hợp lệ và kiểm tra assert
     // Lưu ý: Trong môi trường unit test, assert sẽ dừng chương trình nếu điều kiện
     // không thỏa mãn, nên ta sẽ gọi hàm này trong một test case riêng biệt để kiểm tra assert.
-    GPIO_ReadPin(GPIOx, 0x0000); // Không chọn chân nào
-
-    // Nếu chương trình không bị dừng bởi assert thì test case đã thất bại
-    printf("-> FAILED (Expected assert failure)\n");
+    ASSERT_EXPECT_FAIL(GPIO_ReadPin(GPIOx, 0x0000)); // Không chọn chân nào
   }
   
   void test_GPIO_ReadPin_ValidParameter_ShouldReturnPinState(GPIO_REGS_Typedef *GPIOx) {
@@ -366,8 +389,29 @@
   }
 
 int main() {
-  printf("\n--- RESET UNIT TEST ---\n");
-    
+  printf("\n--- GPIO UNIT TEST ---\n");
+  
+  // Chạy tất cả các test case
+  test_GPIO_Init_NullPointer_ShouldReturnError(&MOCK_GPIOA_REGS);
+  test_GPIO_Init_InvalidParameter_ShouldAssert(&MOCK_GPIOA_REGS);
+  test_GPIO_Init_ValidParameter_ShouldConfigureGPIO(&MOCK_GPIOA_REGS, GPIO_MODE_OUTPUT_10MHz_PP);
+  test_GPIO_Init_MultiplePins_ShouldConfigureAllSelectedPins(&MOCK_GPIOA_REGS, GPIO_MODE_INPUT_PU_PD);
+  test_GPIO_DeInit_NullPointer_ShouldReturnError(&MOCK_GPIOA_REGS);
+  test_GPIO_DeInit_InvalidParameter_ShouldAssert(&MOCK_GPIOA_REGS);
+  test_GPIO_DeInit_ValidParameter_ShouldResetGPIO(&MOCK_GPIOA_REGS);
+  test_GPIO_ReadPin_NullPointer_ShouldReturnError(&MOCK_GPIOA_REGS);
+  test_GPIO_ReadPin_InvalidParameter_ShouldAssert(&MOCK_GPIOA_REGS);
+  test_GPIO_ReadPin_ValidParameter_ShouldReturnPinState(&MOCK_GPIOA_REGS);
+  test_GPIO_WritePin_NullPointer_ShouldDoNothing(&MOCK_GPIOA_REGS);
+  test_GPIO_WritePin_InvalidParameter_ShouldAssert(&MOCK_GPIOA_REGS);
+  test_GPIO_WritePin_ValidParameter_ShouldSetODR(&MOCK_GPIOA_REGS); // MS TỚI ĐÂY
+  test_GPIO_TogglePin_NullPointer_ShouldDoNothing(&MOCK_GPIOA_REGS);
+  test_GPIO_TogglePin_InvalidParameter_ShouldAssert(&MOCK_GPIOA_REGS);
+  test_GPIO_TogglePin_ShouldToggleODR(&MOCK_GPIOA_REGS);
+  test_GPIO_LockPin_NullPointer_ShouldReturnError(&MOCK_GPIOA_REGS);
+  test_GPIO_LockPin_InvalidParameter_ShouldAssert(&MOCK_GPIOA_REGS);
+  test_GPIO_LockPin_ShouldSetLCKR(&MOCK_GPIOA_REGS);
+
   printf("\n--- ALL TESTS PASSED ---\n");
   return 0;
 }
