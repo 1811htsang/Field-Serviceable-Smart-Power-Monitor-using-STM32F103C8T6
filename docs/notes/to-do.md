@@ -29,6 +29,10 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Unit Test cho Driver Reset
 - [x] Viết Driver GPIO
 - [x] Viết Unit Test cho Driver GPIO
+- [ ] Viết Driver AFIO
+- [ ] Viết Unit Test cho Driver AFIO
+- [ ] Viết Driver EXTI
+- [ ] Viết Unit Test cho Driver EXTI
 - [ ] Viết Driver SPI
 - [ ] Viết Unit Test cho Driver SPI
 - [ ] Viết Driver I2C
