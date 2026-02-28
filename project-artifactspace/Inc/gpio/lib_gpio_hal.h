@@ -52,23 +52,7 @@
                                   ((GPIOx) == GPIOF_REGS_PTR) || \
                                   ((GPIOx) == GPIOG_REGS_PTR))
 
-    #define IS_GPIO_PIN(PIN) (((PIN) == GPIO_PIN_0)   || \
-                              ((PIN) == GPIO_PIN_1)   || \
-                              ((PIN) == GPIO_PIN_2)   || \
-                              ((PIN) == GPIO_PIN_3)   || \
-                              ((PIN) == GPIO_PIN_4)   || \
-                              ((PIN) == GPIO_PIN_5)   || \
-                              ((PIN) == GPIO_PIN_6)   || \
-                              ((PIN) == GPIO_PIN_7)   || \
-                              ((PIN) == GPIO_PIN_8)   || \
-                              ((PIN) == GPIO_PIN_9)   || \
-                              ((PIN) == GPIO_PIN_10)  || \
-                              ((PIN) == GPIO_PIN_11)  || \
-                              ((PIN) == GPIO_PIN_12)  || \
-                              ((PIN) == GPIO_PIN_13)  || \
-                              ((PIN) == GPIO_PIN_14)  || \
-                              ((PIN) == GPIO_PIN_15)  || \
-                              ((PIN) == GPIO_PIN_ALL))
+    #define IS_GPIO_PIN(PIN) ((((PIN) & (~GPIO_PIN_ALL)) == 0x00u) && ((PIN) != 0x00u))
     
     #define IS_GPIO_CONFIG(INPUT) (((INPUT) == GPIO_CNF_INPUT_ANALOG)    || \
                                   ((INPUT) == GPIO_CNF_INPUT_FLOATING)   || \
@@ -115,10 +99,10 @@
     RETR_STAT GPIO_Init(GPIO_REGS_Typedef *GPIOx, GPIO_Init_Param *init_param);
 
     // >> Hàm vô hiệu hóa GPIO
-    RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui8 Pin);
+    RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm đọc trạng thái chân GPIO
-    PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui8 Pin);
+    PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm ghi trạng thái chân GPIO
     void GPIO_WritePin(
@@ -128,16 +112,16 @@
     );
 
     // >> Hàm đảo trạng thái chân GPIO
-    void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui8 Pin);
+    void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm khóa cấu hình chân GPIO
-    RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui8 Pin);
+    RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm xử lý ngắt ngoại vi GPIO
-    void GPIO_EXTI_IRQHandler(ui8 Pin);
+    void GPIO_EXTI_IRQHandler(ui16 Pin);
 
     // >> Hàm callback ngắt ngoại vi GPIO weak
-    __weak void GPIO_EXTI_Callback(ui8 Pin);
+    __weak void GPIO_EXTI_Callback(ui16 Pin);
     
 
 #endif /* LIB_GPIO_HAL_H_ */

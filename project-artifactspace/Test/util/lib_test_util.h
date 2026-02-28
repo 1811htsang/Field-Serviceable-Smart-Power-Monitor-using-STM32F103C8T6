@@ -27,10 +27,10 @@
           if (setjmp(assert_env) == 0) { \
               code_to_test; \
               /* Nếu chạy đến đây mà không nhảy vào longjmp nghĩa là thoát lỗi */ \
-              printf("-> FAILED (Expected assert failure)\n"); \
+              printf("-> ASSERT FAILED (Expected assert failure)\n"); \
           } else { \
               /* Nhảy vào đây nghĩa là Assert đã hoạt động đúng */ \
-              printf("-> PASSED (Expected assert failure)\n"); \
+              printf("-> ASSERT PASSED (Expected assert failure)\n"); \
           } \
           assert_caught = 0; \
       } while(0)

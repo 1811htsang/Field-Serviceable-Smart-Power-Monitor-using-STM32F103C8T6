@@ -77,9 +77,9 @@
         ui16 io_current;
 
       // Bộ biến tạm để lưu giá trị tham số
-        ui8 pin_num = init_param->Pin;
-        ui8 pin_mode = init_param->Mode;
-        ui8 pin_pull = init_param->Pull;
+        ui16 pin_num = init_param->Pin;
+        ui16 pin_mode = init_param->Mode;
+        ui16 pin_pull = init_param->Pull;
 
       // Bộ biến tạm thanh ghi để select cấu hình
         __vo BLANK_REG* config_register;
@@ -102,6 +102,11 @@
 
         // Nếu chân GPIO hiện tại được chọn thì cấu hình
           if (io_current == io_pos) {
+
+            if (__DEBUG_GET_MODE(ENABLE)) {
+              printf("GPIO_Init, DBG4-%u: Configuring pin %u.\n", pos, pos);
+            }
+
             // Kiểm tra xem GPIO có hỗ trợ cấu hình AFIO hay không;
               if (__DEBUG_GET_MODE(ENABLE)) {
                 printf("GPIO_Init, DBG4-%u: Checking AFIO support.\n", pos);
@@ -164,7 +169,7 @@
     return STAT_DONE;
   }
 
-  RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+  RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("GPIO_DeInit, DBG1: Check Null pointer.\n");
@@ -194,21 +199,27 @@
         ui16 pos = 0x0000u;
         ui16 io_pos;
         ui16 io_current;
+        ui16 pin_num = Pin;
 
       // Bộ biến tạm thanh ghi để select cấu hình
         __vo BLANK_REG* config_register;
         ui32 config_offset;
 
-      while ((Pin >> pos) != 0x0000u) {
+      while ((pin_num >> pos) != 0x0000u) {
         // Lấy vị trí chân GPIO hiện tại
         io_pos = (0x0001u << pos);
-        io_current = Pin & io_pos;
+        io_current = pin_num & io_pos;
 
         if (__DEBUG_GET_MODE(ENABLE)) {
           printf("GPIO_DeInit, DBG3-%u: Checking pin %u.\n", pos, pos);
         }
 
           if (io_current == io_pos) {
+            
+            if (__DEBUG_GET_MODE(ENABLE)) {
+              printf("GPIO_DeInit, DBG3-%u: Deinitializing pin %u.\n", pos, pos);
+            }
+            
             config_register = (io_pos < GPIO_PIN_8) ? &GPIOx->GPIO_CRL : &GPIOx->GPIO_CRH;
             config_offset = (io_pos < GPIO_PIN_8) ? (pos << 2u) : ((pos - 8u) << 2u);
 
@@ -230,7 +241,7 @@
     return STAT_DONE;
   }
 
-  PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+  PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
       if (__DEBUG_GET_MODE(ENABLE)) {
         printf("GPIO_ReadPin, DBG1: Check Null pointer.\n");
@@ -296,12 +307,30 @@
 
         if (PinState != GPIO_PIN_RESET) {
           GPIOx->GPIO_BSRR = Pin; // Set bit tương ứng trong BSRR để đưa chân lên mức cao
+
+          #ifdef UNIT_TEST
+            GPIOx->GPIO_ODR |= Pin;
+            /** 
+             * Ghi chú:
+             * Cập nhật giá trị ODR trong môi trường unit test 
+             * để mô phỏng hiệu ứng của BSRR
+             */
+          #endif
         } else {
           GPIOx->GPIO_BSRR = (ui32)Pin << 16u; // Reset bit tương ứng trong BSRR để đưa chân về mức thấp
+
+          #ifdef UNIT_TEST
+            GPIOx->GPIO_ODR &= ~Pin;
+            /** 
+             * Ghi chú:
+             * Cập nhật giá trị ODR trong môi trường unit test 
+             * để mô phỏng hiệu ứng của BSRR
+             */
+          #endif
         }
   }
 
-  void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+  void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
       if (__DEBUG_GET_MODE(ENABLE)) {
         printf("GPIO_TogglePin, DBG1: Check Null pointer.\n");
@@ -330,10 +359,25 @@
         ui32 odr = GPIOx->GPIO_ODR;
         ui32 toggle_mask = Pin;
 
-        GPIOx->GPIO_BSRR = ((odr & toggle_mask) << 16u) | (~odr & toggle_mask); // Set bit tương ứng trong BSRR để đưa chân lên mức cao, reset bit tương ứng trong BSRR để đưa chân về mức thấp
+        GPIOx->GPIO_BSRR = ((odr & toggle_mask) << 16u) | (~odr & toggle_mask);
+
+        /**
+         * Ghi chú:
+         * Set bit tương ứng trong BSRR để đưa chân lên mức cao, 
+         * reset bit tương ứng trong BSRR để đưa chân về mức thấp
+         */
+        
+        #ifdef UNIT_TEST
+          GPIOx->GPIO_ODR ^= toggle_mask;
+          /** 
+           * Ghi chú:
+           * Cập nhật giá trị ODR trong môi trường unit test 
+           * để mô phỏng hiệu ứng của BSRR
+           */
+        #endif
   }
 
-  RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui8 Pin) {
+  RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
       if (__DEBUG_GET_MODE(ENABLE)) {
         printf("GPIO_LockPin, DBG1: Check Null pointer.\n");
@@ -383,6 +427,6 @@
     return STAT_DONE;
   }
 
-  void GPIO_EXTI_IRQHandler(ui8 Pin) {
+  void GPIO_EXTI_IRQHandler(ui16 Pin) {
     
   }
