@@ -19,4 +19,3 @@ Từ thiết kế ban đầu, đã có một số thay đổi để phù hợp v
 - Thay thế ADE7757 thành ADE7758 nhằm hỗ trợ đo lường cả điện áp và dòng điện, giúp hệ thống có khả năng giám sát năng lượng toàn diện hơn.
 
 Trong tài liệu, nhóm tác giả thiết kế hệ thống nhằm sử dụng cho mục đích đo lường ở phạm vi mạng lưới điện dân dụng. Tuy nhiên, để sử dụng được trong môi trường công nghiệp, cần phải bổ sung thêm MCP4728 để đưa điện 1 pha vào hệ thống và chuyển đổi thành 3 pha để đo lường, giúp hệ thống có khả năng giám sát năng lượng trên lưới điện công nghiệp giả lập.
-

@@ -104,3 +104,9 @@ Suy ra, trình tự khi thiết kế là như sau:
 - Thực hiện các chức năng chính của hệ thống
 
 Ở đây, nếu có thể thì bổ sung thêm các thanh ghi BKP (Backup Power) để lưu trữ trạng thái trước khi reset, giúp hệ thống có thể phục hồi nhanh chóng sau khi reset hoặc cung cấp thông tin chi tiết về nguyên nhân reset cũng như ngắt việc phải reset liên tục trong các trường hợp lỗi phần mềm.
+
+## Logic thiết kế giữa GPIO, AFIO và EXTI
+
+Trong thiết kế driver của STM32, ta sẽ thấy có sự liên kết phụ thuộc giữa GPIO, AFIO và EXTI nhằm đảm bảo tính linh hoạt và tiện lợi khi sử dụng HAL Driver của STM32.
+
+Tuy nhiên, sự phụ thuộc này sẽ gây ra sự khó khăn và phá vỡ nguyên tắc đơn nhiệm với các hàm init phải chứa logic của các ngoại vi khác. Do đó, cần thiết kế lại để tách biệt các phần này ra khỏi nhau, giúp giảm sự phụ thuộc và tăng tính mô-đun của mã nguồn.
