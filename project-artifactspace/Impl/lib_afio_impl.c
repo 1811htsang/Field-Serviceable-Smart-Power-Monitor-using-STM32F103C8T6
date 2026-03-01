@@ -73,18 +73,18 @@
       printf("AFIO_EXTI_Init, DBG3: Initializing EXTI for Port %u with shift %u.\n", init_param->Port, init_param->Shift);
     }
 
-      ui8 exticr_index = init_param->Shift / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui8 exticr_shift = (init_param->Shift % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui8 index = init_param->Shift / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui8 shift = (init_param->Shift % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit cũ tại vị trí cần cấu hình
-      AFIO_REGS_PTR->AFIO_EXTICR[exticr_index] &= ~(0x0Fu << exticr_shift);
+      AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
       // Ghi giá trị Port vào vị trí cần cấu hình
-      AFIO_REGS_PTR->AFIO_EXTICR[exticr_index] |= (init_param->Port << exticr_shift);
+      AFIO_REGS_PTR->AFIO_EXTICR[index] |= (init_param->Port << shift);
 
       /**
        * Ghi chú:
        * Ví dụ ta cần cấu hình cho chân GPIOB pin 6 (tương ứng với EXTI6):
-       * - Port = AFIO_EXTICR_PORTB (0x01), Shift = 6 % 4 = 2 → exticr_index = 1, exticr_shift = (6 % 4) * 4 = 2 * 4 = 8
+       * - Port = AFIO_EXTICR_PORTB (0x01), Shift = 6 % 4 = 2 → index = 1, shift = (6 % 4) * 4 = 2 * 4 = 8
        * - Ta sẽ xóa các bit cũ tại vị trí bit 8-11 của AFIO_EXTICR[1] rồi ghi giá trị 0x01 vào đó để cấu hình EXTI6 cho GPIOB.
        */
 
@@ -115,11 +115,11 @@
       printf("AFIO_EXTI_DeInit, DBG3: Deinitializing EXTI for Port %u with shift %u.\n", init_param->Port, init_param->Shift);
     }
 
-      ui8 exticr_index = init_param->Shift / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui8 exticr_shift = (init_param->Shift % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui8 index = init_param->Shift / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui8 shift = (init_param->Shift % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit tại vị trí cần cấu hình để vô hiệu hóa EXTI
-      AFIO_REGS_PTR->AFIO_EXTICR[exticr_index] &= ~(0x0Fu << exticr_shift);
+      AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
 
     return STAT_DONE;
   }
