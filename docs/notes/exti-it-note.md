@@ -59,3 +59,30 @@ Theo tài liệu, CMSIS đề xuất hướng thiết kế tối giản hoạt �
 ### Lưu ý
 
 Trong tất cả các thiết kế mapping này, tất cả các ngắt đều được thiết kế với yêu cầu truy cập có quyền ưu tiên (privileged access) để đảm bảo rằng chỉ có các phần của hệ thống có quyền truy cập cao mới có thể thiết lập hoặc thay đổi mức ưu tiên của các ngắt, giúp tăng cường bảo mật và ổn định của hệ thống. Điều này đảm bảo rằng các ngắt quan trọng và các sự kiện hệ thống luôn được xử lý một cách an toàn và hiệu quả, giảm thiểu nguy cơ bị tấn công hoặc lỗi do việc thiết lập mức ưu tiên không đúng cách.
+
+Trong đó cần làm rõ:
+
+Unprivilieged được định nghĩa là phần mềm:
+
+- Quyền truy cập hạn chế đối với lệnh MSR, MRS, CPS.
+- Không được phép truy cập vào Sys-Tim, NVIC hoặc SCB.
+- Có thể giới hạn quyền truy cập đối với các ngoại vi và bộ nhớ.
+
+Privileged được định nghĩa là phần mềm:
+
+- Có thể truy cập đầy đủ vào tất cả các lệnh và truy cập và tất cả tài nguyên.
+
+Ở Thread mode, Để kiểm tra thì xem trong nhóm thanh ghi CONTROL để xác định việc xử lý phần mềm đang ở chế độ privileged hay unprivileged.
+
+Ở Handler mode, phần mềm luôn ở chế độ privileged. Điều này đảm bảo rằng các ngắt và các sự kiện hệ thống luôn được xử lý với quyền truy cập đầy đủ, giúp tăng cường bảo mật và ổn định của hệ thống.
+
+Chỉ có phần mềm được quyền mới có thể ghi vào nhóm thanh ghi CONTROL để thay đổi quyền hạn thực thi phần mềm ở Thread mode, giúp đảm bảo rằng chỉ có các phần của hệ thống có quyền truy cập cao mới có thể thay đổi quyền hạn của phần mềm, tăng cường bảo mật và ổn định của hệ thống.
+
+Để thực hiện quyền ưu tiên cần dùng lệnh SVC để chuyển quyền hoạt động sang chế độ privileged, sau đó mới có thể thiết lập mức ưu tiên cho các ngắt hoặc thực hiện các thao tác yêu cầu quyền truy cập cao khác. Điều này đảm bảo rằng chỉ có phần mềm được quyền mới có thể thực hiện các thao tác quan trọng liên quan đến quản lý ngắt và hệ thống, giúp tăng cường bảo mật và ổn định của hệ thống.
+
+Ghi chú: Theo tìm hiểu thì ARM Cortex-M3 chia ra hoạt động ở 2 chế độ là Thread mode và Handler mode, trong đó khi khởi tạo chương trình và dự án thì phần mềm sẽ hoạt động ở Thread mode với quyền ưu tiên privileged sẵn có thể truy cập đầy đủ vào tất cả các lệnh và tài nguyên. Tuy nhiên, khi có ngắt xảy ra, phần mềm sẽ chuyển sang Handler mode để xử lý ngắt, trong đó phần mềm luôn ở chế độ privileged để đảm bảo rằng các ngắt và các sự kiện hệ thống luôn được xử lý với quyền truy cập đầy đủ, giúp tăng cường bảo mật và ổn định của hệ thống.
+
+Kiểm chứng thông tin trong 2 nguồn sau:
+
+- [pm0056](../references/pm0056-stm32-f10-f20-f21-l1-cortex-m3-programming-manual.pdf)
+- [arm-access-level](https://www.iotality.com/armcm-access-levels/)
