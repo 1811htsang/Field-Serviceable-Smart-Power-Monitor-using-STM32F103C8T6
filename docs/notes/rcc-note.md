@@ -28,6 +28,8 @@ Bật bit SYSRESETREQ trong thanh ghi SCB_AIRCR để yêu cầu một system re
 
 Cụ thể hơn phải ghi `0x5FA` vào trường `VECTKEY[31:16]` và `1` vào trường `SYSRESETREQ[2]` của thanh ghi SCB_AIRCR để được chấp nhận.
 
+Lưu ý: Đối với nhóm thanh ghi SCB, đòi hỏi thực hiện truy cập theo word-aligned (truy cập theo từ) để đảm bảo tính toàn vẹn của dữ liệu và tránh các lỗi không mong muốn. Điều này có nghĩa là khi ghi vào thanh ghi SCB, phải đảm bảo rằng địa chỉ của thanh ghi đó là bội số của 4 bytes (32 bits) để đảm bảo rằng việc ghi dữ liệu diễn ra một cách chính xác và hiệu quả.
+
 Kiểm chứng thông tin này trong [rm0008-stm32](/docs/references/rm0008-stm32-f101-f102-f103-f105-f107-reference-manual.pdf) trang 90 và [pm0056-stm32](/docs/references/pm0056-stm32-f10-f20-f21-l1-cortex-m3-programming-manual.pdf) trang 134.
 
 ### LPM reset
