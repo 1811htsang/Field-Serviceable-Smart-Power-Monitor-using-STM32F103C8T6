@@ -27,8 +27,9 @@
     #ifndef AFIO_EXTI_INIT_PARAM_TYPE
       #define AFIO_EXTI_INIT_PARAM_TYPE
         tdf_strc AFIO_EXTI_Init_Param {
-          ui8 Port;      // Chọn GPIOx cần cấu hình ngắt ngoài
-          ui8 Shift;     // Chọn vị trí chân GPIO cần cấu hình ngắt ngoài (0-3/4-7/8-11/12-15)
+          ui16 Port;      // Chọn GPIOx cần cấu hình ngắt ngoài
+          ui16 Pin;       // Chọn vị trí chân GPIO cần cấu hình ngắt ngoài (0-3/4-7/8-11/12-15)
+          ui16 Shift;     // Lưu thông tin về Line EXTI tương ứng với chân GPIO đã chọn, sử dụng cho param của EXTI
         } AFIO_EXTI_Init_Param;
     #endif
 
@@ -42,20 +43,19 @@
                                   ((PORT) == AFIO_EXTICR_PORTF) || \
                                   ((PORT) == AFIO_EXTICR_PORTG))
 
-    #define IS_AFIO_EXTI_SHIFT(SHIFT) (((SHIFT) == M4R0_SHIFT) || \
-                                    ((SHIFT) == M4R1_SHIFT) || \
-                                    ((SHIFT) == M4R2_SHIFT) || \
-                                    ((SHIFT) == M4R3_SHIFT))
+    #define IS_AFIO_PERI_REMAP(PERI) (((PERI) == AFIO_MAPR_SPI1_REMAP) || \
+                                  ((PERI) == AFIO_MAPR_I2C1_REMAP) || \
+                                  ((PERI) == AFIO_MAPR_USART1_REMAP))
 
   // Khai báo các hàm thành phần
 
     // >> Hàm gọi xử lý mapping 
     RETR_STAT AFIO_PinRemap(ui32 Peri);
 
-    // >> Hàm khởi tạo ngắt ngoài
-    RETR_STAT AFIO_EXTI_Init(AFIO_EXTI_Init_Param *init_param);
+    // >> Hàm khởi tạo thông tin line ngắt ngoài
+    RETR_STAT AFIO_EXTI_Line_Init(AFIO_EXTI_Init_Param *init_param);
 
-    // >> Hàm vô hiệu hóa ngắt ngoài
-    RETR_STAT AFIO_EXTI_DeInit(AFIO_EXTI_Init_Param *init_param);
+    // >> Hàm vô hiệu hóa thông tin line ngắt ngoài
+    RETR_STAT AFIO_EXTI_Line_DeInit(AFIO_EXTI_Init_Param *init_param);
 
 #endif /* LIB_AFIO_HAL_H_ */

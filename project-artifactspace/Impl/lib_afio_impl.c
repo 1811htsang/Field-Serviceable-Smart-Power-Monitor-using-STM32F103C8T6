@@ -49,32 +49,35 @@
     return STAT_DONE;
   }
 
-  RETR_STAT AFIO_EXTI_Init(AFIO_EXTI_Init_Param *init_param) {
+  RETR_STAT AFIO_EXTI_Line_Init(AFIO_EXTI_Init_Param *init_param) {
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Init, DBG1: Check Null pointer.\n");
+      printf("AFIO_EXTI_Line_Init, DBG1: Check Null pointer.\n");
     }
 
       if (init_param == NULL) {
         if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("AFIO_EXTI_Init, ERR: Null pointer detected.\n");
+          printf("AFIO_EXTI_Line_Init, ERR: Null pointer detected.\n");
         }
         return STAT_ERROR;
       }
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Init, DBG2: Assert parameter.\n");
+      printf("AFIO_EXTI_Line_Init, DBG2: Assert parameter.\n");
     }
 
       assert_param(IS_AFIO_EXTI_PORT(init_param->Port));
-      assert_param(IS_AFIO_EXTI_SHIFT(init_param->Shift));
+      assert_param(IS_GPIO_PIN(init_param->Pin));
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Init, DBG3: Initializing EXTI for Port %u with shift %u.\n", init_param->Port, init_param->Shift);
+      printf(
+        "AFIO_EXTI_Line_Init, DBG3: Initializing EXTI for Port %u with pin %u.\n", 
+        init_param->Port, init_param->Pin
+      );
     }
 
-      ui8 index = init_param->Shift / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui8 shift = (init_param->Shift % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui16 index = init_param->Port / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui16 shift = (init_param->Pin % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit cũ tại vị trí cần cấu hình
       AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
@@ -88,38 +91,45 @@
        * - Ta sẽ xóa các bit cũ tại vị trí bit 8-11 của AFIO_EXTICR[1] rồi ghi giá trị 0x01 vào đó để cấu hình EXTI6 cho GPIOB.
        */
 
+      init_param->Shift = shift; // Lưu thông tin shift vào cấu trúc tham số để sử dụng cho EXTI
+
     return STAT_DONE;
   }
 
-  RETR_STAT AFIO_EXTI_DeInit(AFIO_EXTI_Init_Param *init_param) {
+  RETR_STAT AFIO_EXTI_Line_DeInit(AFIO_EXTI_Init_Param *init_param) {
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_DeInit, DBG1: Check Null pointer.\n");
+      printf("AFIO_EXTI_Line_DeInit, DBG1: Check Null pointer.\n");
     }
 
       if (init_param == NULL) {
         if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("AFIO_EXTI_DeInit, ERR: Null pointer detected.\n");
+          printf("AFIO_EXTI_Line_DeInit, ERR: Null pointer detected.\n");
         }
         return STAT_ERROR;
       }
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_DeInit, DBG2: Assert parameter.\n");
+      printf("AFIO_EXTI_Line_DeInit, DBG2: Assert parameter.\n");
     }
 
       assert_param(IS_AFIO_EXTI_PORT(init_param->Port));
-      assert_param(IS_AFIO_EXTI_SHIFT(init_param->Shift));
+      assert_param(IS_GPIO_PIN(init_param->Pin));
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_DeInit, DBG3: Deinitializing EXTI for Port %u with shift %u.\n", init_param->Port, init_param->Shift);
+      printf(
+        "AFIO_EXTI_Line_DeInit, DBG3: Deinitializing EXTI for Port %u with pin %u.\n", 
+        init_param->Port, init_param->Pin)
+      ;
     }
 
-      ui8 index = init_param->Shift / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui8 shift = (init_param->Shift % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui16 index = init_param->Port / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui16 shift = (init_param->Pin % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit tại vị trí cần cấu hình để vô hiệu hóa EXTI
       AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
+
+      init_param->Shift = 15u; // Reset thông tin shift trong cấu trúc tham số
 
     return STAT_DONE;
   }
