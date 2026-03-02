@@ -27,11 +27,15 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Unit Test cho Driver IWDG
 - [x] Viết Unit Test cho Driver Clock
 - [x] Viết Unit Test cho Driver Reset
+- [x] Tìm hiểu về GPIO và AFIO
 - [x] Viết Driver GPIO
 - [x] Viết Unit Test cho Driver GPIO
 - [x] Viết Driver AFIO
-- [ ] Viết Driver EXTI
+- [x] Tìm hiểu về NVIC và EXTI
+- [x] Viết Driver EXTI
 - [ ] Viết Unit Test cho Driver EXTI
+- [ ] Viết Driver NVIC
+- [ ] Viết Unit Test cho Driver NVIC
 - [ ] Viết Driver SPI
 - [ ] Viết Unit Test cho Driver SPI
 - [ ] Viết Driver I2C
