@@ -13,11 +13,15 @@
     #ifndef UNIT_TEST
       #include "generic/lib_keyword_def.h"
       #include "exti/lib_exti_def.h"
+      #include "gpio/lib_gpio_def.h"
+      #include "gpio/lib_gpio_hal.h"
       #include "afio/lib_afio_def.h"
       #include "afio/lib_afio_hal.h"
     #else
       #include "lib_keyword_def.h"
       #include "lib_exti_def.h"
+      #include "lib_gpio_def.h"
+      #include "lib_gpio_hal.h"
       #include "lib_afio_def.h"
       #include "lib_afio_hal.h"
     #endif
@@ -39,7 +43,7 @@
     #ifndef EXTI_CALLBACK_EVENT_PARAM_TYPE
       #define EXTI_CALLBACK_EVENT_PARAM_TYPE
         tdf_enum EXTI_Callback_Event_Param_Type {
-          HAL_EXTI_COMMON_CB_ID = 0x00U // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
+          EXTI_COMMON_CB_ID = 0xFFU // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
         } EXTI_Callback_Event_Param_Type;
     #endif
 
@@ -54,10 +58,16 @@
   // Khai báo các hàm thành phần
 
     // >> Hàm cấu hình tham số EXTI theo thông tin line đã khởi tạo trong AFIO
-    RETR_STAT EXTI_Config_Init(AFIO_EXTI_Init_Param *init_param);
+    RETR_STAT EXTI_Config_Init(
+      GPIO_Init_Param *gpio_init_param,
+      AFIO_EXTI_Init_Param *afio_init_param
+    );
 
     // >> Hàm vô hiệu hóa tham số EXTI theo thông tin line đã khởi tạo trong AFIO
-    RETR_STAT EXTI_Config_DeInit(AFIO_EXTI_Init_Param *init_param);
+    RETR_STAT EXTI_Config_DeInit(
+      GPIO_Init_Param *gpio_init_param,
+      AFIO_EXTI_Init_Param *afio_init_param
+    );
 
     // >> Hàm xử lý ngắt EXTI
     void EXTI_IRQHandler(EXTI_Handle_Param *handle_param);
@@ -66,7 +76,10 @@
     RETR_STAT EXTI_RegisterCallback(
       EXTI_Handle_Param *handle_param,
       EXTI_Callback_Event_Param_Type callback_event_type,
-      void (*callback_func)(void)
+      void (*callback_func)(void) = nullptr
     );
+
+    // >> Hàm tạo ngắt EXTI bằng phần mềm
+    void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param);
 
 #endif /* LIB_EXTI_HAL_H_ */

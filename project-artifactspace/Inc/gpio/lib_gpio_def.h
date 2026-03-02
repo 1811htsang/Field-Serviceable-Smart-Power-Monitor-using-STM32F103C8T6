@@ -167,4 +167,11 @@
     #define GPIO_PULLUP                  0xF1u
     #define GPIO_PULLDOWN                0xF2u
 
+  // Khai báo cấu hình trigger ngắt ngoài
+
+    #define GPIO_TRIGGER_NONE            0xA0u
+    #define GPIO_TRIGGER_RISING          0xA1u
+    #define GPIO_TRIGGER_FALLING         0xA2u
+    #define GPIO_TRIGGER_BOTH            0xA3u
+
 #endif /* LIB_GPIO_DEF_H_ */

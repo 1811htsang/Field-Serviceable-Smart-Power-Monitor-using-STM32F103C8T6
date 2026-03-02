@@ -29,7 +29,7 @@
         tdf_strc AFIO_EXTI_Init_Param {
           ui16 Port;      // Chọn GPIOx cần cấu hình ngắt ngoài
           ui16 Pin;       // Chọn vị trí chân GPIO cần cấu hình ngắt ngoài (0-3/4-7/8-11/12-15)
-          ui16 Shift;     // Lưu thông tin về Line EXTI tương ứng với chân GPIO đã chọn, sử dụng cho param của EXTI
+          ui16 Line;     // Lưu thông tin về Line EXTI tương ứng với chân GPIO đã chọn, sử dụng cho param của EXTI
         } AFIO_EXTI_Init_Param;
     #endif
 

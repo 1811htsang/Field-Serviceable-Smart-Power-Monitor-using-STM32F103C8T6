@@ -26,8 +26,9 @@
       #define GPIO_INIT_PARAM_TYPE
         tdf_strc GPIO_Init_Param{
           ui16 Pin;       // Chọn chân GPIO cần cấu hình
-          ui8 Mode;      // Chọn chế độ hoạt động cho chân GPIO
-          ui8 Pull;     // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
+          ui8 Mode;       // Chọn chế độ hoạt động cho chân GPIO
+          ui8 Pull;       // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
+          ui8 Trigger;    // Chọn kiểu trigger ngắt ngoài (rising/falling/both) nếu chân GPIO được cấu hình cho EXTI, ngược lại sẽ bỏ qua tham số này
         } GPIO_Init_Param;
     #endif
 
@@ -61,6 +62,10 @@
                                   ((INPUT) == GPIO_CNF_OUTPUT_OD)        || \
                                   ((INPUT) == AFIO_OUTPUT_PP)            || \
                                   ((INPUT) == AFIO_OUTPUT_OD))
+
+    #define IS_GPIO_INPUT_MODE(MODE) (((MODE) == GPIO_MODE_INPUT_ANALOG)     || \
+                              ((MODE) == GPIO_MODE_INPUT_FLOATING)          || \
+                              ((MODE) == GPIO_MODE_INPUT_PU_PD))
                                     
     #define IS_GPIO_AFIO_MODE(MODE) (((MODE) == GPIO_MODE_INPUT_ANALOG)     || \
                               ((MODE) == GPIO_MODE_INPUT_FLOATING)          || \
@@ -88,6 +93,11 @@
     #define IS_GPIO_PULL(PULL) (((PULL) == GPIO_NOPULL) || \
                                 ((PULL) == GPIO_PULLUP) || \
                                 ((PULL) == GPIO_PULLDOWN))
+
+    #define IS_GPIO_TRIGGER(TRIGGER) (((TRIGGER) == GPIO_TRIGGER_NONE)   || \
+                                    ((TRIGGER) == GPIO_TRIGGER_RISING) || \
+                                    ((TRIGGER) == GPIO_TRIGGER_FALLING)|| \
+                                    ((TRIGGER) == GPIO_TRIGGER_BOTH))
 
     #define IS_PINRETR_ENUM(STATE) (((STATE) == GPIO_PIN_RESET) || \
                                   ((STATE) == GPIO_PIN_SET)   || \
