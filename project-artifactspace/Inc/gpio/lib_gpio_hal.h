@@ -133,5 +133,7 @@
     // >> Hàm callback ngắt ngoại vi GPIO weak
     __weak void GPIO_EXTI_Callback(ui16 Pin);
     
+    // >> Hàm trả về index chân GPIO từ bitmask Pin
+    ui16 GPIO_GetPinIndex(ui16 Pin);
 
 #endif /* LIB_GPIO_HAL_H_ */

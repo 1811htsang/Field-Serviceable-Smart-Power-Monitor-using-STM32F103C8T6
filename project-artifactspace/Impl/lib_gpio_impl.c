@@ -571,3 +571,23 @@
   void GPIO_EXTI_IRQHandler(ui16 Pin) {
     GPIO_EXTI_Callback(Pin);
   }
+
+  ui16 GPIO_GetPinIndex(ui16 Pin) {
+    // Kiểm tra giá trị tham số đầu vào
+    if (__DEBUG_GET_MODE(ENABLE)) {
+      printf("GPIO_GetPinIndex, DBG1: Assert parameter.\n");
+    }
+
+        assert_param(IS_GPIO_PIN(Pin));
+
+    // Tính toán index chân GPIO từ bitmask Pin
+    ui16 index = 0;
+    while ((Pin >> index) != 0x0000u) {
+      if ((Pin & (0x0001u << index)) != 0) {
+        return index; // Trả về index của chân GPIO được chọn
+      }
+      index++;
+    }
+
+    return 0xFFFFu; // Trả về giá trị không hợp lệ nếu không tìm thấy chân nào được chọn
+  }

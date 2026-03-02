@@ -2,14 +2,15 @@
 # gcc 
 # -DUNIT_TEST 
 # -I ../../Inc/generic/ 
-# -I ../../Inc/iwdg/ 
-# -I ../../Inc/clock/ 
+# -I ../../Inc/gpio/ 
+# -I ../../Inc/afio/
+# -I ../../Inc/exti/ 
 # -I ./ 
 # -g -o ./unit_test_implementation 
 # -o ./unit_test_implementation.exe 
 #    ./unit_test_implementation.c 
 #    ./source_dependency.c 
-#    ../../Impl/lib_clock_impl.c
+#    ../../Impl/lib_exti_impl.c
 
 cmake_minimum_required(VERSION 3.10)
 

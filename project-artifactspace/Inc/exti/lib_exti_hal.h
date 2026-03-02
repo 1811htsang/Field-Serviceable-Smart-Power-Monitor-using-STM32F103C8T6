@@ -55,7 +55,10 @@
      * đã được kiểm tra trong hàm khởi tạo AFIO_EXTI_Line_Init
      */
     
-  // Khai báo các hàm thành phần
+  // Khai báo các hàm thành phần 
+  
+    // >> Hàm đăng ký thông tin line EXTI vào bảng quản lý của module EXTI
+    RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param);
 
     // >> Hàm cấu hình tham số EXTI theo thông tin line đã khởi tạo trong AFIO
     RETR_STAT EXTI_Config_Init(
@@ -69,8 +72,11 @@
       AFIO_EXTI_Init_Param *afio_init_param
     );
 
-    // >> Hàm xử lý ngắt EXTI
-    void EXTI_IRQHandler(EXTI_Handle_Param *handle_param);
+    // >> Hàm xử lý ngắt EXTI cấp handler
+    void EXTI_Generic_IRQHandler(EXTI_Handle_Param *handle_param);
+
+    // >> Hàm xử lý ngắt EXTI cấp chân 
+    void EXTI_IRQHandler(ui16 Pin);
 
     // >> Hàm đăng ký callback xử lý ngắt EXTI
     RETR_STAT EXTI_RegisterCallback(

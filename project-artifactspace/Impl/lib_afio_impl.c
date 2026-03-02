@@ -118,7 +118,7 @@
     }
 
       ui16 index = init_param->Port / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui16 shift = (init_param->Pin % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui16 shift = (GPIO_GetPinIndex(init_param->Pin) % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit cũ tại vị trí cần cấu hình
       AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
@@ -132,7 +132,7 @@
        * - Ta sẽ xóa các bit cũ tại vị trí bit 8-11 của AFIO_EXTICR[1] rồi ghi giá trị 0x01 vào đó để cấu hình EXTI6 cho GPIOB.
        */
 
-      init_param->Line = shift; // Lưu thông tin Line vào cấu trúc tham số để sử dụng cho EXTI
+      init_param->Line = GPIO_GetPinIndex(init_param->Pin); // Lưu thông tin Line vào cấu trúc tham số để sử dụng cho EXTI
 
     return STAT_DONE;
   }
@@ -186,7 +186,7 @@
     }
 
       ui16 index = init_param->Port / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui16 shift = (init_param->Pin % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui16 shift = (GPIO_GetPinIndex(init_param->Pin) % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit tại vị trí cần cấu hình để vô hiệu hóa EXTI
       AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
