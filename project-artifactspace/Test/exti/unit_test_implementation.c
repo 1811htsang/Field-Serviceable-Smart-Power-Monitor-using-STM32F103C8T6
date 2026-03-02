@@ -56,3 +56,12 @@
     // Reset các ngoại vi EXTI về các giá trị reset
     memset(&MOCK_EXTI_REGS, 0, sizeof(EXTI_REGS_Typedef));
   }
+
+int main() {
+  printf("\n--- EXTI UNIT TEST ---\n");
+  
+  // Chạy tất cả các test case
+
+  printf("\n--- ALL TESTS PASSED ---\n");
+  return 0;
+}

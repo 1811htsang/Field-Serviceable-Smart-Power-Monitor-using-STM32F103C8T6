@@ -478,7 +478,7 @@
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 1.
    *   - Hàm này sẽ tìm kiếm trong bảng handle và gọi callback tương ứng.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
@@ -493,7 +493,7 @@
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 2.
    *   - Hàm này sẽ tÌm kiếm trong bảng handle và gọi callback tương ứng.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
@@ -508,7 +508,7 @@
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 3.
    *   - Hàm này sẽ tÌm kiếm trong bảng handle và gọi callback tương ứng.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
@@ -523,7 +523,7 @@
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 4.
    *   - Hàm này sẽ tÌm kiếm trong bảng handle và gọi callback tương ứng.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
@@ -540,7 +540,7 @@
    *   - Kiểm tra pending bit của mỗi line trong các line 5-9.
    *   - Nếu có pending bit, gọi EXTI_IRQHandler() với line tương ứng.
    *   - Cho phép xử lý đồng thời 5 line EXTI cụ thể trong cùng một IRQ.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
@@ -562,7 +562,7 @@
    *   - Kiểm tra pending bit của mỗi line trong các line 10-15.
    *   - Nếu có pending bit, gọi EXTI_IRQHandler() với line tương ứng.
    *   - Cho phép xử lý đồng thời 6 line EXTI cụ thể trong cùng một IRQ.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
