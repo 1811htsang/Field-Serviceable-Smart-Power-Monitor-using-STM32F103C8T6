@@ -26,7 +26,7 @@
 
     #ifndef AFIO_EXTI_INIT_PARAM_TYPE
       #define AFIO_EXTI_INIT_PARAM_TYPE
-        tdf_strc AFIO_EXTI_Init_Param {
+        tdf_strc AFIO_EXTI_Init_Param { // Cấu trúc tham số để khởi tạo thông tin line ngắt ngoài trong AFIO
           ui16 Port;      // Chọn GPIOx cần cấu hình ngắt ngoài
           ui16 Pin;       // Chọn vị trí chân GPIO cần cấu hình ngắt ngoài (0-3/4-7/8-11/12-15)
           ui16 Line;      // Lưu thông tin về Line EXTI tương ứng với chân GPIO đã chọn, sử dụng cho param của EXTI

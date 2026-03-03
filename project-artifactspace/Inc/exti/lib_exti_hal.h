@@ -29,7 +29,7 @@
 
     #ifndef EXTI_HANDLE_PARAM_TYPE
       #define EXTI_HANDLE_PARAM_TYPE
-        tdf_strc EXTI_Handle_Param{
+        tdf_strc EXTI_Handle_Param{ // Cấu trúc quản lý thông tin handler xử lý ngắt cho mỗi line EXTI
           ui16 Line;      // Chọn line EXTI cần xử lý
           void (*Callback)(void); // Con trỏ hàm callback để gọi khi có ngắt EXTI xảy ra
         } EXTI_Handle_Param;
