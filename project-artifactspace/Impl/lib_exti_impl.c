@@ -177,7 +177,7 @@
       }
 
       EXTI_REGS_PTR->EXTI_IMR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong IMR để kích hoạt line EXTI
-      EXTI_REGS_PTR->EXTI_PR |= (0x0001u << afio_init_param->Line); // Clear pending bit của line EXTI để đảm bảo không có ngắt nào bị bỏ sót ngay sau khi cấu hình
+      EXTI_REGS_PTR->EXTI_PR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong PR để clear pending bit cũ nếu có, lưu ý rằng thanh ghi PR là rw_c1 
 
     return STAT_DONE;
   }

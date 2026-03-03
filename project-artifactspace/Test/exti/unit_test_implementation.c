@@ -183,7 +183,7 @@
     assert((MOCK_EXTI_REGS.EXTI_IMR & (0x0001u << afio_init_param.Line)) != 0); // Bit trong IMR phải được set
 
     // Kiểm tra nếu pending bit trong PR đã được clear đúng cách cho line 7
-    assert((MOCK_EXTI_REGS.EXTI_PR & (0x0001u << afio_init_param.Line)) == 0); // Bit trong PR phải được clear
+    assert((MOCK_EXTI_REGS.EXTI_PR & (0x0001u << afio_init_param.Line)) != 0); // Bit trong PR phải được clear với 1
 
     printf("-> PASSED\n");
   }
@@ -197,6 +197,8 @@
 
     // Kiểm tra kết quả trả về là lỗi do con trỏ NULL
     assert(result == STAT_ERROR);
+
+    printf("-> PASSED\n");
   }
 
   void test_EXTI_Config_DeInit_InvalidTrigger_ShouldAssert() {
@@ -246,6 +248,8 @@
 
     // Kiểm tra nếu thông tin Line trong cấu trúc tham số đã được reset về giá trị mặc định
     assert(afio_init_param.Line == 15u); // Line phải được reset về giá trị mặc định là 15
+
+    printf("-> PASSED\n");
   }
 
   void test_EXTI_Generic_IRQHandler_NullPointer_ShouldDoNothing() {
@@ -284,7 +288,7 @@
 
   void test_EXTI_Generic_IRQHandler_ValidParameter_ShouldNotCallCallback() {
     setup();
-    printf("TC11: Check Valid Parameter...\n");
+    printf("TC12: Check Valid Parameter...\n");
     
     // Chuẩn bị tham số hợp lệ cho EXTI_Generic_IRQHandler
     EXTI_Handle_Param handle_param;
@@ -307,7 +311,7 @@
 
   void test_EXTI_IRQHandler_LineSpecific_ShouldCallCorrectCallback() {
     setup();
-    printf("TC12: Check Line-Specific IRQ Handler...\n");
+    printf("TC13: Check Line-Specific IRQ Handler...\n");
     
     // Chuẩn bị tham số hợp lệ cho EXTI_Generic_IRQHandler
     EXTI_Handle_Param handle_param_line0;
@@ -338,7 +342,7 @@
 
   void test_EXTI_RegisterCallback_NullPointer_ShouldReturnError() {
     setup();
-    printf("TC13: Check Null Pointer...\n");
+    printf("TC14: Check Null Pointer...\n");
     
     // Gọi hàm EXTI_RegisterCallback với con trỏ NULL
     RETR_STAT result = EXTI_RegisterCallback(NULL, EXTI_COMMON_CB_ID, callback_example);
@@ -351,7 +355,7 @@
 
   void test_EXTI_RegisterCallback_InvalidParameter_ShouldReturnError() {
     setup();
-    printf("TC14: Check Invalid Parameter...\n");
+    printf("TC15: Check Invalid Parameter...\n");
     
     // Chuẩn bị tham số không hợp lệ cho EXTI_RegisterCallback
     EXTI_Handle_Param handle_param;
@@ -366,7 +370,7 @@
 
   void test_EXTI_RegisterCallback_ValidParameter_ShouldRegisterCallback() {
     setup();
-    printf("TC15: Check Valid Parameter...\n");
+    printf("TC16: Check Valid Parameter...\n");
     
     // Chuẩn bị tham số hợp lệ cho EXTI_RegisterCallback
     EXTI_Handle_Param handle_param;
@@ -386,7 +390,7 @@
 
   void test_EXTI_GenerateSWI_NULLPointer_ShouldDoNothing() {
     setup();
-    printf("TC16: Check Null Pointer...\n");
+    printf("TC17: Check Null Pointer...\n");
     
     // Gọi hàm EXTI_GenerateSWI với con trỏ NULL
     EXTI_GenerateSWI(NULL);
@@ -397,11 +401,13 @@
 
   void test_EXTI_GenerateSWI_ValidParameter_ShouldSetPendingBit() {
     setup();
-    printf("TC17: Check Valid Parameter...\n");
+    printf("TC18: Check Valid Parameter...\n");
     
     // Chuẩn bị tham số hợp lệ cho EXTI_GenerateSWI
     EXTI_Handle_Param handle_param;
     handle_param.Line = 4; // Chọn line 4
+
+    interrupt_trigger(handle_param.Line); // Tạo ngắt pending cho line 4 để kiểm tra nếu hàm EXTI_GenerateSWI có set lại pending bit đúng cách hay không
 
     // Gọi hàm EXTI_GenerateSWI với tham số hợp lệ
     EXTI_GenerateSWI(&handle_param);
@@ -418,29 +424,47 @@ int main() {
   // Chạy tất cả các test case
   
   test_EXTI_RegisterParam_NullPointer_ShouldReturnError();
+  printf("\n");
   test_EXTI_RegisterParam_InvalidLine_ShouldAssert();
+  printf("\n");
   test_EXTI_RegisterParam_ValidParameter_ShouldRegisterCallback();
+  printf("\n");
 
   test_EXTI_Config_Init_NullPointer_ShouldReturnError();
+  printf("\n");
   test_EXTI_Config_Init_InvalidTrigger_ShouldAssert();
+  printf("\n");
   test_EXTI_Config_Init_ValidParameter_ShouldConfigureEXTI();
+  printf("\n");
 
   test_EXTI_Config_DeInit_NullPointer_ShouldReturnError();
+  printf("\n");
   test_EXTI_Config_DeInit_InvalidTrigger_ShouldAssert();
+  printf("\n");
   test_EXTI_Config_DeInit_ValidParameter_ShouldDeInitEXTI();
+  printf("\n");
 
   test_EXTI_Generic_IRQHandler_NullPointer_ShouldDoNothing();
+  printf("\n");
   test_EXTI_Generic_IRQHandler_ValidParameter_ShouldCallCallback();
+  printf("\n");
   test_EXTI_Generic_IRQHandler_ValidParameter_ShouldNotCallCallback();
+  printf("\n");
 
   test_EXTI_IRQHandler_LineSpecific_ShouldCallCorrectCallback();
+  printf("\n");
 
   test_EXTI_RegisterCallback_NullPointer_ShouldReturnError();
+  printf("\n");
   test_EXTI_RegisterCallback_InvalidParameter_ShouldReturnError();
+  printf("\n");
   test_EXTI_RegisterCallback_ValidParameter_ShouldRegisterCallback();
+  printf("\n");
 
   test_EXTI_GenerateSWI_NULLPointer_ShouldDoNothing();
+  printf("\n");
   test_EXTI_GenerateSWI_ValidParameter_ShouldSetPendingBit();
+  printf("\n");
 
   printf("\n--- ALL TESTS PASSED ---\n");
   return 0;
