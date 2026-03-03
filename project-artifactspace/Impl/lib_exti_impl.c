@@ -12,8 +12,6 @@
 		#include "lib_condition_def.h"
 		#include "lib_exti_def.h"
 		#include "lib_exti_hal.h"
-    #include "lib_afio_def.h"
-    #include "lib_afio_hal.h"
     #include "header_dependency.h"
   #endif
 
@@ -28,11 +26,19 @@
     #include "exti/lib_exti_hal.h"
   	#include "afio/lib_afio_def.h"
   	#include "afio/lib_afio_hal.h"
+    #include "gpio/lib_gpio_def.h"
+    #include "gpio/lib_gpio_hal.h"
   #endif
 
 // Khai báo bảng quản lý table callback cho các line EXTI
 
-  static EXTI_Handle_Param *EXTI_Handle_Table[16] = {NULL};
+  #ifdef UNIT_TEST
+    #define STATIC
+  #else
+    #define STATIC static
+  #endif
+
+  STATIC EXTI_Handle_Param *EXTI_Handle_Table[16] = {0}; // Bảng quản lý con trỏ tới cấu trúc handle EXTI cho 16 line EXTI (0-15)
 
 // Định nghĩa các hàm thành phần
 
@@ -119,7 +125,7 @@
       printf("EXTI_Config_Init, DBG1: Check Null pointer.\n");
     }
 
-      if (afio_init_param == NULL) {
+      if (gpio_init_param == NULL || afio_init_param == NULL) {
         if (__DEBUG_GET_MODE(ENABLE)) {
           printf("EXTI_Config_Init, ERR: Null pointer detected.\n");
         }
@@ -209,7 +215,7 @@
       printf("EXTI_Config_DeInit, DBG1: Check Null pointer.\n");
     }
 
-      if (afio_init_param == NULL) {
+      if (gpio_init_param == NULL || afio_init_param == NULL) {
         if (__DEBUG_GET_MODE(ENABLE)) {
           printf("EXTI_Config_DeInit, ERR: Null pointer detected.\n");
         }
@@ -278,13 +284,7 @@
       }
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Generic_IRQHandler, DBG2: Assert parameter.\n");
-    }
-
-      assert_param(IS_EXTI_LINE(handle_param->Line));
-
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Generic_IRQHandler, DBG3: Handling EXTI interrupt for Line %u.\n", handle_param->Line);
+      printf("EXTI_Generic_IRQHandler, DBG2: Handling EXTI interrupt for Line %u.\n", handle_param->Line);
     }
 
       // Kiểm tra nếu pending bit của line EXTI được set thì gọi hàm callback tương ứng
@@ -443,13 +443,7 @@
       }
 
     if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_GenerateSWI, DBG2: Assert parameter.\n");
-    }
-
-      assert_param(IS_EXTI_LINE(handle_param->Line));
-
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_GenerateSWI, DBG3: Generating software interrupt for Line %u.\n", handle_param->Line);
+      printf("EXTI_GenerateSWI, DBG2: Generating software interrupt for Line %u.\n", handle_param->Line);
     }
 
       EXTI_REGS_PTR->EXTI_SWIER |= (0x0001u << handle_param->Line); // Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm

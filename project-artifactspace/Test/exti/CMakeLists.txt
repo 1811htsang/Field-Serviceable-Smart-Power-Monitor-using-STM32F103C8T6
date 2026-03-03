@@ -31,13 +31,13 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Định nghĩa các Macro (tương đương flag -D)
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TEST)
+target_compile_definitions(${PROJECT_NAME} PRIVATE USE_FULL_ASSERT)
 
 # Cấu hình các đường dẫn Include (tương đương các tham số -I)
 target_include_directories(${PROJECT_NAME} PRIVATE
   ../../Inc/generic/
-  ../../Inc/gpio/
-  ../../Inc/afio/
   ../../Inc/exti/
+  ../util/
   ./
 )
 

@@ -20,10 +20,7 @@
     #else
       #include "lib_keyword_def.h"
       #include "lib_exti_def.h"
-      #include "lib_gpio_def.h"
-      #include "lib_gpio_hal.h"
-      #include "lib_afio_def.h"
-      #include "lib_afio_hal.h"
+      #include "header_dependency.h"
     #endif
 
     #include <stdint.h>
@@ -43,7 +40,7 @@
     #ifndef EXTI_CALLBACK_EVENT_PARAM_TYPE
       #define EXTI_CALLBACK_EVENT_PARAM_TYPE
         tdf_enum EXTI_Callback_Event_Param_Type {
-          EXTI_COMMON_CB_ID = 0xFFU // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
+          EXTI_COMMON_CB_ID = 0xFFu // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
         } EXTI_Callback_Event_Param_Type;
     #endif
 
