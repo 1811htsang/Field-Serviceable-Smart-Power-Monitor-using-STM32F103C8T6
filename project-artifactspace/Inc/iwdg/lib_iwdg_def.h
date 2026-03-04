@@ -29,32 +29,11 @@
 
 	// Khai báo cấu trúc thanh ghi
 
-		tdf_strc IWDG_KR_REG {
-			__vo ui KEY : 16;
-			__vo ui RESERVED : 16;
-		} IWDG_KR_REG_Typedef;
-
-		tdf_strc IWDG_PR_REG {
-			__vo ui PR : 3;
-			__vo ui RESERVED : 29;
-		} IWDG_PR_REG_Typedef;
-
-		tdf_strc IWDG_RLR_REG {
-			__vo ui RL : 12;
-			__vo ui RESERVED : 20;
-		} IWDG_RLR_REG_Typedef;
-
-		tdf_strc IWDG_SR_REG {
-			__vo ui PVU : 1;
-			__vo ui RVU : 1;
-			__vo ui RESERVED : 30;
-		} IWDG_SR_REG_Typedef;
-
 		tdf_strc IWDG_REGS {
-			__vo IWDG_KR_REG_Typedef KR;
-			__vo IWDG_PR_REG_Typedef PR;
-			__vo IWDG_RLR_REG_Typedef RLR;
-			__vo IWDG_SR_REG_Typedef SR;
+			__vo BLANK_REG KR;
+			__vo BLANK_REG PR;
+			__vo BLANK_REG RLR;
+			__vo BLANK_REG SR;
 		} IWDG_REGS_Typedef;
 
 	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
@@ -68,33 +47,36 @@
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_KR_REG
 
-		#define IWDG_KR_REG_KEY_ENABLE_ACCESS 0x5555ul
-		#define IWDG_KR_REG_KEY_DISABLE_ACCESS 0x0000ul
-		#define IWDG_KR_REG_KEY_START 0xCCCCul
-		#define IWDG_KR_REG_KEY_RELOAD_COUNTER 0xAAAAul
+		#define IWDG_KR_REG_KEY_ENABLE_ACCESS  ((ui16)0x5555ul << 0)
+		#define IWDG_KR_REG_KEY_DISABLE_ACCESS ((ui16)0x0000ul << 0)
+		#define IWDG_KR_REG_KEY_START 				 ((ui16)0xCCCCul << 0)
+		#define IWDG_KR_REG_KEY_RELOAD_COUNTER ((ui16)0xAAAAul << 0)
+		#define IWDG_KR_REG_KEY_MASK 				   ((ui32)0xFFFFFFFFul << 0)
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_PR_REG
 
-		#define IWDG_PR_REG_PR_DIV_4 0x00ul
-		#define IWDG_PR_REG_PR_DIV_8 0x01ul
-		#define IWDG_PR_REG_PR_DIV_16 0x02ul
-		#define IWDG_PR_REG_PR_DIV_32 0x03ul
-		#define IWDG_PR_REG_PR_DIV_64 0x04ul
-		#define IWDG_PR_REG_PR_DIV_128 0x05ul
-		#define IWDG_PR_REG_PR_DIV_256 0x06ul
+		#define IWDG_PR_REG_PR_DIV_4   ((ui8)0x00ul << 0)
+		#define IWDG_PR_REG_PR_DIV_8   ((ui8)0x01ul << 0)
+		#define IWDG_PR_REG_PR_DIV_16  ((ui8)0x02ul << 0)
+		#define IWDG_PR_REG_PR_DIV_32  ((ui8)0x03ul << 0)
+		#define IWDG_PR_REG_PR_DIV_64  ((ui8)0x04ul << 0)
+		#define IWDG_PR_REG_PR_DIV_128 ((ui8)0x05ul << 0)
+		#define IWDG_PR_REG_PR_DIV_256 ((ui8)0x06ul << 0)
+		#define IWDG_PR_REG_PR_MASK    ((ui32)0xFFFFFFFFul << 0)
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_RLR_REG
 
-		#define IWDG_RLR_REG_RL_MIN 0x001ul
-		#define IWDG_RLR_REG_RL_AVG 0x7FFul
-		#define IWDG_RLR_REG_RL_MAX 0xFFFul
-		
+		#define IWDG_RLR_REG_RL_MIN ((ui16)0x001ul << 0)
+		#define IWDG_RLR_REG_RL_AVG ((ui16)0x7FFul << 0)
+		#define IWDG_RLR_REG_RL_MAX ((ui16)0xFFFul << 0)
+		#define IWDG_RLR_REG_RL_MASK ((ui32)0xFFFFFFFFul << 0)
+
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_SR_REG
 
-		#define IWDG_SR_REG_PVU_UPDATE_ONGOING SET
-		#define IWDG_SR_REG_PVU_UPDATE_COMPLETED RESET
+		#define IWDG_SR_REG_PVU_UPDATE_ONGOING (SET << 0)
+		#define IWDG_SR_REG_PVU_UPDATE_COMPLETED ~(SET << 0)
 
-		#define IWDG_SR_REG_RVU_UPDATE_ONGOING SET
-		#define IWDG_SR_REG_RVU_UPDATE_COMPLETED RESET
+		#define IWDG_SR_REG_RVU_UPDATE_ONGOING (SET << 1)
+		#define IWDG_SR_REG_RVU_UPDATE_COMPLETED ~(SET << 1)
 
 #endif /* LIB_IWDG_DEF_H_ */

@@ -40,23 +40,29 @@
  *   RETR_STAT - Trạng thái thực thi (STAT_DONE, STAT_ERROR, STAT_NRDY).
  */
 RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
-  // Kiểm tra con trỏ đầu vào
-  if (init_param == NULL) {
-    return STAT_ERROR;
+
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG1: Check Null pointer.\n");
   }
 
-    // Kiểm tra giá trị tham số đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG2: Assert parameter.\n");
+    // Kiểm tra con trỏ đầu vào
+    if (init_param == NULL) {
+      return STAT_ERROR;
     }
+
+  // Kiểm tra giá trị tham số đầu vào
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG2: Assert parameter.\n");
+  }
+
     assert_param(IS_IWDG_PRESCALER(init_param->Prescaler));
     assert_param(IS_IWDG_RELOAD(init_param->Reload));
 
+  // Bật LSI nếu chưa được bật
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG3: Check LSI ready.\n");
+  }
 
-    // Bật LSI nếu chưa được bật
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG3: Check LSI ready.\n");
-    }
     if (__NRDY_CHECK(RCC_IsLSIReady())) {
       RCC_CLK_Init_Param rcc_lsi_init;
       rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
@@ -66,51 +72,51 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
       }
     }
 
-
-    // Kích hoạt quyền ghi vào các thanh ghi cấu hình IWDG
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG4: Enable write access.\n");
-    }
+  // Kích hoạt quyền ghi vào các thanh ghi cấu hình IWDG
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG4: Enable write access.\n");
+  }
+    
     IWDG_EnableWriteAccess();
 
+  // Cấu hình bộ chia tần số
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG5: Set prescaler.\n");
+  }
 
-    // Cấu hình bộ chia tần số
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG5: Set prescaler.\n");
-    }
     if (__RDY_CHECK(IWDG_IsPrescalerUpdated())) {
-      IWDG_REGS_PTR->PR.PR = init_param->Prescaler;
+      SET_BIT(IWDG_REGS_PTR->PR, init_param->Prescaler);
     } else {
       IWDG_DisableWriteAccess();
       return STAT_NRDY;
     }
 
+  // Cấu hình giá trị nạp lại
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG6: Set reload value.\n");
+  }
 
-    // Cấu hình giá trị nạp lại
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG6: Set reload value.\n");
-    }
     if (__RDY_CHECK(IWDG_IsReloadValueUpdated())) {
-      IWDG_REGS_PTR->RLR.RL = init_param->Reload;
+      SET_BIT(IWDG_REGS_PTR->RLR, init_param->Reload);
     } else {
       IWDG_DisableWriteAccess();
       return STAT_NRDY;
     }
 
+  // Tắt quyền ghi vào các thanh ghi cấu hình IWDG
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG7: Disable write access.\n");
+  }
 
-    // Tắt quyền ghi vào các thanh ghi cấu hình IWDG
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG7: Disable write access.\n");
-    }
     IWDG_DisableWriteAccess();
 
-    
-    // Kết thúc quy trình khởi tạo
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("IWDG_Init, DBG8: Setup procedure done.\n");
-    }
-    return STAT_DONE;
+  // Kết thúc quy trình khởi tạo
+  if (__DEBUG_GET_MODE(ENABLE)) {
+    printf("IWDG_Init, DBG8: Setup procedure done.\n");
   }
+
+    return STAT_DONE;
+}
 
   /*
    * Hàm de-initialize (reset) watchdog độc lập (IWDG).
@@ -126,6 +132,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    *   RETR_STAT - Luôn trả về STAT_DONE.
    */
   RETR_STAT IWDG_DeInit(IWDG_Init_Param *init_param) {
+
     // Reload bộ đếm IWDG về giá trị mặc định
     IWDG_Reload();
 
@@ -141,7 +148,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    * Không có tham số và không trả về giá trị.
    */
   void IWDG_Start(void) {
-    IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_START;
+    SET_BIT(IWDG_REGS_PTR->KR, IWDG_KR_REG_KEY_START);
   }
 
   /*
@@ -150,7 +157,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    * Không có tham số và không trả về giá trị.
    */
   void IWDG_Reload(void) {
-    IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_RELOAD_COUNTER;
+    SET_BIT(IWDG_REGS_PTR->KR, IWDG_KR_REG_KEY_RELOAD_COUNTER);
   }
 
   /*
@@ -164,7 +171,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    *   RETR_STAT - STAT_RDY nếu đã cập nhật xong, STAT_NRDY nếu đang cập nhật.
    */
   RETR_STAT IWDG_IsReloadValueUpdated(void) {
-    if (IWDG_REGS_PTR->SR.RVU == SET) {
+    if (__DIFF_CHECK(IWDG_REGS_PTR->SR, IWDG_SR_REG_RVU_UPDATE_COMPLETED)) {
       return STAT_NRDY;
     }
     return STAT_RDY;
@@ -181,7 +188,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    *   RETR_STAT - STAT_RDY nếu đã cập nhật xong, STAT_NRDY nếu đang cập nhật.
    */
   RETR_STAT IWDG_IsPrescalerUpdated(void) {
-    if (IWDG_REGS_PTR->SR.PVU == SET) {
+    if (__DIFF_CHECK(IWDG_REGS_PTR->SR, IWDG_SR_REG_PVU_UPDATE_COMPLETED)) {
       return STAT_NRDY;
     }
     return STAT_RDY;
@@ -193,7 +200,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    * Không có tham số và không trả về giá trị.
    */
   void IWDG_EnableWriteAccess(void) {
-    IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_ENABLE_ACCESS;
+    SET_BIT(IWDG_REGS_PTR->KR, IWDG_KR_REG_KEY_ENABLE_ACCESS);
   }
 
   /*
@@ -202,7 +209,7 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    * Không có tham số và không trả về giá trị.
    */
   void IWDG_DisableWriteAccess(void) {
-    IWDG_REGS_PTR->KR.KEY = IWDG_KR_REG_KEY_DISABLE_ACCESS;
+    SET_BIT(IWDG_REGS_PTR->KR, IWDG_KR_REG_KEY_DISABLE_ACCESS);
   }
 
   /*
