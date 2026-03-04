@@ -40,86 +40,20 @@
 
 		/*
 		* Ghi chú:
-		* STM32 sử dụng kiểu little-endian,
+		* - STM32 sử dụng kiểu little-endian,
 		* nghĩa là bit thấp nhất được đánh số 0.
+		* - Tất cả thanh ghi đều sử dụng truy cập mức word.
 		*/
 
-		tdf_strc RCC_CR_REG {
-			__vo ui HSION : 1;
-			__vo ui HSIRDY : 1;
-			__vo ui RESERVED0 : 1;
-			__vo ui HSITRIM : 5;
-			__vo ui HSICAL : 8;
-			__vo ui HSEON : 1;
-			__vo ui HSERDY : 1;
-			__vo ui HSEBYP : 1;
-			__vo ui CSSON : 1;
-			__vo ui RESERVED1 : 4;
-			__vo ui PLLON : 1;
-			__vo ui PLLRDY : 1;
-			__vo ui RESERVED2 : 6;
-		} RCC_CR_REG_Typedef;
-
-		tdf_strc RCC_CFGR_REG {
-			__vo ui SW : 2;
-			__vo ui SWS : 2;
-			__vo ui HPRE : 4;
-			__vo ui PPRE1 : 3;
-			__vo ui PPRE2 : 3;
-			__vo ui ADCPRE : 2;
-			__vo ui PLLSRC : 1;
-			__vo ui PLLXTPRE : 1;
-			__vo ui PLLMUL : 4;
-			__vo ui USBPRE : 1;
-			__vo ui RESERVED0 : 1;
-			__vo ui MCO : 3;
-			__vo ui RESERVED1 : 5;
-		} RCC_CFGR_REG_Typedef;
-
-		tdf_strc RCC_CIR_REG {
-			__vo ui LSIRDYF : 1;
-			__vo ui LSERDYF : 1;
-			__vo ui HSIRDYF : 1;
-			__vo ui HSERDYF : 1;
-			__vo ui PLLRDYF : 1;
-			__vo ui RESERVED0 : 2;
-			__vo ui CSSF : 1;
-			__vo ui LSIRDYIE : 1;
-			__vo ui LSERDYIE : 1;
-			__vo ui HSIRDYIE : 1;
-			__vo ui HSERDYIE : 1;
-			__vo ui PLLRDYIE : 1;
-			__vo ui RESERVED1 : 3;
-			__vo ui LSIRDYC : 1;
-			__vo ui LSERDYC : 1;
-			__vo ui HSIRDYC : 1;
-			__vo ui HSERDYC : 1;
-			__vo ui PLLRDYC : 1;
-			__vo ui RESERVED2 : 2;
-			__vo ui CSSC : 1;
-			__vo ui RESERVED3 : 8;
-		} RCC_CIR_REG_Typedef;
-
-		tdf_strc RCC_CSR {
-			__vo ui LSION : 1;
-			__vo ui LSIRDY : 1;
-			__vo ui RESERVED0 : 22;
-			__vo ui RMVF : 1;
-			__vo ui RESERVED1 : 1;
-			__vo ui PINRSTF : 1;
-			__vo ui PORRSTF : 1;
-			__vo ui SFTRSTF : 1;
-			__vo ui IWDGRSTF : 1;
-			__vo ui WWDGRSTF : 1;
-			__vo ui LPWRRSTF : 1;
-		} RCC_CSR_REG_Typedef;
-
 		tdf_strc RCC_REGS {
-			__vo RCC_CR_REG_Typedef CR;
-			__vo RCC_CFGR_REG_Typedef CFGR;
-			__vo RCC_CIR_REG_Typedef CIR;
-			__vo BLANK_REG RESERVED[6];
-			__vo RCC_CSR_REG_Typedef CSR;
+			__vo BLANK_REG CR;
+			__vo BLANK_REG CFGR;
+			__vo BLANK_REG CIR;
+			__vo BLANK_REG RCC_APB2RSTR;
+			__vo BLANK_REG RESERVED0[2];
+			__vo BLANK_REG RCC_APB2ENR;
+			__vo BLANK_REG RESERVED1[2];
+			__vo BLANK_REG CSR;
 		} RCC_REGS_Typedef;
 
   // >> Tạo con trỏ tới ngoại vi
@@ -128,93 +62,45 @@
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CR_REG
 
-		#define RCC_CR_REG_HSION_RESET RESET
-		#define RCC_CR_REG_HSION_SET SET
-		#define RCC_CR_REG_HSEON_RESET RESET
-		#define RCC_CR_REG_HSEON_SET SET
-		#define RCC_CR_REG_CSSON_RESET RESET
-		#define RCC_CR_REG_CSSON_SET SET
-		#define RCC_CR_REG_PLLON_RESET RESET
-		#define RCC_CR_REG_PLLON_SET SET
+		#define RCC_CR_REG_MASK 0xFFFFFFFFul
+		#define RCC_CR_REG_HSION_SET (1u << 0)
+		#define RCC_CR_REG_HSIRDY_ON (1u << 1)
+		#define RCC_CR_REG_HSEON_SET (1u << 16)
+		#define RCC_CR_REG_HSERDY_ON (1u << 17)
+		#define RCC_CR_REG_CSSON_SET (1u << 19)
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CFGR_REG
 
-		#define RCC_CFGR_REG_SW_SET_HSI 0x00ul
-		#define RCC_CFGR_REG_SW_SET_HSE 0x01ul
-		#define RCC_CFGR_REG_SW_SET_PLL 0x02ul
+		#define RCC_CFGR_REG_SW_SET_HSI (((ui32)0x00ul) << 0)
+		#define RCC_CFGR_REG_SW_SET_HSE (((ui32)0x01ul) << 0)
+		#define RCC_CFGR_REG_SW_SET_PLL (((ui32)0x02ul) << 0)
+
+		#define RCC_CFGR_REG_SWS_HSI    (((ui32)0x00ul) << 2)
+		#define RCC_CFGR_REG_SWS_HSE    (((ui32)0x01ul) << 2)
+		#define RCC_CFGR_REG_SWS_PLL    (((ui32)0x02ul) << 2)
+		#define RCC_CFGR_REG_SW_MASK 0xFFFFFFFFul
+
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CIR_REG
 
-		#define RCC_CIR_REG_LSIRDYF_NOT_READY RESET
-		#define RCC_CIR_REG_LSIRDYF_READY SET
+		#define RCC_CIR_REG_MASK 0xFFFFFFFFul
+		#define RCC_CIR_REG_CSSF_ON (1u << 7)
+		#define RCC_CIR_REG_CSSC_SET (1u << 8)
 
-		#define RCC_CIR_REG_HSIRDYF_NOT_READY RESET
-		#define RCC_CIR_REG_HSIRDYF_READY SET
-
-		#define RCC_CIR_REG_HSERDYF_NOT_READY RESET
-		#define RCC_CIR_REG_HSERDYF_READY SET
-
-		#define RCC_CIR_REG_PLLRDYF_NOT_READY RESET
-		#define RCC_CIR_REG_PLLRDYF_READY SET
-
-		#define RCC_CIR_REG_CSSF_NO_CLOCK_FAILURE RESET
-		#define RCC_CIR_REG_CSSF_CLOCK_FAILURE SET
-
-		#define RCC_CIR_REG_LSIRDYIE_DISABLE RESET
-		#define RCC_CIR_REG_LSIRDYIE_ENABLE SET
-
-		#define RCC_CIR_REG_HSIRDYIE_DISABLE RESET
-		#define RCC_CIR_REG_HSIRDYIE_ENABLE SET
-
-		#define RCC_CIR_REG_HSERDYIE_DISABLE RESET
-		#define RCC_CIR_REG_HSERDYIE_ENABLE SET
-
-		#define RCC_CIR_REG_PLLRDYIE_DISABLE RESET
-		#define RCC_CIR_REG_PLLRDYIE_ENABLE SET
-
-		#define RCC_CIR_REG_LSIRDYC_NO_EFFECT RESET
-		#define RCC_CIR_REG_LSIRDYC_CLEAR SET
-
-		#define RCC_CIR_REG_HSIRDYC_NO_EFFECT RESET
-		#define RCC_CIR_REG_HSIRDYC_CLEAR SET
-
-		#define RCC_CIR_REG_HSERDYC_NO_EFFECT RESET
-		#define RCC_CIR_REG_HSERDYC_CLEAR SET
-
-		#define RCC_CIR_REG_PLLRDYC_NO_EFFECT RESET
-		#define RCC_CIR_REG_PLLRDYC_CLEAR SET
-
-		#define RCC_CIR_REG_CSSC_NO_EFFECT RESET
-		#define RCC_CIR_REG_CSSC_CLEAR SET
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CSR
 
-		#define RCC_CSR_REG_LSION_RESET RESET
-		#define RCC_CSR_REG_LSION_SET SET
+		#define RCC_CSR_REG_MASK 0xFFFFFFFFul
+		#define RCC_CSR_REG_LSION_SET (1u << 0)
+		#define RCC_CSR_REG_LSIRDY_ON (1u << 1)
 
-		#define RCC_CSR_REG_LSIRDY_NOT_READY RESET
-		#define RCC_CSR_REG_LSIRDY_READY SET
+	// Khai báo các định nghĩa bit cần sử dụng trên RCC_APB2RSTR
 
-		#define RCC_CSR_REG_RMVF_NO_EFFECT RESET
-		#define RCC_CSR_REG_RMVF_CLEAR SET
+		#define RCC_APB2RSTR_MASK 0xFFFFFFFFul
 
-		#define RCC_CSR_REG_PINRSTF_NO_RESET_OCCURRED RESET
-		#define RCC_CSR_REG_PINRSTF_RESET_OCCURRED SET
+	// Khai báo các định nghĩa bit cần sử dụng trên RCC_APB2ENR
 
-		#define RCC_CSR_REG_PORRSTF_NO_RESET_OCCURRED RESET
-		#define RCC_CSR_REG_PORRSTF_RESET_OCCURRED SET
-
-		#define RCC_CSR_REG_SFTRSTF_NO_RESET_OCCURRED RESET
-		#define RCC_CSR_REG_SFTRSTF_RESET_OCCURRED SET
-
-		#define RCC_CSR_REG_IWDGRSTF_NO_RESET_OCCURRED RESET
-		#define RCC_CSR_REG_IWDGRSTF_RESET_OCCURRED SET
-
-		#define RCC_CSR_REG_WWDGRSTF_NO_RESET_OCCURRED RESET
-		#define RCC_CSR_REG_WWDGRSTF_RESET_OCCURRED SET
-
-		#define RCC_CSR_REG_LPWRRSTF_NO_RESET_OCCURRED RESET
-		#define RCC_CSR_REG_LPWRRSTF_RESET_OCCURRED SET
+		#define RCC_APB2ENR_MASK 0xFFFFFFFFul
 
   // Khai báo các nguồn clock khởi tạo
 
@@ -228,4 +114,15 @@
 		 * LSI không được sử dụng làm SYSCLK select nên không có định nghĩa tương ứng
 		 */
 
+	// Khai báo các ngoại vi cần mở nguồn
+
+		#define AFIO  (0x01ul << 0)
+		#define GPIOA (0x01ul << 2)
+		#define GPIOB (0x01ul << 3)
+		#define GPIOC (0x01ul << 4)
+		#define GPIOD (0x01ul << 5)
+		#define GPIOE (0x01ul << 6)
+		#define GPIOF (0x01ul << 7)
+		#define GPIOG (0x01ul << 8)
+		
 #endif /* LIB_CLOCK_DEF_H_ */

@@ -22,8 +22,10 @@
   // Khai báo các định nghĩa dùng chung
 
 		#define __vo volatile
-		#define HIGH 1
-		#define LOW 0
+
+		#define HIGH 0x1u
+		#define LOW 0x0u
+
 		#define SET HIGH
 		#define RESET LOW
 		#define ENABLE HIGH
@@ -64,6 +66,19 @@
 			STAT_NRDY     = STAT_ERROR,
 			STAT_RDY      = STAT_OK
 		} RETR_STAT;
+
+	// Khai báo các thao tác bit
+		
+		#define SET_BIT(REG, BIT)     ((REG) |= (BIT)) // Bit sẽ có dạng (1u << n) để đảm bảo chỉ thao tác trên bit đó
+		#define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT)) // Bit sẽ có dạng (1u << n), khi đảo lại sẽ có tất cả bit là 1 ngoại trừ bit cần xóa sẽ là 0
+		#define READ_BIT(REG, BIT)    ((REG) & (BIT)) // Bit sẽ có dạng (1u << n), phép AND sẽ trả về giá trị khác 0 nếu bit đó được set, ngược lại sẽ trả về 0
+
+	// Khai báo các thao tác thanh ghi
+	
+		#define CLEAR_REG(REG)        ((REG) = (0x0))
+		#define WRITE_REG(REG, VAL)   ((REG) = (VAL))
+		#define READ_REG(REG)         ((REG))
+		#define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
 
 #endif /* LIB_KEYWORD_DEF_H_ */
 
