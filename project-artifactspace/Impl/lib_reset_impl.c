@@ -32,8 +32,8 @@
 
   void RST_SYS_SW_Reset(void) {
     // Ghi giá trị VECTKEY và SYSRESETREQ vào thanh ghi AIRCR để thực hiện reset phần mềm
-    SCB_AIRCR_REG_PTR->VECTKEY = 0x5FA; // Giá trị khóa
-    SCB_AIRCR_REG_PTR->SYSRESETREQ = SET; // Yêu cầu reset hệ thống
+    SET_BIT(*SCB_AIRCR_REG_PTR, SCB_AIRCR_REG_VECTKEY_SET);
+    SET_BIT(*SCB_AIRCR_REG_PTR, SCB_AIRCR_REG_SYSRESETREQ_SET); // Yêu cầu reset hệ thống
 
     // Chờ đợi cho đến khi hệ thống được reset
     while (1) {
@@ -56,17 +56,17 @@
     }
 
       // Đọc trạng thái các cờ reset từ RCC_CSR_REG và gán vào cấu trúc reset_source
-      reset_source->IsPinReset = (RCC_REGS_PTR->CSR.PINRSTF == RCC_CSR_REG_PINRSTF_RESET_OCCURRED) ? SET : RESET;
-      reset_source->IsPorReset = (RCC_REGS_PTR->CSR.PORRSTF == RCC_CSR_REG_PORRSTF_RESET_OCCURRED) ? SET : RESET;
-      reset_source->IsSftReset = (RCC_REGS_PTR->CSR.SFTRSTF == RCC_CSR_REG_SFTRSTF_RESET_OCCURRED) ? SET : RESET;
-      reset_source->IsIwdgReset = (RCC_REGS_PTR->CSR.IWDGRSTF == RCC_CSR_REG_IWDGRSTF_RESET_OCCURRED) ? SET : RESET;
-      reset_source->IsWwdgReset = (RCC_REGS_PTR->CSR.WWDGRSTF == RCC_CSR_REG_WWDGRSTF_RESET_OCCURRED) ? SET : RESET;
-      reset_source->IsLowPwrReset = (RCC_REGS_PTR->CSR.LPWRRSTF == RCC_CSR_REG_LPWRRSTF_RESET_OCCURRED) ? SET : RESET;
+      reset_source->IsPinReset = (READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_PINRSTF_OCCURRED) == RCC_CSR_REG_PINRSTF_OCCURRED) ? SET : RESET;
+      reset_source->IsPorReset = (READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_PORRSTF_OCCURRED) == RCC_CSR_REG_PORRSTF_OCCURRED) ? SET : RESET;
+      reset_source->IsSftReset = (READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_SFTRSTF_OCCURRED) == RCC_CSR_REG_SFTRSTF_OCCURRED) ? SET : RESET;
+      reset_source->IsIwdgReset = (READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_IWDGRSTF_OCCURRED) == RCC_CSR_REG_IWDGRSTF_OCCURRED) ? SET : RESET;
+      reset_source->IsWwdgReset = (READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_WWDGRSTF_OCCURRED) == RCC_CSR_REG_WWDGRSTF_OCCURRED) ? SET : RESET;
+      reset_source->IsLowPwrReset = (READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LPWRRSTF_OCCURRED) == RCC_CSR_REG_LPWRRSTF_OCCURRED) ? SET : RESET;
 
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RESET_CaptureResetSource, DBG3: Clear reset source flags.\n");
     }
 
       // Xóa các cờ reset đã đọc bằng cách ghi RMVF
-      RCC_REGS_PTR->CSR.RMVF = RCC_CSR_REG_RMVF_CLEAR;
+      SET_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_RMVF_SET);
   }
