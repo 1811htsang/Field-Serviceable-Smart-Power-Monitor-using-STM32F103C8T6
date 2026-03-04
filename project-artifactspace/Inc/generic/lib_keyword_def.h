@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file           : lib_keyword_define.h
+ * @file           : lib_keyword_def.h
  * @author         : shanghuang
  * @brief          : Header for define keyword
  ******************************************************************************
@@ -19,6 +19,10 @@
 #ifndef LIB_KEYWORD_DEF_H_
   #define LIB_KEYWORD_DEF_H_
 
+	// Khai báo thư viện phụ thuộc
+
+		#include <stdint.h>
+
   // Khai báo các định nghĩa dùng chung
 
 		#define __vo volatile
@@ -28,28 +32,46 @@
 
 		#define SET HIGH
 		#define RESET LOW
+
 		#define ENABLE HIGH
 		#define DISABLE LOW
+
 		#define SUCCESS HIGH
 		#define ERROR LOW
+
 		#define ON HIGH
 		#define OFF LOW
+
 		#define TRUE HIGH
 		#define FALSE LOW
+
 		#define u unsigned
 		#define ul unsigned long
 		#define ui unsigned int
 		#define ui8 uint8_t
 		#define ui16 uint16_t
 		#define ui32 uint32_t
+		
 		#define tdf_strc typedef struct
+		#define tdf_enum typedef enum
+
 		#define BLANK_REG uint32_t
+
 		#define __weak __attribute__((weak))
+		
 		#define DEBUG_MODE ENABLE
 
 		#ifdef  USE_FULL_ASSERT
-			#define assert_param(expr) ((expr) ? (void)0u : assert_failed((uint8_t *)__FILE__, __LINE__))
-			void assert_failed(uint8_t* file, uint32_t line);
+			#ifndef UNIT_TEST
+        void assert_failed(ui8* file, ui32 line) {
+          printf("Assertion failed in file %s on line %lu.\n", file, line);
+          while(1) { }
+        }
+      #endif
+			#define assert_param(expr) ((expr) ? (void)1u : assert_failed((ui8*)__FILE__, __LINE__))
+			#ifdef UNIT_TEST
+				void assert_failed(ui8* file, ui8 line);
+			#endif
 		#else
 			#define assert_param(expr) ((void)0u)
 		#endif /* USE_FULL_ASSERT */

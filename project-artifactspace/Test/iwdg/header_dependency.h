@@ -11,6 +11,7 @@
   // Khai báo các thư viện chung cho unit test
 
     #include "lib_keyword_def.h"
+    #include "lib_condition_def.h"
   
   // Khai báo các dependency definition từ các file header cần thiết
 

@@ -20,17 +20,23 @@
 
   // Khai báo cấu trúc tham số hàm khởi tạo
 
-		tdf_strc RCC_CLK_Init_Param{
-			ul CLK_Source; // Chọn nguồn clock hệ thống
-		} RCC_CLK_Init_Param;
+		#ifndef RCC_CLK_INIT_PARAM_TYPE
+			#define RCC_CLK_INIT_PARAM_TYPE
+			tdf_strc RCC_CLK_Init_Param{
+				ul CLK_Source; // Chọn nguồn clock hệ thống
+			} RCC_CLK_Init_Param;
+		#endif
 
 	// Khai báo các cờ trả về có thời hạn 
 
-		tdf_strc RCC_RDYFLG_Typdef {
-			ui HSI_RDY_FLG : 1;
-			ui HSE_RDY_FLG : 1;
-			ui LSI_RDY_FLG : 1;
-		} RCC_RDYFLG_Typdef;
+		#ifndef RCC_RDYFLG_TYPEDEF
+			#define RCC_RDYFLG_TYPEDEF
+			tdf_strc RCC_RDYFLG_Typdef {
+				__vo ui HSI_RDY_FLG : 1;
+				__vo ui HSE_RDY_FLG : 1;
+				__vo ui LSI_RDY_FLG : 1;
+			} RCC_RDYFLG_Typdef;
+		#endif
 
 		/**
 		 * Ghi chú:
@@ -46,10 +52,14 @@
 																					((SOURCE) == RCC_SYSCLK_SOURCE_HSE))
 		#define IS_RCC_IWDG_SOURCE(SOURCE) (((SOURCE) == RCC_IWDG_SOURCE_LSI))
 
-  // Khai báo IQRHandler
-
-		#define RCC_NMI_IRQ_Handler NMI_Handler
-		#define RCC_GNR_IRQ_Handler RCC_IRQHandler
+	  #define IS_RCC_PERIPH(PERIPH) (((PERIPH) == AFIO) || \
+																						((PERIPH) == GPIOA) || \
+																						((PERIPH) == GPIOB) || \
+																						((PERIPH) == GPIOC) || \
+																						((PERIPH) == GPIOD) || \
+																						((PERIPH) == GPIOE) || \
+																						((PERIPH) == GPIOF) || \
+																						((PERIPH) == GPIOG))
 
   // Khai báo các hàm thành phần
 
@@ -71,9 +81,6 @@
 		// >> Hàm xử lý ngắt NMI do CSS
 		void RCC_NMI_IRQ_Handler(void);
 
-		// >> Hàm xử lý ngắt chung RCC
-		void RCC_GNR_IRQ_Handler(void);
-
 		// >> Hàm callback CSS weak
 		__weak void RCC_CSS_Callback(void);
 
@@ -85,5 +92,11 @@
 
 		// >> Hàm kiểm tra clock LSI sẵn sàng
 		RETR_STAT RCC_IsLSIReady(void);
+
+		// >> Hàm hoạt hóa ngoại vi 
+		RETR_STAT RCC_PCLK_Enable(ul periph);
+
+		// >> Hàm vô hiệu hóa ngoại vi
+		RETR_STAT RCC_PCLK_Disable(ul periph);
 
 #endif /* LIB_CLOCK_HAL_H_ */

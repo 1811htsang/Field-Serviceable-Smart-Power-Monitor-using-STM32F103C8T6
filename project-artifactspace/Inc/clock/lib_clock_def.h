@@ -17,13 +17,13 @@
 
   // Khai báo các thư viện sử dụng chung
 
+		#include <stdint.h>
+
 		#ifndef UNIT_TEST
 			#include "generic/lib_keyword_def.h"
 		#else
 			#include "lib_keyword_def.h"
 		#endif
-
-  
 
   // Khai báo địa chỉ ngoại vi
 
@@ -56,9 +56,14 @@
 			__vo BLANK_REG CSR;
 		} RCC_REGS_Typedef;
 
-  // >> Tạo con trỏ tới ngoại vi
+  // >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
 
-  	#define RCC_REGS_PTR ((RCC_REGS_Typedef *)RCC_REGS_BASEADDR)
+  	#ifndef UNIT_TEST
+			#define RCC_REGS_PTR ((RCC_REGS_Typedef *) RCC_REGS_BASEADDR)
+		#else
+			extern RCC_REGS_Typedef MOCK_RCC_REGS;
+			#define RCC_REGS_PTR (&MOCK_RCC_REGS)
+		#endif
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CR_REG
 

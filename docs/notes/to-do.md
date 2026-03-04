@@ -1,43 +1,62 @@
-# Ghi chú
-Lộ trình triển khai chi tiết, đi từ 
-  1. **Nền tảng** (Drivers) 
+# Tổng quan
+
+Lộ trình triển khai chi tiết, đi từ
+
+  1. **Nền tảng** (Drivers)
   2. **Cốt lõi** (Bootloader Logic)
-  3. **Giao thức** (Protocol) 
+  3. **Giao thức** (Protocol)
   4. **Công cụ** (Host Tool)
 
-# Giai đoạn Nền tảng
+Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để viết Unit Test cho các Driver thuận tiện hơn.
+
+## Giai đoạn Nền tảng
+
 - [x] Thiết kế khung dự án (Project Structure)
 - [x] Bổ sung các tài liệu căn bản của dự án
 - [x] Tìm hiểu đầy đủ về Clock System
 - [x] Tìm hiểu về reset và khởi động STM32
 - [x] Tìm hiểu về Watchdog Timer
 - [x] Tìm hiểu về Unit Testing trong Embedded
-- [x] Viết Unit Test cho Driver IWDG
 - [x] Viết Header & Source Inclusion cho GCC Compiler
-- [x] Tìm hiểu sử dụng GDB cho Unit Test 
-- [ ] Hoàn thiện ghi chú về sử dụng GDB cho Unit Test
-- [ ] Hoàn thiện ghi chú về thiết kế mã nguồn hỗ trợ Unit Test
-- [ ] Thiết kế Unit Test Framework cho dự án
-- [ ] Viết Driver RCC (Reset and Clock Control)
-- [ ] Viết Driver IWDG (Independent Watchdog)
-- [ ] Viết Driver GPIO
-- [ ] Viết Driver USART (Polling Mode)
+- [x] Tìm hiểu sử dụng GDB cho Unit Test
+- [x] Hoàn thiện ghi chú về sử dụng GDB cho Unit Test
+- [x] Hoàn thiện ghi chú về thiết kế mã nguồn hỗ trợ Unit Test
+- [x] Viết Driver Clock (Clock Control)
+- [x] Viết Driver IWDG (Independent Watchdog)
+- [x] Viết Driver Reset (Reset Control)
+- [x] Viết Unit Test cho Driver IWDG
+- [x] Viết Unit Test cho Driver Clock
+- [x] Viết Unit Test cho Driver Reset
+- [x] Viết Driver GPIO
+- [x] Viết Unit Test cho Driver GPIO
+- [x] Viết Driver AFIO
+- [ ] Viết Driver EXTI
+- [ ] Viết Unit Test cho Driver EXTI
+- [ ] Viết Driver SPI
+- [ ] Viết Unit Test cho Driver SPI
+- [ ] Viết Driver I2C
+- [ ] Viết Unit Test cho Driver I2C
+- [ ] Triển khai Driver lên mạch thực tế
 
-# Giai đoạn Cốt lõi
+## Giai đoạn Cốt lõi
+
 - [ ] Phân vùng bộ nhớ
 - [ ] Viết Driver Flash Internal
 - [ ] Viết hàm Jump to Application
 
-# Giai đoạn Giao thức
+## Giai đoạn Giao thức
+
 - [ ] Triển khai giao thức XMODEM
 - [ ] Triển khai XMODEM Receive
 - [ ] Xử lý Timeout
 
-# Giai đoạn Công cụ
+## Giai đoạn Công cụ
+
 - [ ] Viết Python script gửi file qua XMODEM
 - [ ] So sánh kích thước
 
-# Danh sách Commit chủ chốt
+## Danh sách Commit chủ chốt
+
 - [ ] feat(rcc): setup system clock to 72MHz bare-metal
 - [ ] feat(uart): implement polling uart driver
 - [ ] feat(flash): implement internal flash erase and write

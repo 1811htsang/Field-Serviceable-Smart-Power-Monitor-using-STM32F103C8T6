@@ -214,7 +214,7 @@ Cấu trúc của 1 file gitignore tiêu chuẩn cho dự án này như sau:
 <Liệt các file hoặc thư mục hoặc kiểu file cần ignore theo quy tắc đã nêu ở trên>
 ```
 
----
+
 # Cấu trúc làm việc với project-artifactspace
 Dưới đây là hướng dẫn về cách tổ chức và làm việc với không gian dự án `project-artifactspace/`, nơi chứa mã nguồn và tài nguyên chính của dự án.
 
@@ -298,6 +298,11 @@ Cấu trúc file định nghĩa cấu hình ngoại vi mới (`lib_<peripheral>_
 
 #endif /* LIB_<PERIPHERAL>_DEF_H_ */
 ```
+
+**Luu ý:** 
+
+- Thay `<PERIPHERAL>` bằng tên ngoại vi viết hoa toàn bộ, và `<peripheral>` bằng tên ngoại vi viết thường trong toàn bộ file.
+- Trong 1 số ngoại vi có thể sẽ không sử dụng tới phần khai báo cấu trúc thanh ghi hoặc địa chỉ thanh ghi cụ thể, thì có thể bỏ qua phần đó.
 
 ### Cấu trúc file hal
 Cấu trúc file khai báo hàm sử dụng ngoại vi mới (`lib_<peripheral>_hal.h`) như sau:

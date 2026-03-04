@@ -16,20 +16,102 @@
  ******************************************************************************
  */
 
-#include "generic/lib_keyword_def.h"
-#include <stdio.h>
-#include <stdint.h>
+// Khai báo các thư viện bổ sung
 
+	#include <stdio.h>
+	#include <stdint.h>
+	#include "generic/lib_keyword_def.h"
+	#include "generic/lib_condition_def.h"
+	#include "clock/lib_clock_def.h"
+	#include "clock/lib_clock_hal.h"
+	#include "reset/lib_reset_def.h"
+	#include "reset/lib_reset_hal.h"
+	#include "iwdg/lib_iwdg_def.h"
+	#include "iwdg/lib_iwdg_hal.h"
 
-#if !defined(__SOFT_FP__) && defined(__ARM_FP)
-  #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
-#endif
+	#if !defined(__SOFT_FP__) && defined(__ARM_FP)
+		#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
+	#endif
 
+// Thực thi chương trình
 
+	int main() {
 
-int main(void)
-{
-    /* Loop forever */
-	printf("Hello world\n");
-	for(;;);
-}
+		if (__DEBUG_GET_MODE(ENABLE)) {
+			printf("Main, DBG1: Check reset flag.\n");
+		}
+
+		// Kiểm tra reset flag
+
+			RCC_RSTFLG_Typedef reset_source;
+			RST_SRC_Capture(&reset_source);
+
+			if (__DEBUG_GET_MODE(ENABLE)) {
+				printf("Main, DBG2: Reset source - PinReset: %u, PorReset: %u, SftReset: %u, IwdgReset: %u, WwdgReset: %u, LowPwrReset: %u.\n",
+					reset_source.IsPinReset,
+					reset_source.IsPorReset,
+					reset_source.IsSftReset,
+					reset_source.IsIwdgReset,
+					reset_source.IsWwdgReset,
+					reset_source.IsLowPwrReset
+				);
+			}
+
+			if (reset_source.IsIwdgReset == SET) {
+				printf("Main: System reset caused by Independent Watchdog (IWDG).\n");
+			} else if (reset_source.IsWwdgReset == SET) {
+				printf("Main: System reset caused by Window Watchdog (WWDG).\n");
+			} else if (reset_source.IsSftReset == SET) {
+				printf("Main: System reset caused by Software Reset (SFT).\n");
+			} else if (reset_source.IsPorReset == SET) {
+				printf("Main: System reset caused by Power-On Reset (POR).\n");
+			} else if (reset_source.IsPinReset == SET) {
+				printf("Main: System reset caused by External Pin Reset (NRST pin).\n");
+			} else if (reset_source.IsLowPwrReset == SET) {
+				printf("Main: System reset caused by Low Power Reset.\n");
+			} else {
+				printf("Main: System reset source is unknown.\n");
+			}
+
+		// Khởi động watchdog độc lập (IWDG) để bảo vệ hệ thống
+
+			IWDG_Init_Param iwdg_init = {
+				.Prescaler = IWDG_PR_REG_PR_DIV_4,
+				.Reload = IWDG_RLR_REG_RL_MAX
+			};
+			if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
+				printf("Main: IWDG initialization failed.\n");
+				return -1;
+			}
+			IWDG_Start();
+
+			/**
+			 * Ghi chú:
+			 * Mặc dù trong RCC_CLK_Init() có bổ sung một execution path
+			 * trong trường hợp IWDG chưa được khởi động, tuy nhiên
+			 * để đảm bảo an toàn, ta vẫn nên khởi động IWDG trước khi
+			 * cấu hình clock hệ thống.
+			 */
+
+		// Khởi động clock
+
+			RCC_CLK_Init_Param clk_init_param = {
+				.CLK_Source = RCC_SYSCLK_SOURCE_HSE
+			};
+
+			RCC_RDYFLG_Typdef clk_rdy_flg;
+
+			if (!__OK_CHECK(RCC_CLK_Init(&clk_init_param, &clk_rdy_flg))) {
+				printf("Main: Clock initialization failed.\n");
+				return -1;
+			}
+
+		// Vòng lặp chính
+
+			while (1) {
+				// Thực thi các tác vụ chính của ứng dụng tại đây
+				IWDG_Reload(); // Nạp lại IWDG để tránh reset hệ thống
+			}
+
+		return 0;
+	}

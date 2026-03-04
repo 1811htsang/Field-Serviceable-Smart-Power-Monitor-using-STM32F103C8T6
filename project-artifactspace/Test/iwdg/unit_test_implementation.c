@@ -11,6 +11,7 @@
   #include <assert.h>
 	#include <string.h>
   #include "lib_keyword_def.h"
+  #include "lib_condition_def.h"
   #include "lib_iwdg_def.h"
 	#include "lib_iwdg_hal.h"
   #include "header_dependency.h"
@@ -29,14 +30,17 @@
 // Định nghĩa các hàm 
 
   void setup() {
-    // Hàm thiết lập ban đầu cho mỗi test case
-    // Có thể thêm các thao tác khởi tạo biến toàn cục ở đây nếu cần
+    /*
+      Hàm này được gọi trước mỗi test case để khởi tạo lại trạng thái cho unit test
+    */
 
     // Reset thanh ghi IWDG giả về các giá trị reset 
     MOCK_IWDG_REGS.KR.KEY = 0x0000;
     MOCK_IWDG_REGS.PR.PR = 0x0000;
     MOCK_IWDG_REGS.RLR.RL = 0x0FFF;
 
+
+    // Reset các biến giả lập trạng thái trả về của các hàm mock
     RCC_IsLSIReady_Expect = STAT_RDY;
     RCC_CLK_Init_Expect = STAT_OK;
     IWDG_IsPrescalerUpdated_Expect = STAT_RDY;
@@ -46,7 +50,7 @@
   void test_Init_NullPointer_ShouldReturnError() {
     setup();
     printf("TC1: Check Null Pointer...\n");
-    assert(IWDG_Init(NULL) == STAT_ERROR);
+    assert(__ERROR_CHECK(IWDG_Init(NULL)));
     printf("-> PASSED\n");
   }
 
@@ -58,7 +62,7 @@
       
       RETR_STAT result = IWDG_Init(&param);
       
-      assert(result == STAT_DONE);
+      assert(__DONE_CHECK(result));
       // Kiểm tra giá trị thực tế đã ghi vào thanh ghi giả (bitfield)
       assert(IWDG_REGS_PTR->PR.PR == IWDG_PR_REG_PR_DIV_16);
       assert(IWDG_REGS_PTR->RLR.RL == 0x500);
@@ -73,7 +77,7 @@
     RCC_CLK_Init_Expect = STAT_OK;     // Giả lập việc bật LSI thành công
     
     IWDG_Init_Param param = { .Prescaler = 0, .Reload = 100 };
-    assert(IWDG_Init(&param) == STAT_DONE);
+    assert(__DONE_CHECK(IWDG_Init(&param)));
     printf("-> PASSED\n");
   }
 
@@ -85,7 +89,7 @@
       RCC_CLK_Init_Expect = STAT_ERROR;  // Giả lập bật LSI thất bại
       
       IWDG_Init_Param param = { .Prescaler = 0, .Reload = 100 };
-      assert(IWDG_Init(&param) == STAT_ERROR);
+      assert(__ERROR_CHECK(IWDG_Init(&param)));
       printf("-> PASSED\n");
   }
 
@@ -97,7 +101,7 @@
       IWDG_IsPrescalerUpdated_Expect = STAT_NRDY; // Giả lập thanh ghi PR đang bận
       
       IWDG_Init_Param param = { .Prescaler = 4, .Reload = 100 };
-      assert(IWDG_Init(&param) == STAT_NRDY);
+      assert(__NRDY_CHECK(IWDG_Init(&param)));
       printf("-> PASSED\n");
   }
 
