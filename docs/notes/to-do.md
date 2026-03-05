@@ -34,7 +34,7 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Tìm hiểu về NVIC và EXTI
 - [x] Viết Driver EXTI
 - [x] Viết Unit Test cho Driver EXTI
-- [ ] Viết Driver NVIC
+- [x] Viết Driver NVIC
 - [ ] Viết Unit Test cho Driver NVIC
 - [ ] Viết Driver SPI
 - [ ] Viết Unit Test cho Driver SPI
