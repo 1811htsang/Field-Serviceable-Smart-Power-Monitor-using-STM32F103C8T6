@@ -694,10 +694,34 @@
     }
   }
 
-  /**
-   * 
+  /*
+   * Hàm kích hoạt clock cho các ngoại vi (peripheral clock enable).
+   *
+   * Tham số:
+   *   periph - Mã định danh ngoại vi cần kích hoạt clock (AFIO, GPIOA-G).
+   *
+   * Logic:
+   *   - Kiểm tra giá trị tham số periph hợp lệ.
+   *   - Dựa vào periph, set bit tương ứng trong thanh ghi RCC_APB2ENR:
+   *       + AFIO: Bit 0
+   *       + GPIOA: Bit 2
+   *       + GPIOB: Bit 3
+   *       + GPIOC: Bit 4
+   *       + GPIOD: Bit 5
+   *       + GPIOE: Bit 6
+   *       + GPIOF: Bit 7
+   *       + GPIOG: Bit 8
+   *   - Trả về STAT_OK sau khi kích hoạt thành công.
+   *   - Trả về STAT_ERROR nếu periph không hợp lệ.
+   *
+   * Trả về:
+   *   RETR_STAT - STAT_OK nếu kích hoạt thành công, STAT_ERROR nếu lỗi.
+   *
+   * Phụ thuộc ngoài module Clock:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - SET_BIT() - Macro set bit thanh ghi
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-
   RETR_STAT RCC_PCLK_Enable(ul periph) {
 
     if (__DEBUG_GET_MODE(ENABLE)) {
@@ -759,10 +783,35 @@
     return STAT_DONE;
   }
 
-	/**
-   *  
-   */	
-	RETR_STAT RCC_PCLK_Disable(ul periph) {
+  /*
+   * Hàm vô hiệu hóa clock cho các ngoại vi (peripheral clock disable).
+   *
+   * Tham số:
+   *   periph - Mã định danh ngoại vi cần vô hiệu hóa clock (AFIO, GPIOA-G).
+   *
+   * Logic:
+   *   - Kiểm tra giá trị tham số periph hợp lệ.
+   *   - Dựa vào periph, clear bit tương ứng trong thanh ghi RCC_APB2ENR:
+   *       + AFIO: Bit 0
+   *       + GPIOA: Bit 2
+   *       + GPIOB: Bit 3
+   *       + GPIOC: Bit 4
+   *       + GPIOD: Bit 5
+   *       + GPIOE: Bit 6
+   *       + GPIOF: Bit 7
+   *       + GPIOG: Bit 8
+   *   - Trả về STAT_OK sau khi vô hiệu hóa thành công.
+   *   - Trả về STAT_ERROR nếu periph không hợp lệ.
+   *
+   * Trả về:
+   *   RETR_STAT - STAT_OK nếu vô hiệu hóa thành công, STAT_ERROR nếu lỗi.
+   *
+   * Phụ thuộc ngoài module Clock:
+   *   - assert_param() - Macro kiểm tra điều kiện
+   *   - CLEAR_BIT() - Macro clear bit thanh ghi
+   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+   */
+  RETR_STAT RCC_PCLK_Disable(ul periph) {
 
     if (__DEBUG_GET_MODE(ENABLE)) {
       printf("RCC_PCLK_Disable, DBG1: Assert parameter.\n");
