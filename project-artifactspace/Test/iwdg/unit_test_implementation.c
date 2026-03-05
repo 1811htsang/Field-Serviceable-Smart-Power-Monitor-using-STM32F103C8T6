@@ -35,9 +35,7 @@
     */
 
     // Reset thanh ghi IWDG giả về các giá trị reset 
-    MOCK_IWDG_REGS.KR.KEY = 0x0000;
-    MOCK_IWDG_REGS.PR.PR = 0x0000;
-    MOCK_IWDG_REGS.RLR.RL = 0x0FFF;
+    memset(&MOCK_IWDG_REGS, 0, sizeof(IWDG_REGS_Typedef));
 
 
     // Reset các biến giả lập trạng thái trả về của các hàm mock
@@ -59,19 +57,24 @@
       printf("TC2: Init Success Happy Path...\n");
       
       IWDG_Init_Param param = { .Prescaler = IWDG_PR_REG_PR_DIV_16, .Reload = 0x500 };
+
+      // Giả lập thanh ghi SR đang sẵn sàng để cập nhật (PVU và RVU bit đều đã reset)
+      // PVU bit 0, RVU bit 1
+      // ~(1 << 0) 
+      MOCK_IWDG_REGS.SR &= ~(IWDG_SR_REG_PVU_UPDATE_COMPLETED | IWDG_SR_REG_RVU_UPDATE_COMPLETED); // Reset PVU và RVU bit để cho phép cập nhật
       
       RETR_STAT result = IWDG_Init(&param);
       
       assert(__DONE_CHECK(result));
       // Kiểm tra giá trị thực tế đã ghi vào thanh ghi giả (bitfield)
-      assert(IWDG_REGS_PTR->PR.PR == IWDG_PR_REG_PR_DIV_16);
-      assert(IWDG_REGS_PTR->RLR.RL == 0x500);
+      assert(MOCK_IWDG_REGS.PR == IWDG_PR_REG_PR_DIV_16);
+      assert(MOCK_IWDG_REGS.RLR == 0x500);
       printf("-> PASSED\n");
   }
 
   void test_Init_LSI_NotReady_ShouldTryToEnableLSI() {
     setup();
-    printf("TC3: LSI Not Ready -> Enable LSI...");
+    printf("TC3: LSI Not Ready -> Enable LSI...\n");
     
     RCC_IsLSIReady_Expect = STAT_NRDY; // Giả lập LSI ban đầu chưa sẵn sàng
     RCC_CLK_Init_Expect = STAT_OK;     // Giả lập việc bật LSI thành công
@@ -83,7 +86,7 @@
 
   void test_Init_LSI_InitFail_ShouldReturnError() {
       setup();
-      printf("TC4: LSI Init Failed -> Return Error...");
+      printf("TC4: LSI Init Failed -> Return Error...\n");
       
       RCC_IsLSIReady_Expect = STAT_NRDY;
       RCC_CLK_Init_Expect = STAT_ERROR;  // Giả lập bật LSI thất bại
@@ -95,9 +98,11 @@
 
   void test_Init_PrescalerBusy_ShouldReturnNRDY() {
       setup();
-      printf("TC5: Prescaler Busy -> Return NRDY...");
+      printf("TC5: Prescaler Busy -> Return NRDY...\n");
       
-      MOCK_IWDG_REGS.SR.PVU = SET; // Giả lập thanh ghi SR đang bận
+      // Giả lập thanh ghi SR đang bận
+      MOCK_IWDG_REGS.SR = 0x3u; // PVU bit 0 và RVU bit 1 đều đang SET (bận)
+
       IWDG_IsPrescalerUpdated_Expect = STAT_NRDY; // Giả lập thanh ghi PR đang bận
       
       IWDG_Init_Param param = { .Prescaler = 4, .Reload = 100 };

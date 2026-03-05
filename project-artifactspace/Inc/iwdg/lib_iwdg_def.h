@@ -73,10 +73,10 @@
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_SR_REG
 
-		#define IWDG_SR_REG_PVU_UPDATE_ONGOING (SET << 0)
-		#define IWDG_SR_REG_PVU_UPDATE_COMPLETED ~(SET << 0)
+		#define IWDG_SR_REG_PVU_UPDATE_ONGOING SET
+		#define IWDG_SR_REG_PVU_UPDATE_COMPLETED RESET
 
-		#define IWDG_SR_REG_RVU_UPDATE_ONGOING (SET << 1)
-		#define IWDG_SR_REG_RVU_UPDATE_COMPLETED ~(SET << 1)
+		#define IWDG_SR_REG_RVU_UPDATE_ONGOING 0x2u // Tương đương 10
+		#define IWDG_SR_REG_RVU_UPDATE_COMPLETED 0x0u // Tương đương 01
 
 #endif /* LIB_IWDG_DEF_H_ */

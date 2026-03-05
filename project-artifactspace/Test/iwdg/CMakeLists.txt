@@ -35,7 +35,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TEST)
 target_include_directories(${PROJECT_NAME} PRIVATE
   ../../Inc/generic/
   ../../Inc/iwdg/
-  ../../Inc/clock/
   ./
 )
 
