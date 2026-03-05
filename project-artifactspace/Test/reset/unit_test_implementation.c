@@ -19,7 +19,10 @@
 // Khai báo ngoại vi giả cho mục đích unit test
 
   RCC_REGS_Typedef MOCK_RCC_REGS;
-  SCB_AIRCR_REG MOCK_SCB_AIRCR_REG;
+  
+  __vo ui32 mock_aircr_reg; 
+  __vo BLANK_REG* SCB_AIRCR_REG_PTR;
+  
 
 // Gọi ủy quyền các biến và hàm mock từ source_dependency.c
 
@@ -36,69 +39,61 @@
     */
 
     // Reset các cờ reset trong thanh ghi RCC giả về trạng thái chưa reset
-    MOCK_RCC_REGS.CSR.PINRSTF = RESET;
-    MOCK_RCC_REGS.CSR.PORRSTF = RESET;
-    MOCK_RCC_REGS.CSR.SFTRSTF = RESET;
-    MOCK_RCC_REGS.CSR.IWDGRSTF = RESET;
-    MOCK_RCC_REGS.CSR.WWDGRSTF = RESET;
-    MOCK_RCC_REGS.CSR.LPWRRSTF = RESET;
+    memset(&MOCK_RCC_REGS, 0, sizeof(MOCK_RCC_REGS));
 
-    // Reset thanh ghi SCB AIRCR giả về các giá trị reset
-    MOCK_SCB_AIRCR_REG.VECTRESET = RESET;
-    MOCK_SCB_AIRCR_REG.VECTCLRACTIVE = RESET;
-    MOCK_SCB_AIRCR_REG.SYSRESETREQ = RESET;
-    MOCK_SCB_AIRCR_REG.PRIGROUP = 0x00;
-    MOCK_SCB_AIRCR_REG.ENDIANNESS = 0x00;
-    MOCK_SCB_AIRCR_REG.VECTKEY = 0x0000;
+    // Reset giá trị thanh ghi AIRCR giả về 0
+    mock_aircr_reg = 0;
+    SCB_AIRCR_REG_PTR = (BLANK_REG *)&mock_aircr_reg;
   }
 
   void PINRSTF_set() {
     /*
       Hàm này mô phỏng việc reset bởi tín hiệu bên ngoài (PIN NRST) bằng cách thiết lập cờ PINRSTF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.PINRSTF = SET;
+
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_PINRSTF_OCCURRED);
   }
 
   void PORRSTF_set() {
     /*
       Hàm này mô phỏng việc reset bởi nguồn điện (POR) bằng cách thiết lập cờ PORRSTF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.PORRSTF = SET;
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_PORRSTF_OCCURRED);
   }
 
   void SFTRSTF_set() {
     /*
       Hàm này mô phỏng việc reset bởi phần mềm (SFT) bằng cách thiết lập cờ SFTRSTF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.SFTRSTF = SET;
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_SFTRSTF_OCCURRED);
   }
 
   void IWDGRSTF_set() {
     /*
       Hàm này mô phỏng việc reset bởi watchdog độc lập (IWDG) bằng cách thiết lập cờ IWDGRSTF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.IWDGRSTF = SET;
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_IWDGRSTF_OCCURRED);
   } 
 
   void WWDGRSTF_set() {
     /*
       Hàm này mô phỏng việc reset bởi watchdog cửa sổ (WWDG) bằng cách thiết lập cờ WWDGRSTF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.WWDGRSTF = SET;
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_WWDGRSTF_OCCURRED);
   } 
 
   void LPWRRSTF_set() {
     /*
       Hàm này mô phỏng việc reset bởi chế độ điện áp thấp (Low Power) bằng cách thiết lập cờ LPWRRSTF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.LPWRRSTF = SET;
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_LPWRRSTF_OCCURRED);
   }
 
   void RMVF_set() {
     /*
       Hàm này mô phỏng việc xóa các cờ reset bằng cách ghi RMVF trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.RMVF = SET;
+    SET_BIT(MOCK_RCC_REGS.CSR, RCC_CSR_REG_RMVF_SET);
   }
 
   void test_RST_SRC_Capture(RCC_RSTFLG_Typedef *reset_source) {
