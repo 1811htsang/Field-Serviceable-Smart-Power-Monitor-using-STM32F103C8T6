@@ -130,13 +130,6 @@
           if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
             return STAT_ERROR;
           }
-          // Khởi tạo LSI
-          RCC_CLK_Init_Param rcc_lsi_init;
-          rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-          RCC_RDYFLG_Typdef lsi_rdy_flg;
-          if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
-            return STAT_ERROR;
-          }
 
           // Khởi tạo và start IWDG
           IWDG_Init_Param iwdg_init = {
@@ -237,13 +230,6 @@
           if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
             return STAT_ERROR;
           }
-          // Khởi tạo LSI
-          RCC_CLK_Init_Param rcc_lsi_init;
-          rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-          RCC_RDYFLG_Typdef lsi_rdy_flg;
-          if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
-            return STAT_ERROR;
-          }
 
           // Khởi tạo và start IWDG
           IWDG_Init_Param iwdg_init = {
@@ -258,6 +244,8 @@
         
         // Bật CSS trước khi bật HSE
         RCC_CSS_Enable();
+
+        
         // Bật HSE
         SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
 
@@ -439,10 +427,22 @@
        * Nếu bit SWS (System Clock Switch Status) không phản ánh đúng nguồn SYSCLK đã chọn thì có thể coi là chuyển đổi thất bại
        */
 
-      if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSI), sysclk_source) ||
-          __DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSE), sysclk_source)
-        ) {
-        return STAT_ERROR;
+      switch (sysclk_source) {
+        case RCC_SYSCLK_SOURCE_HSI:
+          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSI), RCC_CFGR_REG_SWS_HSI)) {
+            return STAT_ERROR;
+          }
+          break;
+
+        case RCC_SYSCLK_SOURCE_HSE:
+          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSE), RCC_CFGR_REG_SWS_HSE)) {
+            return STAT_ERROR;
+          }
+          break;
+        
+        default:
+          return STAT_ERROR;
+          break;
       }
 
       return STAT_DONE;
