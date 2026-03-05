@@ -29,12 +29,6 @@
   // >> Tạo con trỏ tới thanh ghi
 
     #ifndef UNIT_TEST
-      /**
-       * Ghi chú:
-       * Sử dụng khai báo biến, 
-       * không sử dụng define
-       */
-
       __vo BLANK_REG* SCB_AIRCR_REG_PTR = (__vo BLANK_REG *)SCB_AIRCR_REG_ADDR;
       
     #else
@@ -44,8 +38,8 @@
        * do cần sử dụng biến giả để mô phỏng giá trị thanh ghi và kiểm tra trong các test case.
        */  
 
-      uint32_t mock_aircr_reg = 0; 
-      __vo BLANK_REG* SCB_AIRCR_REG_PTR = &mock_aircr_reg; // Trỏ vào biến giả lập
+      extern __vo ui32 mock_aircr_reg; 
+      extern __vo BLANK_REG* SCB_AIRCR_REG_PTR; // Trỏ vào biến giả lập
       
     #endif
 
@@ -56,7 +50,6 @@
 
   // Khai báo các định nghĩa bit cần sử dụng trên RCC_CSR_REG
 
-    #define RCC_CSR_REG_MASK ((ui32)0xFFFFFFFFul)
     #define RCC_CSR_REG_PINRSTF_OCCURRED  ((ui32)1u << 26)
     #define RCC_CSR_REG_PORRSTF_OCCURRED  ((ui32)1u << 27)
     #define RCC_CSR_REG_SFTRSTF_OCCURRED  ((ui32)1u << 28)

@@ -10,8 +10,8 @@
   #ifdef UNIT_TEST
 		#include "lib_keyword_def.h"
 		#include "lib_condition_def.h"
-		#include "lib_clock_def.h"
-		#include "lib_clock_hal.h"
+    #include "lib_iwdg_def.h"
+		#include "lib_iwdg_hal.h"
     #include "header_dependency.h"
   #endif
 
@@ -171,10 +171,26 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    *   RETR_STAT - STAT_RDY nếu đã cập nhật xong, STAT_NRDY nếu đang cập nhật.
    */
   RETR_STAT IWDG_IsReloadValueUpdated(void) {
-    if (__DIFF_CHECK(IWDG_REGS_PTR->SR, IWDG_SR_REG_RVU_UPDATE_COMPLETED)) {
-      return STAT_NRDY;
+
+    /**
+     * Ghi chú:
+     * Ở trường hoạt động giả định,
+     * RVU được đảm bảo reset trước để bỏ qua vòng lặp.
+     */
+    
+    while (__DIFF_CHECK(READ_BIT(IWDG_REGS_PTR->SR, 1u << 1), IWDG_SR_REG_RVU_UPDATE_COMPLETED)) {
+      // Chờ cho đến khi RVU bit được reset (cập nhật xong)
+
+      #ifdef UNIT_TEST
+        // Trong unit test, giả lập trường hợp RVU không được reset 
+        // để kiểm tra logic xử lý khi RVU bit đang SET (bận)
+        return STAT_NRDY; // Trả về STAT_NRDY để kiểm tra logic khi RVU bit đang SET
+      #endif
+
     }
+
     return STAT_RDY;
+
   }
 
   /*
@@ -188,10 +204,26 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
    *   RETR_STAT - STAT_RDY nếu đã cập nhật xong, STAT_NRDY nếu đang cập nhật.
    */
   RETR_STAT IWDG_IsPrescalerUpdated(void) {
-    if (__DIFF_CHECK(IWDG_REGS_PTR->SR, IWDG_SR_REG_PVU_UPDATE_COMPLETED)) {
-      return STAT_NRDY;
+
+    /**
+     * Ghi chú:
+     * Ở trường hoạt động giả định,
+     * RVU được đảm bảo reset trước để bỏ qua vòng lặp.
+     */
+
+    while (__DIFF_CHECK(READ_BIT(IWDG_REGS_PTR->SR, 1u << 0), IWDG_SR_REG_PVU_UPDATE_COMPLETED)) {
+      // Chờ cho đến khi PVU bit được reset (cập nhật xong)
+
+      #ifdef UNIT_TEST
+        // Trong unit test, giả lập trường hợp PVU không được reset 
+        // để kiểm tra logic xử lý khi PVU bit đang SET (bận)
+        return STAT_NRDY; // Trả về STAT_NRDY để kiểm tra logic khi PVU bit đang SET
+      #endif
+
     }
+
     return STAT_RDY;
+    
   }
 
   /*

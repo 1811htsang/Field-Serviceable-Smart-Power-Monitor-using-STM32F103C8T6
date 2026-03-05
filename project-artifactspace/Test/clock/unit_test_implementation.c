@@ -34,15 +34,7 @@
     */
 
     // Reset thanh ghi RCC giả về các giá trị reset
-    MOCK_RCC_REGS.CR.HSION = RESET;
-    MOCK_RCC_REGS.CR.HSIRDY = RESET; 
-    MOCK_RCC_REGS.CR.HSEON = RESET;
-    MOCK_RCC_REGS.CR.HSERDY = RESET; 
-    MOCK_RCC_REGS.CR.CSSON = RESET;
-    MOCK_RCC_REGS.CFGR.SW = 0x00;
-    MOCK_RCC_REGS.CFGR.SWS = 0x00;
-    MOCK_RCC_REGS.CSR.LSION = RESET;
-    MOCK_RCC_REGS.CSR.LSIRDY = RESET;
+    memset(&MOCK_RCC_REGS, 0, sizeof(MOCK_RCC_REGS));
 
     // Reset các biến giả lập trạng thái trả về của các hàm mock
     IWDG_Init_Expect = STAT_DONE;
@@ -54,35 +46,39 @@
     /*
       Hàm này mô phỏng việc HSI đã sẵn sàng bằng cách thiết lập cờ HSIRDY trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CR.HSIRDY = SET;
+    MOCK_RCC_REGS.CR |= RCC_CR_REG_HSIRDY_ON;
   }
 
   void HSERDY_ready_set() {
     /*
       Hàm này mô phỏng việc HSE đã sẵn sàng bằng cách thiết lập cờ HSERDY trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CR.HSERDY = SET;
+    MOCK_RCC_REGS.CR |= RCC_CR_REG_HSERDY_ON;
   }
 
   void LSI_ready_set() {
     /*
       Hàm này mô phỏng việc LSI đã sẵn sàng bằng cách thiết lập cờ LSIRDY trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CSR.LSIRDY = SET;
+    MOCK_RCC_REGS.CSR |= RCC_CSR_REG_LSIRDY_ON;
   }
 
   void SYSCLK_HSE_switched() {
     /*
       Hàm này mô phỏng việc chuyển đổi SYSCLK sang HSE bằng cách thiết lập trường SWS trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CFGR.SWS = RCC_SYSCLK_SOURCE_HSE;
+    MOCK_RCC_REGS.CFGR &= ~RCC_CFGR_REG_SW_MASK; // Clear trường SW
+    MOCK_RCC_REGS.CFGR |= RCC_SYSCLK_SOURCE_HSE; // Set trường SW để chọn HSE làm SYSCLK
+    MOCK_RCC_REGS.CFGR |= RCC_CFGR_REG_SWS_HSE; // Set cờ trạng thái SYSCLK để phản ánh việc chuyển đổi thành công
   }
 
   void SYSCLK_HSI_switched() {
     /*
       Hàm này mô phỏng việc chuyển đổi SYSCLK sang HSI bằng cách thiết lập trường SWS trong thanh ghi RCC giả
     */
-    MOCK_RCC_REGS.CFGR.SWS = RCC_SYSCLK_SOURCE_HSI;
+    MOCK_RCC_REGS.CFGR &= ~RCC_CFGR_REG_SW_MASK; // Clear trường SW
+    MOCK_RCC_REGS.CFGR |= RCC_SYSCLK_SOURCE_HSI; // Set trường SW để chọn HSI làm SYSCLK
+    MOCK_RCC_REGS.CFGR |= RCC_CFGR_REG_SWS_HSI; // Set cờ trạng thái SYSCLK để phản ánh việc chuyển đổi thành công
   }
 
   void test_Init_NullPointer_ShouldReturnError() {
@@ -241,7 +237,7 @@
     RETR_STAT result = RCC_CLK_DeInit(&param, &rdy_flg);
     
     assert(__DONE_CHECK(result));
-    assert(MOCK_RCC_REGS.CR.HSEON == RESET); // Kiểm tra HSE đã tắt
+    assert((MOCK_RCC_REGS.CR & RCC_CR_REG_HSEON_SET) == RESET); // Kiểm tra HSE đã tắt
     printf("-> PASSED\n");
   }
 
