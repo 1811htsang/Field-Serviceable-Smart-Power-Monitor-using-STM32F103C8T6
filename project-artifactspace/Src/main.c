@@ -22,6 +22,7 @@
 	#include <stdint.h>
 	#include "generic/lib_keyword_def.h"
 	#include "generic/lib_condition_def.h"
+	#include "log/lib_log_def.h"
 	#include "clock/lib_clock_def.h"
 	#include "clock/lib_clock_hal.h"
 	#include "reset/lib_reset_def.h"
@@ -36,6 +37,7 @@
 	#include "exti/lib_exti_hal.h"
 	#include "nvic/lib_nvic_def.h"
 	#include "nvic/lib_nvic_hal.h"
+	
 
 	#if !defined(__SOFT_FP__) && defined(__ARM_FP)
 		#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -51,25 +53,21 @@
 
 	int main() {
 
-		if (__DEBUG_GET_MODE(ENABLE)) {
-			printf("Main, DBG1: Check reset flag.\n");
-		}
+		LOG_D("Main", "System initialization started.");
 
 		// Kiểm tra reset flag
 
 			RCC_RSTFLG_Typedef reset_source;
 			RST_SRC_Capture(&reset_source);
 
-			if (__DEBUG_GET_MODE(ENABLE)) {
-				printf("Main, DBG2: Reset source - PinReset: %u, PorReset: %u, SftReset: %u, IwdgReset: %u, WwdgReset: %u, LowPwrReset: %u.\n",
-					reset_source.IsPinReset,
-					reset_source.IsPorReset,
-					reset_source.IsSftReset,
-					reset_source.IsIwdgReset,
-					reset_source.IsWwdgReset,
-					reset_source.IsLowPwrReset
-				);
-			}
+			LOG_D("Main", "Captured reset source flags: PinReset=%u, PorReset=%u, SftReset=%u, IwdgReset=%u, WwdgReset=%u, LowPwrReset=%u",
+				reset_source.IsPinReset,
+				reset_source.IsPorReset,
+				reset_source.IsSftReset,
+				reset_source.IsIwdgReset,
+				reset_source.IsWwdgReset,
+				reset_source.IsLowPwrReset
+			);
 
 			if (reset_source.IsIwdgReset == SET) {
 				printf("Main: System reset caused by Independent Watchdog (IWDG).\n");
@@ -104,7 +102,7 @@
 			RCC_RDYFLG_Typdef clk_rdy_flg;
 
 			if (!__OK_CHECK(RCC_CLK_Init(&clk_init_param, &clk_rdy_flg))) {
-				printf("Main: Clock initialization failed.\n");
+				LOG_E("Main", "Clock initialization failed.");
 				return -1;
 			}
 
@@ -120,7 +118,7 @@
 			};
 
 			if (!__DONE_CHECK(GPIO_Init(GPIOB_REGS_PTR,&gpio_init_param))) {
-				printf("Main: GPIO initialization failed.\n");
+				LOG_E("Main", "GPIO initialization failed.");
 				return -1;
 			}
 
@@ -133,12 +131,12 @@
 			};
 
 			if (!__DONE_CHECK(AFIO_EXTI_Line_Init(&afio_exti_init_param))) {
-				printf("Main: AFIO EXTI line initialization failed.\n");
+				LOG_E("Main", "AFIO EXTI line initialization failed.");
 				return -1;
 			}
 
 			if (!__DONE_CHECK(EXTI_Config_Init(&gpio_init_param, &afio_exti_init_param))) {
-				printf("Main: EXTI configuration initialization failed.\n");
+				LOG_E("Main", "EXTI configuration initialization failed.");
 				return -1;
 			}
 
@@ -148,7 +146,7 @@
 			};
 
 			if (!__DONE_CHECK(EXTI_RegisterParam(&exti_handle_param))) {
-				printf("Main: EXTI parameter registration failed.\n");
+				LOG_E("Main", "EXTI parameter registration failed.");
 				return -1;
 			}
 
@@ -160,12 +158,12 @@
 			};
 
 			if (!__DONE_CHECK(NVIC_INTR_Config(&nvic_init_param))) {
-				printf("Main: NVIC configuration initialization failed.\n");
+				LOG_E("Main", "NVIC configuration initialization failed.");
 				return -1;
 			}
 
 			ui32 nvic_activation = NVIC_INTR_GetActivation(NVIC_IRQ_POS_EXTI15_10);
-			printf("Main: NVIC activation status for EXTI15_10 - %s.\n", (nvic_activation == INTR_STAT_ENABLE) ? "Enabled" : "Disabled");
+			LOG_D("Main", "NVIC activation status for EXTI15_10 - %s.", (nvic_activation == INTR_STAT_ENABLE) ? "Enabled" : "Disabled");
 
 			/**
 			 * Ghi chú:
@@ -176,7 +174,7 @@
 
 			while (1) {
 				// Thực thi các tác vụ chính của ứng dụng tại đây
-				
+				LOG_D("Main", "Main loop executed.");
 			}
 
 		return 0;
