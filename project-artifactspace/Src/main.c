@@ -28,10 +28,24 @@
 	#include "reset/lib_reset_hal.h"
 	#include "iwdg/lib_iwdg_def.h"
 	#include "iwdg/lib_iwdg_hal.h"
+	#include "gpio/lib_gpio_def.h"
+	#include "gpio/lib_gpio_hal.h"
+	#include "afio/lib_afio_def.h"
+	#include "afio/lib_afio_hal.h"
+	#include "exti/lib_exti_def.h"
+	#include "exti/lib_exti_hal.h"
+	#include "nvic/lib_nvic_def.h"
+	#include "nvic/lib_nvic_hal.h"
 
 	#if !defined(__SOFT_FP__) && defined(__ARM_FP)
 		#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 	#endif
+
+// Khai báo callback EXTI
+
+	void callback_function(void) {
+		printf("Callback function called successfully.\n");
+	}
 
 // Thực thi chương trình
 
@@ -73,17 +87,14 @@
 				printf("Main: System reset source is unknown.\n");
 			}
 
-		// Khởi động watchdog độc lập (IWDG) để bảo vệ hệ thống
+			/**
+         * Ghi chú: 
+         * Trong các thiết kế trước,
+         * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn,
+         * tuy nhiên, sau khi thực hiện HIL test thì
+         * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống.
+         */
 
-			IWDG_Init_Param iwdg_init = {
-				.Prescaler = IWDG_PR_REG_PR_DIV_4,
-				.Reload = IWDG_RLR_REG_RL_MAX
-			};
-			if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
-				printf("Main: IWDG initialization failed.\n");
-				return -1;
-			}
-			IWDG_Start();
 
 			/**
 			 * Ghi chú:
@@ -106,11 +117,55 @@
 				return -1;
 			}
 
+		// Khởi động mẫu GPIO kèm theo cấu hình ngắt AFIO, EXTI và NVIC
+
+			RCC_PCLK_Enable(GPIOB); // Bật clock cho GPIOB
+
+			GPIO_Init_Param gpio_init_param = {
+				.Pin = GPIO_PIN_11,
+				.Mode = GPIO_MODE_INPUT_PU_PD,
+				.Pull = GPIO_PULLUP,
+				.Trigger = GPIO_TRIGGER_RISING
+			};
+
+			if (!__DONE_CHECK(GPIO_Init(GPIOB_REGS_PTR,&gpio_init_param))) {
+				printf("Main: GPIO initialization failed.\n");
+				return -1;
+			}
+
+			RCC_PCLK_Enable(AFIO); // Bật clock
+
+			AFIO_EXTI_Init_Param afio_exti_init_param = {
+				.Port = AFIO_EXTICR_PORTB,
+				.Pin = gpio_init_param.Pin,
+				.Line = 15u // Giá trị mặc định, sẽ được cập nhật trong hàm AFIO_EXTI_Line_Init
+			};
+
+			if (!__DONE_CHECK(AFIO_EXTI_Line_Init(&afio_exti_init_param))) {
+				printf("Main: AFIO EXTI line initialization failed.\n");
+				return -1;
+			}
+
+			if (!__DONE_CHECK(EXTI_Config_Init(&gpio_init_param, &afio_exti_init_param))) {
+				printf("Main: EXTI configuration initialization failed.\n");
+				return -1;
+			}
+
+			EXTI_Handle_Param exti_handle_param = {
+				.Line = afio_exti_init_param.Line, // Giá trị mặc định, sẽ được cập nhật trong hàm AFIO_EXTI_Line_Init
+				.Callback = callback_function // Đăng ký callback cho ngắt EXTI
+			};
+
+			if (!__DONE_CHECK(EXTI_RegisterParam(&exti_handle_param))) {
+				printf("Main: EXTI parameter registration failed.\n");
+				return -1;
+			}
+
 		// Vòng lặp chính
 
 			while (1) {
 				// Thực thi các tác vụ chính của ứng dụng tại đây
-				IWDG_Reload(); // Nạp lại IWDG để tránh reset hệ thống
+				
 			}
 
 		return 0;

@@ -117,8 +117,14 @@
       );
     }
 
-      ui16 index = init_param->Port / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui16 index = (GPIO_GetPinIndex(init_param->Pin) / 4u); // Xác định chỉ số của AFIO_EXTICR cần cấu hình
       ui16 shift = (GPIO_GetPinIndex(init_param->Pin) % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+
+      /**
+       * Ghi chú:
+       * Trong tài liệu, index-based là 1
+       * Trong thiết kế code thì index-based là 0
+       */
 
       // Xóa các bit cũ tại vị trí cần cấu hình
       AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);

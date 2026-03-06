@@ -21,9 +21,9 @@
 
   #ifndef UNIT_TEST
     #include "generic/lib_keyword_def.h"
-  	#include "generic/lib_condition_def.h";
-    #include "nvic/lib_nvic_def.h";
-    #include "nvic/lib_nvic_hal.h";
+  	#include "generic/lib_condition_def.h"
+    #include "nvic/lib_nvic_def.h"
+    #include "nvic/lib_nvic_hal.h"
   #endif
 
 // Định nghĩa các hàm thành phần

@@ -72,6 +72,9 @@ RETR_STAT IWDG_Init(IWDG_Init_Param *init_param) {
       }
     }
 
+  // Khởi động IWDG
+  IWDG_Start();
+
   // Kích hoạt quyền ghi vào các thanh ghi cấu hình IWDG
   if (__DEBUG_GET_MODE(ENABLE)) {
     printf("IWDG_Init, DBG4: Enable write access.\n");

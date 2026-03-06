@@ -139,9 +139,9 @@
                   case GPIO_MODE_INPUT_PU_PD:
                     assert_param(IS_GPIO_PULL(pin_pull));
                     if (pin_pull == GPIO_PULLUP) {
-                      GPIOx->GPIO_BSRR = io_pos; // Kích hoạt pull-up bằng cách set bit tương ứng trong ODR
+                      SET_BIT(GPIOx->GPIO_ODR, io_pos); // Kích hoạt pull-up bằng cách set bit tương ứng trong ODR
                     } else if (pin_pull == GPIO_PULLDOWN) {
-                      GPIOx->GPIO_BRR = io_pos; // Kích hoạt pull-down bằng cách reset bit tương ứng trong ODR
+                      CLEAR_BIT(GPIOx->GPIO_ODR, io_pos); // Kích hoạt pull-down bằng cách clear bit tương ứng trong ODR
                     }
 
                     break;

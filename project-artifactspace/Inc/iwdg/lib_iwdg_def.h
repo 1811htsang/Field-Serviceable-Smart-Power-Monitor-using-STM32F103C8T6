@@ -47,10 +47,10 @@
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_KR_REG
 
-		#define IWDG_KR_REG_KEY_ENABLE_ACCESS  ((ui16)0x5555ul << 0)
-		#define IWDG_KR_REG_KEY_DISABLE_ACCESS ((ui16)0x0000ul << 0)
-		#define IWDG_KR_REG_KEY_START 				 ((ui16)0xCCCCul << 0)
-		#define IWDG_KR_REG_KEY_RELOAD_COUNTER ((ui16)0xAAAAul << 0)
+		#define IWDG_KR_REG_KEY_ENABLE_ACCESS  ((ui32)0x5555u << 0)
+		#define IWDG_KR_REG_KEY_DISABLE_ACCESS ((ui32)0x0000u << 0)
+		#define IWDG_KR_REG_KEY_START 				 ((ui32)0xCCCCu << 0)
+		#define IWDG_KR_REG_KEY_RELOAD_COUNTER ((ui32)0xAAAAu << 0)
 		#define IWDG_KR_REG_KEY_MASK 				   ((ui32)0xFFFFFFFFul << 0)
 
 	// Khai báo các định nghĩa bit cần sử dụng trên IWDG_PR_REG

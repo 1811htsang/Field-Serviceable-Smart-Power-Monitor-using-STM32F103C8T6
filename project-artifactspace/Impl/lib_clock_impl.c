@@ -110,37 +110,13 @@
          * Do đó, khởi tạo HSI chỉ cần đảm bảo HSI được bật đúng cách.
          */
 
-        // Khởi tạo IWDG trước để đảm bảo hệ thống không bị treo trong quá trình chờ
-        if (__NRDY_CHECK(RCC_IsLSIReady())) {
-
-          printf("RCC_CLK_Init, DBG4-1: Init LSI for IWDG before HSI ready wait.\n");
-            
-          /**
-           * Ghi chú:
-           * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
-           * để IWDG có thể hoạt động trong vòng chờ HSI ổn định
-           * Bật IWDG init trong RCC_CLK_Init để đảm bảo nếu không có 
-           * khởi tạo IWDG trước đó thì hệ thống vẫn an toàn
-           */
-
-          // Khởi tạo LSI
-          RCC_CLK_Init_Param rcc_lsi_init;
-          rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-          RCC_RDYFLG_Typdef lsi_rdy_flg;
-          if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
-            return STAT_ERROR;
-          }
-
-          // Khởi tạo và start IWDG
-          IWDG_Init_Param iwdg_init = {
-            .Prescaler = IWDG_PR_REG_PR_DIV_4,
-            .Reload = IWDG_RLR_REG_RL_MAX
-          };
-          if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
-            return STAT_ERROR;
-          }
-          IWDG_Start();            
-        }
+        /**
+         * Ghi chú: 
+         * Trong các thiết kế trước,
+         * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn trong trường hợp HSI không thể sẵn sàng,
+         * tuy nhiên, sau khi thực hiện HIL test thì
+         * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống
+         */
 
           // Bật HSI
           SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET);
@@ -174,9 +150,6 @@
               break;
               
             #endif
-
-            // Feed IWDG định kỳ trong vòng chờ
-            IWDG_Reload();
           }
 
           if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), RCC_CR_REG_HSIRDY_ON)) {
@@ -209,38 +182,14 @@
          * Bật CSS trước để đảm bảo hệ thống được bảo vệ ngay 
          * khi HSE được kích hoạt
          */
-
-        // Khởi tạo IWDG trước để đảm bảo hệ thống không bị treo trong quá trình chờ
-        if (__NRDY_CHECK(RCC_IsLSIReady())) {
-          
-          printf("RCC_CLK_Init, DBG4-1: Init LSI for IWDG before HSE ready wait.\n");
-            
-          /**
-           * Ghi chú:
-           * Nếu LSI chưa được bật, tiến hành khởi tạo LSI
-           * để IWDG có thể hoạt động trong vòng chờ HSE ổn định
-           * Bật IWDG init trong RCC_CLK_Init để đảm bảo nếu không có 
-           * khởi tạo IWDG trước đó thì hệ thống vẫn an toàn
-           */
-
-          // Khởi tạo LSI
-          RCC_CLK_Init_Param rcc_lsi_init;
-          rcc_lsi_init.CLK_Source = RCC_IWDG_SOURCE_LSI;
-          RCC_RDYFLG_Typdef lsi_rdy_flg;
-          if (!__OK_CHECK(RCC_CLK_Init(&rcc_lsi_init, &lsi_rdy_flg))) {
-            return STAT_ERROR;
-          }
-
-          // Khởi tạo và start IWDG
-          IWDG_Init_Param iwdg_init = {
-            .Prescaler = IWDG_PR_REG_PR_DIV_4,
-            .Reload = IWDG_RLR_REG_RL_MAX
-          };
-          if (!__DONE_CHECK(IWDG_Init(&iwdg_init))) {
-            return STAT_ERROR;
-          }
-          IWDG_Start();
-        }
+        
+        /**
+         * Ghi chú: 
+         * Trong các thiết kế trước,
+         * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn trong trường hợp HSE không thể sẵn sàng,
+         * tuy nhiên, sau khi thực hiện HIL test thì
+         * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống
+         */
         
         // Bật CSS trước khi bật HSE
         RCC_CSS_Enable();
@@ -285,9 +234,6 @@
               break;
               
             #endif
-
-            // Feed IWDG định kỳ trong vòng chờ
-            IWDG_Reload();
           }
 
           if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), RCC_CR_REG_HSERDY_ON)) {
@@ -654,10 +600,10 @@
    * Phụ thuộc ngoài module Clock: Không có
    */
   RETR_STAT RCC_IsHSIReady(void) {
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), RCC_CR_REG_HSIRDY_ON)) {
-      return STAT_RDY;
-    } else {
+    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET), RCC_CR_REG_HSION_SET)) {
       return STAT_NRDY;
+    } else {
+      return STAT_RDY;
     }
   }
 
@@ -671,10 +617,10 @@
    */
   RETR_STAT RCC_IsHSEReady(void) {
 
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), RCC_CR_REG_HSERDY_ON)) {
-      return STAT_RDY;
-    } else {
+    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET), RCC_CR_REG_HSEON_SET)) {
       return STAT_NRDY;
+    } else {
+      return STAT_RDY;
     }
   }
 
@@ -687,10 +633,10 @@
    */
   RETR_STAT RCC_IsLSIReady(void) {
 
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LSIRDY_ON), RCC_CSR_REG_LSIRDY_ON)) {
-      return STAT_RDY;
-    } else {
+    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LSION_SET), RCC_CSR_REG_LSION_SET)) {
       return STAT_NRDY;
+    } else {
+      return STAT_RDY;
     }
   }
 

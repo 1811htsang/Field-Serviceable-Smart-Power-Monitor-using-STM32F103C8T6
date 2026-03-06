@@ -29,7 +29,7 @@
   // >> Tạo con trỏ tới thanh ghi
 
     #ifndef UNIT_TEST
-      __vo BLANK_REG* SCB_AIRCR_REG_PTR = (__vo BLANK_REG *)SCB_AIRCR_REG_ADDR;
+      extern __vo BLANK_REG* SCB_AIRCR_REG_PTR;
       
     #else
       /**
@@ -39,7 +39,7 @@
        */  
 
       extern __vo ui32 mock_aircr_reg; 
-      extern __vo BLANK_REG* SCB_AIRCR_REG_PTR; // Trỏ vào biến giả lập
+      extern __vo BLANK_REG* SCB_AIRCR_REG; // Trỏ vào biến giả lập
       
     #endif
 
