@@ -35,7 +35,8 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Driver EXTI
 - [x] Viết Unit Test cho Driver EXTI
 - [x] Viết Driver NVIC
-- [ ] Viết Unit Test cho Driver NVIC
+- [x] Viết Unit Test cho Driver NVIC
+- [ ] Triển khai các driver lên mạch thực tế để kiểm tra hoạt động
 - [ ] Viết Driver SPI
 - [ ] Viết Unit Test cho Driver SPI
 - [ ] Viết Driver I2C
