@@ -230,7 +230,7 @@
       printf("NVIC_INTR_Priority_Config, DBG1: Configuring priority for IRQ_POS %u with priority %u.\n", intr_param->Position, intr_param->Priority);
     }
 
-      NVIC_REGS_PTR->NVIC_IPRE[intr_param->Position] = (intr_param->Priority & 0x0Fu) << 4; 
+      NVIC_REGS_PTR->NVIC_IPRE[intr_param->Position] = (ui8)((intr_param->Priority & 0x0Fu) << 4);
       
       /**
        * Ghi chú:

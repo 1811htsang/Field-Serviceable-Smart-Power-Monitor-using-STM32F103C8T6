@@ -37,8 +37,8 @@
       __vo BLANK_REG RESERVED3[29];    // Offset 0x18C - 0x1FF, reserved
       __vo BLANK_REG NVIC_IABR[3];    // Offset 0x200, reset 0x0000 0000
       __vo BLANK_REG RESERVED4[61];    // Offset 0x20C - 0x2FF, reserved
-      __vo BLANK_REG NVIC_IPRE[68];     // Offset 0x300, reset 0x0000 0000
-      __vo BLANK_REG RESERVED5[580];   // Offset 0x344 - 0xBFF, reserved
+      __vo ui8 NVIC_IPRE[68];     // Offset 0x300, reset 0x0000 0000
+      __vo BLANK_REG RESERVED5[752];   // Offset 0x344 - 0xBFF, reserved
       __vo BLANK_REG NVIC_STIR;       // Offset 0xE00, reset 0x0000 0000
     } NVIC_REGS_Typedef;
 
