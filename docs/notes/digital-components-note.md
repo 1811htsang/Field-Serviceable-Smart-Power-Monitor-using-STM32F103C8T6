@@ -38,3 +38,7 @@ Note này chứa thông tin các linh kiện điện tử thu thập cho đề t
    - Module optoisolator dùng để cách ly tín hiệu giữa các mạch điện tử.
    - Số lượng : 2 cái
    - Đường link tại [đây](https://www.thegioiic.com/4n35sm-optoisolator-transistor-with-base-output-4170vrms-1-channel-6-smd).
+9. MCP4728 4-Channel 12-Bit DAC I2C Interface Digital to Analog Converter
+   - Module dùng để chuyển đổi tín hiệu điện 1 pha thành 3 pha, giúp hệ thống có khả năng giám sát năng lượng trên lưới điện công nghiệp giả lập.
+   - Số lượng : 2 cái
+   - Đường link tại [đây](https://shopee.vn/1-C%C3%A1i-l%E1%BB%91c-MCP4728-E-UN-MCP4728-4728-MSOP-10-Ch%E1%BA%A5t-L%C6%B0%E1%BB%A3ng-T%E1%BB%91t-Nh%E1%BA%A5t-C%C3%B2n-H%C3%A0ng-i.381774615.25388616762).

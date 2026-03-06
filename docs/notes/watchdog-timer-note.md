@@ -170,3 +170,9 @@ Trong chế độ debug, bộ đếm WWDG có thể được tạm dừng hoặc
 5. Cấu hình giá trị bộ đếm lùi trong `WWDG_CR`.
 6. Kích hoạt WWDG bằng cách set bit `WDGA` trong `WWDG_CR`.
 7. Trong vòng lặp chính, ghi giá trị mới vào `WWDG_CR` để tải lại bộ đếm lùi trong khung cửa sổ xác định.
+
+## Lưu ý về sử dụng Watchdog Timer
+
+Trong cấu hình hoạt động của mạch, IWDG được sử dụng để đảm bảo hệ thống không bị treo khi có lỗi trong quá trình cấu hình driver, tuy nhiên sau khi tìm hiểu kỹ lưỡng về IWDG thì thấy rằng khi chạy chương trình thì HWDG - Hardware Watchdog sẽ tự động kích hoạt và reset hệ thống nếu có lỗi trong quá trình cấu hình.
+
+Do đó không cần khai báo IWDG mà chỉ cần sử HWDG và WWDG để đảm bảo hệ thống không bị treo trong quá trình cấu hình clock hoặc driver, giúp đơn giản hóa quá trình cấu hình clock và giảm thiểu các rủi ro liên quan đến việc sử dụng IWDG không đúng cách.
