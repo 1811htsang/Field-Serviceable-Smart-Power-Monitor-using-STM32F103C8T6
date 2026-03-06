@@ -21,7 +21,18 @@
 
   NVIC_REGS_Typedef MOCK_NVIC_REGS;
 
+// Khai báo cờ ngữ cảnh cho việc bắt assert trong unit test
+
+  jmp_buf assert_env;
+  ui8 assert_caught = FALSE; // Cờ để theo dõi xem assert fail đã được bắt hay chưa
+
 // Định nghĩa các hàm 
+
+  void assert_failed(ui8* file, ui8 line) {
+    printf("Assertion using assert_param failed in file %s on line %u.\n", file, line);
+    assert_caught = TRUE;
+    longjmp(assert_env, 1);
+  }
 
   void setup() {
 
@@ -142,6 +153,9 @@
     // Set pending bit cho ngắt ở Position 12
     NVIC_INTR_Param intr_param = { .Position = 12, .Priority = 0, .Status = INTR_STAT_PENDING };
     assert(__BUSY_CHECK(NVIC_INTR_Config(&intr_param))); // Cấu hình với Status PENDING sẽ trả về STAT_BUSY
+
+    // Cấu hình pending
+    NVIC_INTR_Pending_Enable(&intr_param); // Set pending bit cho ngắt ở Position 12
 
     // Kiểm tra trạng thái pending của ngắt
     assert(NVIC_INTR_GetPending(12) == 1); // Ngắt ở Position 12 phải đang ở trạng thái pending (return 1)

@@ -15,7 +15,7 @@
       #include "nvic/lib_nvic_def.h"
     #else
       #include "lib_keyword_def.h"
-      #include "lib_nvic_def.h";
+      #include "lib_nvic_def.h"
     #endif
 
     #include <stdint.h>
