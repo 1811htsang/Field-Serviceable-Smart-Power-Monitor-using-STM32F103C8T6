@@ -95,15 +95,6 @@
          * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống.
          */
 
-
-			/**
-			 * Ghi chú:
-			 * Mặc dù trong RCC_CLK_Init() có bổ sung một execution path
-			 * trong trường hợp IWDG chưa được khởi động, tuy nhiên
-			 * để đảm bảo an toàn, ta vẫn nên khởi động IWDG trước khi
-			 * cấu hình clock hệ thống.
-			 */
-
 		// Khởi động clock
 
 			RCC_CLK_Init_Param clk_init_param = {
@@ -160,6 +151,26 @@
 				printf("Main: EXTI parameter registration failed.\n");
 				return -1;
 			}
+
+
+			NVIC_INTR_Param nvic_init_param = {
+					.Position = NVIC_IRQ_POS_EXTI15_10,
+					.Priority = 5,
+					.Status = INTR_STAT_ENABLE
+			};
+
+			if (!__DONE_CHECK(NVIC_INTR_Config(&nvic_init_param))) {
+				printf("Main: NVIC configuration initialization failed.\n");
+				return -1;
+			}
+
+			ui32 nvic_activation = NVIC_INTR_GetActivation(NVIC_IRQ_POS_EXTI15_10);
+			printf("Main: NVIC activation status for EXTI15_10 - %s.\n", (nvic_activation == INTR_STAT_ENABLE) ? "Enabled" : "Disabled");
+
+			/**
+			 * Ghi chú:
+			 * Về kiểm tra bổ sung cho NVIC
+			 */
 
 		// Vòng lặp chính
 
