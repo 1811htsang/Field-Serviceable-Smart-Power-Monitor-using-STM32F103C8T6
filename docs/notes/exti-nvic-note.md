@@ -86,3 +86,21 @@ Kiểm chứng thông tin trong 2 nguồn sau:
 
 - [pm0056](../references/pm0056-stm32-f10-f20-f21-l1-cortex-m3-programming-manual.pdf)
 - [arm-access-level](https://www.iotality.com/armcm-access-levels/)
+
+## Lưu ý thiết kế và khai báo ngắt
+
+Do EXTI là ngắt phục vụ cho các thao tác liên quan đến GPIO và AFIO, nên khi thiết kế thì đảm bảo có thể tái sử dụng khai báo của GPIO và AFIO để tránh việc phải khai báo lại nhiều lần, giúp đơn giản hóa quá trình thiết kế và giảm thiểu các lỗi liên quan đến việc khai báo ngắt không đúng cách.
+
+Ngoài ra, đối với NVIC, các thiết kế nên tuân thủ theo khai báo thiết kế của CMSIS để đảm bảo tính tương thích và dễ dàng tích hợp với các thư viện và công cụ phát triển khác, giúp tăng cường hiệu quả và độ tin cậy của hệ thống. Việc tuân thủ theo thiết kế của CMSIS cũng giúp đảm bảo rằng các ngắt được quản lý một cách hiệu quả và đúng cách, giảm thiểu nguy cơ bị tấn công hoặc lỗi do việc thiết lập ngắt không đúng cách.
+
+Quy trình khai báo ngắt nên tuân thủ theo các bước sau:
+
+- Khởi tạo nguồn clock của GPIO và AFIO
+- Khai báo cấu hình GPIO
+- Gọi cấu hình GPIO
+- Khai báo cấu hình AFIO
+- Gọi cấu hình AFIO
+- Khai báo cấu hình EXTI
+- Gọi cấu hình EXTI
+- Khai báo cấu hình NVIC
+- Gọi cấu hình NVIC

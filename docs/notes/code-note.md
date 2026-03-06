@@ -52,7 +52,7 @@ Trong header file, cần phân biệt rõ ràng giữa con trỏ phần cứng t
 Cấu trúc header file khi khai báo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi như sau:
 
 ```c
-// ... (Các định nghĩa struct của bạn giữ nguyên)
+// ... (Các định nghĩa struct của ta giữ nguyên)
 
 #ifndef UNIT_TEST
   #define IWDG_REGS_PTR ((IWDG_REGS_Typedef *) IWDG_REGS_BASEADDR)
@@ -69,7 +69,7 @@ Trong đó:
 
 Ví dụ:
 
-Sau khi khai báo header file với con trỏ thật và con trỏ giả, khi viết test dependency cho module IWDG, bạn có thể định nghĩa biến giả như sau:
+Sau khi khai báo header file với con trỏ thật và con trỏ giả, khi viết test dependency cho module IWDG, ta có thể định nghĩa biến giả như sau:
 
 ```c
 IWDG_REGS_Typedef Mock_IWDG = {0}; // Khởi tạo biến giả với tất cả giá trị bằng 0 nhằm dễ dàng kiểm tra
@@ -110,3 +110,47 @@ Suy ra, trình tự khi thiết kế là như sau:
 Trong thiết kế driver của STM32, ta sẽ thấy có sự liên kết phụ thuộc giữa GPIO, AFIO và EXTI nhằm đảm bảo tính linh hoạt và tiện lợi khi sử dụng HAL Driver của STM32.
 
 Tuy nhiên, sự phụ thuộc này sẽ gây ra sự khó khăn và phá vỡ nguyên tắc đơn nhiệm với các hàm init phải chứa logic của các ngoại vi khác. Do đó, cần thiết kế lại để tách biệt các phần này ra khỏi nhau, giúp giảm sự phụ thuộc và tăng tính mô-đun của mã nguồn.
+
+Cụ thể hơn, ta có thể thiết kế lại như sau:
+
+- GPIO sẽ chỉ chịu trách nhiệm cấu hình chân GPIO, bao gồm chế độ, cấu hình và tốc độ.
+- AFIO sẽ chỉ chịu trách nhiệm cấu hình chuyển đổi chức năng (Alternate Function) cho các chân GPIO và cấu hình Line của EXTI.
+- EXTI sẽ chỉ chịu trách nhiệm cấu hình ngắt ngoại (External Interrupt) cho các chân GPIO đã được cấu hình bởi AFIO.
+- NVIC sẽ chỉ chịu trách nhiệm cấu hình mức ưu tiên và kích hoạt ngắt cho các ngắt đã được cấu hình bởi EXTI và các ngắt khác của hệ thống.
+
+## Logic thiết kế giữa cấu hình GPIO và EXTI
+
+Trên thiết kế cấu hình GPIO, STM32 sử dụng hướng thiết kế cấu hình hỗ trợ đa chân thông qua việc sử dụng bitmask (ví dụ: `GPIO_PIN_0 | GPIO_PIN_1`) để cấu hình nhiều chân cùng lúc, giúp đơn giản hóa quá trình cấu hình và tăng tính tiện lợi khi cần cấu hình nhiều chân cùng một lúc.
+
+Tuy nhiên, việc áp dụng vòng lặp để cấu hình đa chân trên EXTI là một vấn đề gây tranh cãi về mặt kiến trúc. Câu trả lời là **CÓ THỂ** làm được để đồng nhất với GPIO, nhưng **KHÔNG KHUYẾN KHÍCH** sử dụng cho các ứng dụng thực tế phức tạp.
+
+Dưới đây là phân tích chi tiết tại sao EXTI khác với GPIO và cách nên tiếp cận:
+
+### Sự khác biệt bản chất giữa GPIO và EXTI
+
+- GPIO khi cấu hình `GPIO_PIN_0 | GPIO_PIN_1` là `Output`, cả hai chân này thường có đặc điểm giống hệt nhau (cùng tốc độ, cùng kiểu đẩy kéo). Chúng thuộc về cùng một Port.
+- EXTI (Sự kiện riêng biệt): Ngắt thường là các sự kiện độc lập.
+  - Chân PA0 có thể là nút bấm (ngắt cạnh lên).
+  - Chân PA1 có thể là tín hiệu từ cảm biến (ngắt cả hai cạnh).
+  - Ràng buộc Port đảm bảo Mỗi EXTI Line chỉ có thể nhận tín hiệu từ **một Port duy nhất** tại một thời điểm (thông qua `AFIO_EXTICR`,  không thể cấu hình đồng thời PA0 và PB0 vì chúng dùng chung Line 0.
+
+### Tại sao vòng lặp trong EXTI lại gây khó khăn cho Driver?
+
+Nếu thiết kế hàm `EXTI_Init` hỗ trợ Bitmask (`PIN_0 | PIN_1`), ta sẽ gặp 3 vấn đề sau:
+
+#### Vấn đề về Callback (Đăng ký logic)
+
+Mỗi Line cần một Callback riêng. Nếu ta Init 5 chân cùng lúc trong 1 hàm, ta sẽ truyền Callback vào như thế nào?
+
+- Nếu truyền 1 con trỏ hàm: Cả 5 chân dùng chung 1 logic (thường không thực tế).
+- Nếu truyền mảng con trỏ hàm: Code sẽ cực kỳ phức tạp và dễ lỗi bộ nhớ.
+
+#### Nguy cơ xung đột Port ngầm
+
+Giả sử người dùng gọi: `EXTI_Init(GPIOA, PIN_0 | PIN_1, ...)`.
+Sau đó lại gọi: `EXTI_Init(GPIOB, PIN_0 | PIN_2, ...)`.
+Vòng lặp trong Driver sẽ vô tình ghi đè cấu hình của Line 0 từ Port A sang Port B. Nếu ta cấu hình từng chân riêng lẻ, việc kiểm soát xung đột này (bằng các lệnh `assert` hoặc kiểm tra trạng thái) sẽ minh bạch hơn rất nhiều.
+
+#### Hiệu suất thực thi
+
+Ngắt thường không được khởi tạo hàng loạt như GPIO. Trong một dự án, ta thường chỉ có 2-3 nguồn ngắt EXTI. Việc viết một vòng lặp quét 16 bit để cấu hình cho 1 chân duy nhất là một sự lãng phí tài nguyên (dù nhỏ).

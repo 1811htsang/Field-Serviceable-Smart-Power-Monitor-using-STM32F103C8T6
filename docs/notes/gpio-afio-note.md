@@ -128,3 +128,16 @@ Tập trung vào phần SPI, I2C ở trang 181.
 
 3. Cấu hình thanh ghi `GPIOx_CRL` hoặc `GPIOx_CRH` dựa trên chân được chọn.
 4. Cấu hình ngắt ngoại nếu cần thiết.
+
+## Lưu ý về cấu hình
+
+Khi cấu hình GPIO hoặc AFIO, cần đảm bảo cấu hình đúng chế độ được khai báo bên trong lớp def, nếu không tuân thủ các cấu hình đề ra thì sẽ dẫn đến lỗi không mong muốn trong quá trình hoạt động của hệ thống. Do đó, việc tuân thủ đúng các cấu hình được đề ra là rất quan trọng để đảm bảo hệ thống hoạt động ổn định và đúng cách.
+
+## Lưu ý về khai báo chuyển đổi chức năng
+
+Khi cần chuyển đổi 1 bộ chân GPIO cho ngoại vi sử dụng thì đảm bảo quy trình sau:
+
+- Khai báo chuyển đổi chức năng (AFIO) cho bộ chân GPIO cần sử dụng.
+- Khai báo cấu hình GPIO cho bộ chân GPIO cần sử dụng.
+
+Không nên đảo ngược lại trình tự này vì sẽ dễ gây lỗi nhiễu do tín hiệu nội bộ chưa được điều hướng chính xác.

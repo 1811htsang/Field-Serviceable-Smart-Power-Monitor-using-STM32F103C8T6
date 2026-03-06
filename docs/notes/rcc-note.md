@@ -247,3 +247,11 @@ Nguồn có thể xuất ra chân MCO bao gồm:
    - `RCC_CR->HSIRDY = 1;` // Cờ từ RCC_CR
 7. `RCC_CIR->HSIRDYC = 1;` // Xóa cờ ngắt HSI ready
 8. Thực hiện các bước xử lý khác nếu cần thiết
+
+## Lưu ý về cấu hình clock hoặc ngoại vi
+
+Khi cấu hình clock hoặc ngoại vi, luôn đảm bảo rằng nguồn clock đã được chọn và khai báo trước khi thực hiện các thao tác cấu hình. Điều này đảm bảo rằng các thiết lập được áp dụng đúng cách và tránh các lỗi không mong muốn do việc cấu hình trước khi nguồn clock sẵn sàng.
+
+Nếu không có cấu hình nguồn clock được chọn thì toàn bộ các cấu hình của các ngoại vi sẽ không có hiệu lực, dẫn đến việc các ngoại vi không hoạt động như mong muốn hoặc không hoạt động được. Do đó, việc đảm bảo rằng nguồn clock đã được chọn và khai báo trước khi cấu hình các ngoại vi là rất quan trọng để đảm bảo hệ thống hoạt động ổn định và đúng cách.
+
+Ngoài ra trong cấu hình clock trước đây có sử dụng IWDG để đảm bảo hệ thống không bị treo khi có lỗi trong quá trình cấu hình clock, tuy nhiên sau khi tìm hiểu kỹ lưỡng về IWDG thì thấy rằng khi chạy chương trình thì HWDG - Hardware Watchdog sẽ tự động kích hoạt và reset hệ thống nếu có lỗi trong quá trình cấu hình clock, do đó không cần thiết phải sử dụng IWDG để đảm bảo hệ thống không bị treo trong quá trình cấu hình clock. Điều này giúp đơn giản hóa quá trình cấu hình clock và giảm thiểu các rủi ro liên quan đến việc sử dụng IWDG không đúng cách.
