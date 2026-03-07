@@ -22,7 +22,6 @@
 	#include <stdint.h>
 	#include "generic/lib_keyword_def.h"
 	#include "generic/lib_condition_def.h"
-	#include "generic/core_cm3.h"
 	#include "log/lib_log_def.h"
 	#include "clock/lib_clock_def.h"
 	#include "clock/lib_clock_hal.h"
@@ -43,16 +42,6 @@
 	#if !defined(__SOFT_FP__) && defined(__ARM_FP)
 		#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 	#endif
-
-// Khai báo ITM Print
-
-	int _write(int file, char *ptr, int len) {
-		for (int i = 0; i < len; i++) {
-			ITM_SendChar((*ptr++));
-		}
-		return len;
-	}
-
 
 // Khai báo callback EXTI
 
