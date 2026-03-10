@@ -46,6 +46,10 @@
     #define AFIO_MAPR_SPI1_REMAP             (ui32)(1u << 0)  // Bit 0
     #define AFIO_MAPR_I2C1_REMAP             (ui32)(1u << 1)  // Bit 1
     #define AFIO_MAPR_USART1_REMAP           (ui32)(1u << 2)  // Bit 2
+    #define AFIO_SWJ_CFG_FULL_REMAP          (ui32)(0x00u << 24) // Bits 24-26 = 000: Full SWJ (JTAG-DP + SW-DP): Reset State
+    #define AFIO_SWJ_CFG_NO_NJTRST           (ui32)(0x01u << 24) // Bits 24-26 = 001: Full SWJ (JTAG-DP + SW-DP) but without NJTRST
+    #define AFIO_SWJ_CFG_JTAG_NO_SW          (ui32)(0x02u << 24) // Bits 24-26 = 010: JTAG-DP disabled and SW-DP enabled
+    #define AFIO_SWJ_CFG_NO_JTAG_NO_SW       (ui32)(0x04u << 24) // Bits 24-26 = 100: Full SWJ disabled (JTAG-DP + SW-DP)
 
     /**
      * Ghi chú:

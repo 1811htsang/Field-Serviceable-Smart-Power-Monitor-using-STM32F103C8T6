@@ -45,7 +45,11 @@
 
     #define IS_AFIO_PERI_REMAP(PERI) (((PERI) == AFIO_MAPR_SPI1_REMAP) || \
                                   ((PERI) == AFIO_MAPR_I2C1_REMAP) || \
-                                  ((PERI) == AFIO_MAPR_USART1_REMAP))
+                                  ((PERI) == AFIO_MAPR_USART1_REMAP) || \
+                                  ((PERI) == AFIO_SWJ_CFG_FULL_REMAP) || \
+                                  ((PERI) == AFIO_SWJ_CFG_NO_NJTRST) || \
+                                  ((PERI) == AFIO_SWJ_CFG_JTAG_NO_SW) || \
+                                  ((PERI) == AFIO_SWJ_CFG_NO_JTAG_NO_SW))
 
   // Khai báo các hàm thành phần
 

@@ -53,7 +53,7 @@
 
 	int main() {
 
-		LOG_D("Main", "System initialization started.");
+		LOG_D("Main", "Firmware starts running\n");
 
 		// Kiểm tra reset flag
 
@@ -122,7 +122,10 @@
 				return -1;
 			}
 
-			RCC_PCLK_Enable(AFIO); // Bật clock
+			/**
+			 * Ghi chú:
+			 * Bên trên đã bật clock cho AFIO khi cấu hình nên không cần bật lại ở đây.
+			 */
 
 			AFIO_EXTI_Init_Param afio_exti_init_param = {
 				.Port = AFIO_EXTICR_PORTB,
