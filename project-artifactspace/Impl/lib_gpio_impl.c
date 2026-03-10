@@ -358,32 +358,20 @@
     PIN_RETR_Enum PinState
   ) {
     // Kiểm tra con trỏ và giá trị tham số đầu vào
-      if (__DEBUG_GET_MODE(ENABLE)) {
-        printf("GPIO_WritePin, DBG1: Check Null pointer.\n");
-      }
 
         if (GPIOx == NULL) {
-          if (__DEBUG_GET_MODE(ENABLE)) {
-            printf("GPIO_WritePin, ERR: Null pointer detected.\n");
-          }
           return;
         }
       
     // Kiểm tra giá trị tham số đầu vào
-      if (__DEBUG_GET_MODE(ENABLE)) {
-        printf("GPIO_WritePin, DBG2: Assert parameter.\n");
-      }
 
         assert_param(IS_GPIO_INSTANCE(GPIOx));
         assert_param(IS_GPIO_PIN(Pin));
         assert_param(IS_PINRETR_ENUM(PinState));
 
     // Ghi trạng thái chân GPIO theo tham số đầu vào
-      if (__DEBUG_GET_MODE(ENABLE)) {
-        printf("GPIO_WritePin, DBG3: Writing pin %u state to %s.\n", Pin, (PinState == GPIO_PIN_SET) ? "SET" : "RESET");
-      }
 
-        if (PinState != GPIO_PIN_RESET) {
+        if (PinState == GPIO_PIN_SET) {
           GPIOx->GPIO_BSRR = Pin; // Set bit tương ứng trong BSRR để đưa chân lên mức cao
 
           #ifdef UNIT_TEST
@@ -394,7 +382,7 @@
              * để mô phỏng hiệu ứng của BSRR
              */
           #endif
-        } else {
+        } else if (PinState == GPIO_PIN_RESET) {
           GPIOx->GPIO_BSRR = (ui32)Pin << 16u; // Reset bit tương ứng trong BSRR để đưa chân về mức thấp
 
           #ifdef UNIT_TEST
@@ -406,6 +394,7 @@
              */
           #endif
         }
+        return;
   }
 
   /*
