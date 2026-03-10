@@ -54,7 +54,7 @@
   // Khai báo các hàm thành phần
 
     // >> Hàm gọi xử lý mapping 
-    RETR_STAT AFIO_PinRemap(ui32 Peri);
+    stinl RETR_STAT AFIO_PinRemap(ui32 Peri);
 
     // >> Hàm khởi tạo thông tin line ngắt ngoài
     RETR_STAT AFIO_EXTI_Line_Init(AFIO_EXTI_Init_Param *init_param);

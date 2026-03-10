@@ -55,7 +55,7 @@
   // Khai báo các hàm thành phần 
   
     // >> Hàm đăng ký thông tin line EXTI vào bảng quản lý của module EXTI
-    RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param);
+    stinl RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param);
 
     // >> Hàm cấu hình tham số EXTI theo thông tin line đã khởi tạo trong AFIO
     RETR_STAT EXTI_Config_Init(
@@ -83,6 +83,6 @@
     );
 
     // >> Hàm tạo ngắt EXTI bằng phần mềm
-    void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param);
+    stinl void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param);
 
 #endif /* LIB_EXTI_HAL_H_ */

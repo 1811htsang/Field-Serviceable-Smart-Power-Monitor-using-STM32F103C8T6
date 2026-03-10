@@ -48,7 +48,7 @@
    * Phụ thuộc ngoài module NVIC:
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  void NVIC_INTR_Activation_Enable(NVIC_INTR_Param *intr_param) {
+  stinl void NVIC_INTR_Activation_Enable(NVIC_INTR_Param *intr_param) {
 
     /**
      * Ghi chú:
@@ -56,19 +56,15 @@
      * nên ở đây ta có thể yên tâm rằng việc set bit trong ISER sẽ không gây ra lỗi.
      */
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Activation_Enable, DBG1: Enabling NVIC interrupt for IRQ_POS %u.\n", intr_param->Position);
+    if (intr_param->Position < 32) {
+      NVIC_REGS_PTR->NVIC_ISER[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ISER để kích hoạt ngắt
+    } else if (intr_param->Position < 64) {
+      NVIC_REGS_PTR->NVIC_ISER[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ISER để kích hoạt ngắt
+    } else {
+      NVIC_REGS_PTR->NVIC_ISER[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ISER để kích hoạt ngắt
     }
 
-      if (intr_param->Position < 32) {
-        NVIC_REGS_PTR->NVIC_ISER[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ISER để kích hoạt ngắt
-      } else if (intr_param->Position < 64) {
-        NVIC_REGS_PTR->NVIC_ISER[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ISER để kích hoạt ngắt
-      } else {
-        NVIC_REGS_PTR->NVIC_ISER[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ISER để kích hoạt ngắt
-      }
-
-      return;
+    return;
   }
 
   /*
@@ -91,7 +87,7 @@
    * Phụ thuộc ngoài module NVIC:
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  void NVIC_INTR_Activation_Disable(NVIC_INTR_Param *intr_param) {
+  stinl void NVIC_INTR_Activation_Disable(NVIC_INTR_Param *intr_param) {
 
     /**
      * Ghi chú:
@@ -99,19 +95,15 @@
      * nên ở đây ta có thể yên tâm rằng việc set bit trong ICER sẽ không gây ra lỗi.
      */
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Activation_Disable, DBG1: Disabling NVIC interrupt for IRQ_POS %u.\n", intr_param->Position);
+    if (intr_param->Position < 32) {
+      NVIC_REGS_PTR->NVIC_ICER[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ICER để vô hiệu hóa ngắt
+    } else if (intr_param->Position < 64) {
+      NVIC_REGS_PTR->NVIC_ICER[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ICER để vô hiệu hóa ngắt
+    } else {
+      NVIC_REGS_PTR->NVIC_ICER[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ICER để vô hiệu hóa ngắt
     }
 
-      if (intr_param->Position < 32) {
-        NVIC_REGS_PTR->NVIC_ICER[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ICER để vô hiệu hóa ngắt
-      } else if (intr_param->Position < 64) {
-        NVIC_REGS_PTR->NVIC_ICER[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ICER để vô hiệu hóa ngắt
-      } else {
-        NVIC_REGS_PTR->NVIC_ICER[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ICER để vô hiệu hóa ngắt
-      }
-
-      return;
+    return;
   }
 
   /*
@@ -134,27 +126,23 @@
    * Phụ thuộc ngoài module NVIC:
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  void NVIC_INTR_Pending_Enable(NVIC_INTR_Param *intr_param) {
+  stinl void NVIC_INTR_Pending_Enable(NVIC_INTR_Param *intr_param) {
     
     /**
      * Ghi chú:
      * Do ở hàm cấu hình tổng quát đã có kiểm tra tham số đầu vào và đã đảm bảo rằng pending bit đang ở trạng thái disable,
      * nên ở đây ta có thể yên tâm rằng việc set bit trong ISPR sẽ không gây ra lỗi.
      */
-
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Pending_Enable, DBG1: Setting pending bit for NVIC interrupt with IRQ_POS %u.\n", intr_param->Position);
-    }
     
-      if (intr_param->Position < 32) {
-        NVIC_REGS_PTR->NVIC_ISPR[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ISPR để kích hoạt pending bit
-      } else if (intr_param->Position < 64) {
-        NVIC_REGS_PTR->NVIC_ISPR[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ISPR để kích hoạt pending bit
-      } else {
-        NVIC_REGS_PTR->NVIC_ISPR[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ISPR để kích hoạt pending bit
-      }
+    if (intr_param->Position < 32) {
+      NVIC_REGS_PTR->NVIC_ISPR[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ISPR để kích hoạt pending bit
+    } else if (intr_param->Position < 64) {
+      NVIC_REGS_PTR->NVIC_ISPR[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ISPR để kích hoạt pending bit
+    } else {
+      NVIC_REGS_PTR->NVIC_ISPR[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ISPR để kích hoạt pending bit
+    }
 
-      return;
+    return;
   }
 
   /*
@@ -177,7 +165,7 @@
    * Phụ thuộc ngoài module NVIC:
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  void NVIC_INTR_Pending_Disable(NVIC_INTR_Param *intr_param) {
+  stinl void NVIC_INTR_Pending_Disable(NVIC_INTR_Param *intr_param) {
 
     /**
      * Ghi chú:
@@ -185,19 +173,15 @@
      * nên ở đây ta có thể yên tâm rằng việc set bit trong ICPR sẽ không gây ra lỗi.
      */
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Pending_Disable, DBG1: Clearing pending bit for NVIC interrupt with IRQ_POS %u.\n", intr_param->Position);
+    if (intr_param->Position < 32) {
+      NVIC_REGS_PTR->NVIC_ICPR[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ICPR để clear pending bit
+    } else if (intr_param->Position < 64) {
+      NVIC_REGS_PTR->NVIC_ICPR[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ICPR để clear pending bit
+    } else {
+      NVIC_REGS_PTR->NVIC_ICPR[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ICPR để clear pending bit
     }
 
-      if (intr_param->Position < 32) {
-        NVIC_REGS_PTR->NVIC_ICPR[0] |= (0x0001u << intr_param->Position); // Set bit tương ứng trong ICPR để clear pending bit
-      } else if (intr_param->Position < 64) {
-        NVIC_REGS_PTR->NVIC_ICPR[1] |= (0x0001u << (intr_param->Position - 32)); // Set bit tương ứng trong ICPR để clear pending bit
-      } else {
-        NVIC_REGS_PTR->NVIC_ICPR[2] |= (0x0001u << (intr_param->Position - 64)); // Set bit tương ứng trong ICPR để clear pending bit
-      }
-
-      return;
+    return;
   }
 
   /*
@@ -218,7 +202,7 @@
    * Phụ thuộc ngoài module NVIC:
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  void NVIC_INTR_Priority_Config(NVIC_INTR_Param *intr_param) {
+  stinl void NVIC_INTR_Priority_Config(NVIC_INTR_Param *intr_param) {
 
     /**
      * Ghi chú:
@@ -226,22 +210,17 @@
      * nên ở đây ta có thể yên tâm rằng việc set bit trong IPR sẽ không gây ra lỗi.
      */
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Priority_Config, DBG1: Configuring priority for IRQ_POS %u with priority %u.\n", intr_param->Position, intr_param->Priority);
-    }
-
-      NVIC_REGS_PTR->NVIC_IPRE[intr_param->Position] = (ui8)((intr_param->Priority & 0x0Fu) << 4);
-      
-      /**
-       * Ghi chú:
-       * Set 4 bit cao của byte tương ứng trong IPR để cấu hình mức ưu tiên ngắt, 
-       * lưu ý rằng trong thiết kế tài liệu mức ưu tiên chỉ sử dụng loại preempt 
-       * và bỏ qua sub-preempt nên ta sẽ không sử dụng 4 bit thấp của byte trong IPR.
-       * Thực hiện and với mask 0x0F để đảm bảo rằng chỉ có 4 bit cao của intr_param->Priority được sử dụng, tránh việc giá trị priority vượt quá 15u
-       */
-
-      return;
+    NVIC_REGS_PTR->NVIC_IPRE[intr_param->Position] = (ui8)((intr_param->Priority & 0x0Fu) << 4);
     
+    /**
+     * Ghi chú:
+     * Set 4 bit cao của byte tương ứng trong IPR để cấu hình mức ưu tiên ngắt, 
+     * lưu ý rằng trong thiết kế tài liệu mức ưu tiên chỉ sử dụng loại preempt 
+     * và bỏ qua sub-preempt nên ta sẽ không sử dụng 4 bit thấp của byte trong IPR.
+     * Thực hiện and với mask 0x0F để đảm bảo rằng chỉ có 4 bit cao của intr_param->Priority được sử dụng, tránh việc giá trị priority vượt quá 15u
+     */
+
+    return;
   }
 
   /*
@@ -281,35 +260,23 @@
      * nên ta sẽ giữ nguyên logic hiện tại.
      */
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Config, DBG1: Check NULL input.\n");
-    }
+    // Kiểm tra con trỏ intr_param hợp lệ
 
       if (intr_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("NVIC_INTR_Config, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
     
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Config, DBG2: Assert parameter.\n");
-    }
+    // Kiểm tra các giá trị tham số đầu vào
 
       assert_param(IS_NVIC_IRQ_POS(intr_param->Position));
       assert_param(IS_NVIC_INTR_PRIORITY(intr_param->Priority));
       assert_param(IS_NVIC_INTR_STATUS(intr_param->Status));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf(
-        "NVIC_INTR_Config, DBG3: Configuring NVIC interrupt for IRQ_POS %u with priority %u and status %u.\n", 
-        intr_param->Position, 
-        intr_param->Priority, 
-        intr_param->Status
-      );
-    }
+    // Clear pending bit trước khi cấu hình để tránh ngắt không mong muốn
 
       NVIC_INTR_Pending_Disable(intr_param); // Trước khi config thì phải đảm bảo pending bit đang ở trạng thái disable để tránh việc ngắt được kích hoạt ngay sau khi config nếu có pending bit cũ chưa được clear
+
+    // Dựa vào Status, gọi hàm enable/disable ngắt
 
       switch (intr_param->Status) {
         case INTR_STAT_DISABLE:
@@ -336,11 +303,11 @@
           break;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("NVIC_INTR_Config, DBG4: Configure priority for IRQ_POS %u with priority %u.\n", intr_param->Position, intr_param->Priority);
-    }
+    // Cấu hình priority cho ngắt
 
       NVIC_INTR_Priority_Config(intr_param);
+
+    // Trả về trạng thái hoàn thành sau khi đã cấu hình xong ngắt
 
       return STAT_DONE;
   }
@@ -361,7 +328,7 @@
    *
    * Phụ thuộc ngoài module NVIC: Không có
    */
-  ui32 NVIC_INTR_GetActivation(IRQ_POS_Enum_Type position) {
+  stinl ui32 NVIC_INTR_GetActivation(IRQ_POS_Enum_Type position) {
     
     ui32 result = 0;
 
@@ -393,7 +360,8 @@
    *
    * Phụ thuộc ngoài module NVIC: Không có
    */
-  ui32 NVIC_INTR_GetPending(IRQ_POS_Enum_Type position) {
+  stinl ui32 NVIC_INTR_GetPending(IRQ_POS_Enum_Type position) {
+
     ui32 result = 0;
 
     if (position < 32) {

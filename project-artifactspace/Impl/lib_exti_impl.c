@@ -30,15 +30,17 @@
     #include "gpio/lib_gpio_hal.h"
   #endif
 
-// Khai báo bảng quản lý table callback cho các line EXTI
+// Khai báo define
 
   #ifdef UNIT_TEST
-    #define STATIC
+    #define sta 
   #else
-    #define STATIC static
+    // Không khai báo sta trong code thực tế vì nó đã được định nghĩa trong lib_keyword_def.h
   #endif
 
-  STATIC EXTI_Handle_Param *EXTI_Handle_Table[16] = {0}; // Bảng quản lý con trỏ tới cấu trúc handle EXTI cho 16 line EXTI (0-15)
+// Khai báo bảng quản lý table callback cho các line EXTI
+
+  sta EXTI_Handle_Param *EXTI_Handle_Table[16] = {0}; // Bảng quản lý con trỏ tới cấu trúc handle EXTI cho 16 line EXTI (0-15)
 
 // Định nghĩa các hàm thành phần
 
@@ -62,32 +64,25 @@
    *   - assert_param() - Macro kiểm tra điều kiện
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param) {
+  stinl RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_RegisterParam, DBG1: Check Null pointer.\n");
-    }
+    // Kiểm tra con trỏ handle_param hợp lệ
 
       if (handle_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_RegisterParam, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_RegisterParam, DBG2: Check Line parameter.\n");
-    }
+    // Kiểm tra giá trị tham số Line hợp lệ (0-15)
 
       assert_param(handle_param->Line < 16); // Kiểm tra thông tin line EXTI hợp lệ (0-15)
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_RegisterParam, DBG3: Registering EXTI Line %u with callback at address %p.\n", handle_param->Line, (void *)handle_param->Callback);
-    }
+    // Đăng ký con trỏ tới cấu trúc tham số vào bảng quản lý để sử dụng khi EXTI_Generic_IRQHandler() được gọi từ EXTI_IRQHandler()
 
       EXTI_Handle_Table[handle_param->Line] = handle_param; // Đăng ký con trỏ tới cấu trúc tham số vào bảng quản lý
 
-    return STAT_DONE;
+    // Kết thúc quy trình
+      
+      return STAT_DONE;
   }
 
   /*
@@ -120,21 +115,14 @@
     GPIO_Init_Param *gpio_init_param,
     AFIO_EXTI_Init_Param *afio_init_param
   ) {
-    
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Config_Init, DBG1: Check Null pointer.\n");
-    }
+
+    // Kiểm tra tham số đầu vào hợp lệ
 
       if (gpio_init_param == NULL || afio_init_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_Config_Init, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Config_Init, DBG2: Assert parameter.\n");
-    }
+    // Kiểm tra giá trị tham số trigger hợp lệ
 
       assert_param(IS_GPIO_TRIGGER(gpio_init_param->Trigger));
 
@@ -144,42 +132,44 @@
      * hàm AFIO_EXTI_Line_Init nên ta sẽ không kiểm tra lại ở đây nữa.
      */
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Config_Init, DBG3: Initializing EXTI config for Line %u. \n", afio_init_param->Line);
-    }
+    // Cấu hình line EXTI dựa vào thông tin trigger trong GPIO_Init_Param và thông tin line đã khởi tạo trong AFIO_EXTI_Init_Param
 
-      // Cấu hình cạnh lên / xuống cho line EXTI dựa vào thông tin trigger trong GPIO_Init_Param
-      switch (gpio_init_param->Trigger) {
+      // >> Cấu hình cạnh lên / xuống cho line EXTI dựa vào thông tin trigger trong GPIO_Init_Param
         
-        case GPIO_TRIGGER_NONE:
-          printf("EXTI_Config_Init, DBG3: No trigger selected, skipping EXTI configuration for Line %u.\n", afio_init_param->Line);
-          return STAT_ERROR; // Nếu không có trigger nào được chọn thì trả về lỗi vì không thể cấu hình EXTI cho line này  
-          break;
+        switch (gpio_init_param->Trigger) {
+          
+          case GPIO_TRIGGER_NONE:
+            return STAT_ERROR; // Nếu không có trigger nào được chọn thì trả về lỗi vì không thể cấu hình EXTI cho line này  
+            break;
 
-        case GPIO_TRIGGER_FALLING:
-          EXTI_REGS_PTR->EXTI_FTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong FTSR để cấu hình trigger falling
-          EXTI_REGS_PTR->EXTI_RTSR &= ~(0x0001u << afio_init_param->Line); // Clear bit tương ứng trong RTSR để đảm bảo chỉ có trigger falling được kích hoạt
-          break;
+          case GPIO_TRIGGER_FALLING:
+            EXTI_REGS_PTR->EXTI_FTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong FTSR để cấu hình trigger falling
+            EXTI_REGS_PTR->EXTI_RTSR &= ~(0x0001u << afio_init_param->Line); // Clear bit tương ứng trong RTSR để đảm bảo chỉ có trigger falling được kích hoạt
+            break;
 
-        case GPIO_TRIGGER_RISING:
-          EXTI_REGS_PTR->EXTI_RTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong RTSR để cấu hình trigger rising
-          EXTI_REGS_PTR->EXTI_FTSR &= ~(0x0001u << afio_init_param->Line); // Clear bit tương ứng trong FTSR để đảm bảo chỉ có trigger rising được kích hoạt
-          break;
+          case GPIO_TRIGGER_RISING:
+            EXTI_REGS_PTR->EXTI_RTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong RTSR để cấu hình trigger rising
+            EXTI_REGS_PTR->EXTI_FTSR &= ~(0x0001u << afio_init_param->Line); // Clear bit tương ứng trong FTSR để đảm bảo chỉ có trigger rising được kích hoạt
+            break;
 
-        case GPIO_TRIGGER_BOTH:
-          EXTI_REGS_PTR->EXTI_RTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong RTSR để cấu hình trigger rising
-          EXTI_REGS_PTR->EXTI_FTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong FTSR để cấu hình trigger falling
-          break;
-        
-        default:
-          return STAT_ERROR; // Nếu giá trị trigger không hợp lệ thì trả về lỗi
-          break;
-      }
+          case GPIO_TRIGGER_BOTH:
+            EXTI_REGS_PTR->EXTI_RTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong RTSR để cấu hình trigger rising
+            EXTI_REGS_PTR->EXTI_FTSR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong FTSR để cấu hình trigger falling
+            break;
+          
+          default:
+            return STAT_ERROR; // Nếu giá trị trigger không hợp lệ thì trả về lỗi
+            break;
+        }
 
-      EXTI_REGS_PTR->EXTI_IMR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong IMR để kích hoạt line EXTI
-      EXTI_REGS_PTR->EXTI_PR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong PR để clear pending bit cũ nếu có, lưu ý rằng thanh ghi PR là rw_c1 
+      // >> Kích hoạt line EXTI bằng cách set bit tương ứng trong IMR
 
-    return STAT_DONE;
+        EXTI_REGS_PTR->EXTI_IMR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong IMR để kích hoạt line EXTI
+        EXTI_REGS_PTR->EXTI_PR |= (0x0001u << afio_init_param->Line); // Set bit tương ứng trong PR để clear pending bit cũ nếu có, lưu ý rằng thanh ghi PR là rw_c1 
+
+    // Kết thúc quy trình
+
+      return STAT_DONE;
   }
 
   /*
@@ -211,40 +201,38 @@
     AFIO_EXTI_Init_Param *afio_init_param
   ) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Config_DeInit, DBG1: Check Null pointer.\n");
-    }
+    // Kiểm tra tham số đầu vào hợp lệ
 
       if (gpio_init_param == NULL || afio_init_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_Config_DeInit, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Config_DeInit, DBG2: Assert parameter.\n");
-    }
+    // Kiểm tra giá trị tham số trigger hợp lệ
 
       assert_param(IS_GPIO_TRIGGER(gpio_init_param->Trigger));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Config_DeInit, DBG3: Deinitializing EXTI config for Line %u. \n", afio_init_param->Line);
-    }
+    // Vô hiệu hóa line EXTI và xóa cấu hình trigger cạnh lên / xuống
 
-      // Vô hiệu hóa line EXTI bằng cách xóa bit tương ứng trong IMR
-      EXTI_REGS_PTR->EXTI_IMR &= ~(0x0001u << afio_init_param->Line);
+      // >> Vô hiệu hóa line EXTI bằng cách xóa bit tương ứng trong IMR
+        
+        EXTI_REGS_PTR->EXTI_IMR &= ~(0x0001u << afio_init_param->Line);
 
-      // Xóa cấu hình trigger cạnh lên / xuống cho line EXTI bằng cách xóa bit tương ứng trong RTSR và FTSR
-      EXTI_REGS_PTR->EXTI_RTSR &= ~(0x0001u << afio_init_param->Line);
-      EXTI_REGS_PTR->EXTI_FTSR &= ~(0x0001u << afio_init_param->Line);
+      // >> Xóa cấu hình trigger cạnh lên / xuống cho line EXTI bằng cách xóa bit tương ứng trong RTSR và FTSR
+      
+        EXTI_REGS_PTR->EXTI_RTSR &= ~(0x0001u << afio_init_param->Line);
+        EXTI_REGS_PTR->EXTI_FTSR &= ~(0x0001u << afio_init_param->Line);
 
-      // Clear pending bit của line EXTI để đảm bảo không có ngắt nào bị bỏ sót ngay sau khi vô hiệu hóa
-      EXTI_REGS_PTR->EXTI_PR |= (0x0001u << afio_init_param->Line);
+      // >> Clear pending bit của line EXTI để đảm bảo không có ngắt nào bị bỏ sót ngay sau khi vô hiệu hóa
+      
+        EXTI_REGS_PTR->EXTI_PR |= (0x0001u << afio_init_param->Line);
 
-      afio_init_param->Line = 15u; // Reset thông tin Line trong cấu trúc tham số về giá trị mặc định
+      // >> Reset thông tin Line về giá trị mặc định (15u) để tránh nhầm lẫn trong các thao tác tiếp theo
+      
+        afio_init_param->Line = 15u; // Reset thông tin Line trong cấu trúc tham số về giá trị mặc định
 
-    return STAT_DONE;
+      // Kết thúc quy trình
+
+        return STAT_DONE;
   }
 
   /*
@@ -272,31 +260,25 @@
    */
   void EXTI_Generic_IRQHandler(EXTI_Handle_Param *handle_param) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Generic_IRQHandler, DBG1: Check Null pointer.\n");
-    }
+    // Kiểm tra con trỏ handle_param hợp lệ
 
       if (handle_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_Generic_IRQHandler, ERR: Null pointer detected.\n");
-        }
         return;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_Generic_IRQHandler, DBG2: Handling EXTI interrupt for Line %u.\n", handle_param->Line);
-    }
+    // Kiểm tra giá trị tham số Line hợp lệ
 
-      // Kiểm tra nếu pending bit của line EXTI được set thì gọi hàm callback tương ứng
+      assert_param(handle_param->Line < 16); // Kiểm tra thông tin line EXTI hợp lệ (0-15)
+
+    // Kiểm tra nếu pending bit của line EXTI được set thì gọi hàm callback tương ứng
+    
       if ((EXTI_REGS_PTR->EXTI_PR & (0x0001u << handle_param->Line)) != 0) {
         EXTI_REGS_PTR->EXTI_PR |= (0x0001u << handle_param->Line); // Clear pending bit sau khi đã xử lý ngắt
         if (handle_param->Callback != NULL) {
           handle_param->Callback(); // Gọi hàm callback đã đăng ký để xử lý ngắt
         }
       } else {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_Generic_IRQHandler, DBG3: No pending interrupt for Line %u.\n", handle_param->Line);
-        }
+        return; // Nếu không có pending bit nào được set thì không làm gì cả, có thể in thông báo debug nếu cần
       }
   }
 
@@ -322,11 +304,8 @@
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
   void EXTI_IRQHandler(ui16 Pin) {
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_IRQHandler, DBG1: Handling EXTI interrupt for Pin %u.\n", Pin);
-    }
 
-      // Tìm kiếm trong bảng quản lý để xác định line EXTI tương ứng với chân GPIO đã chọn
+    // Tìm kiếm trong bảng quản lý để xác định line EXTI tương ứng với chân GPIO đã chọn
       for (ui16 line = 0; line < 16; line++) {
         if (
           EXTI_Handle_Table[line] != NULL // Kiểm tra nếu có handle đã đăng ký cho line này
@@ -369,29 +348,21 @@
     void (*callback_func)(void)
   ) {
 
-    RETR_STAT status = STAT_OK;
+    // Lưu trạng thái trả về, mặc định là STAT_OK và sẽ được cập nhật nếu có lỗi xảy ra
     
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_RegisterCallback, DBG1: Check Null pointer.\n");
-    }
+      RETR_STAT status = STAT_OK;
+    
+    // Kiểm tra con trỏ handle_param hợp lệ và con trỏ callback_func không NULL
 
       if (handle_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_RegisterCallback, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
 
       if (callback_func == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_RegisterCallback, ERR: Null pointer detected for callback function.\n");
-        }
         return STAT_ERROR;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_RegisterCallback, DBG2: Registering callback for Line %u.\n", handle_param->Line);
-    }
+    // Đăng ký hàm callback vào trường Callback của handle_param dựa vào loại sự kiện callback_event_type
 
       switch (callback_event_type) {
         case EXTI_COMMON_CB_ID:
@@ -400,13 +371,12 @@
         
         default:
           status = STAT_ERROR; // Nếu callback_event_type không hợp lệ thì trả về lỗi
-          if (__DEBUG_GET_MODE(ENABLE)) {
-            printf("EXTI_RegisterCallback, ERR: Invalid callback event type %u.\n", callback_event_type);
-          }
           break;
       }
     
-    return status;
+    // Kết thúc quy trình
+
+      return status;
   }
 
   /*
@@ -430,21 +400,21 @@
    *   - EXTI_Generic_IRQHandler() - Hàm xử lý ngắt được gọi
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param) {
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_GenerateSWI, DBG1: Check Null pointer.\n");
-    }
+  stinl void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param) {
+    
+    // Kiểm tra con trỏ handle_param hợp lệ
 
       if (handle_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("EXTI_GenerateSWI, ERR: Null pointer detected.\n");
-        }
         return;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("EXTI_GenerateSWI, DBG2: Generating software interrupt for Line %u.\n", handle_param->Line);
-    }
+    // Kiểm tra giá trị tham số Line hợp lệ
+
+      if (handle_param->Line >= 16) {
+        return;
+      }
+
+    // Tạo ngắt EXTI bằng phần mềm bằng cách set bit tương ứng trong SWIER
 
       EXTI_REGS_PTR->EXTI_SWIER |= (0x0001u << handle_param->Line); // Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm
   }

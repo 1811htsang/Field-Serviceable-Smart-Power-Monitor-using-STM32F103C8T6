@@ -61,6 +61,11 @@
 		
 		#define DEBUG_MODE ENABLE
 
+		#define sta static
+		#define ext extern
+		#define inl inline
+		#define stinl static inline
+
 		#ifdef  USE_FULL_ASSERT
 			#ifndef UNIT_TEST
         void assert_failed(ui8* file, ui32 line) {

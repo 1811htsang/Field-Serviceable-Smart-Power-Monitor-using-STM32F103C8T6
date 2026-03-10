@@ -112,20 +112,20 @@
     RETR_STAT GPIO_DeInit(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm đọc trạng thái chân GPIO
-    PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
+    stinl PIN_RETR_Enum GPIO_ReadPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm ghi trạng thái chân GPIO
-    void GPIO_WritePin(
+    stinl void GPIO_WritePin(
       GPIO_REGS_Typedef *GPIOx, 
       ui16 Pin, 
       PIN_RETR_Enum PinState
     );
 
     // >> Hàm đảo trạng thái chân GPIO
-    void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
+    stinl void GPIO_TogglePin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm khóa cấu hình chân GPIO
-    RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
+    stinl RETR_STAT GPIO_LockPin(GPIO_REGS_Typedef *GPIOx, ui16 Pin);
 
     // >> Hàm xử lý ngắt ngoại vi GPIO
     void GPIO_EXTI_IRQHandler(ui16 Pin);
@@ -134,6 +134,6 @@
     __weak void GPIO_EXTI_Callback(ui16 Pin);
     
     // >> Hàm trả về index chân GPIO từ bitmask Pin
-    ui16 GPIO_GetPinIndex(ui16 Pin);
+    stinl ui16 GPIO_GetPinIndex(ui16 Pin);
 
 #endif /* LIB_GPIO_HAL_H_ */
