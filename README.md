@@ -35,8 +35,11 @@ This project focuses on creating a smart power monitor using the STM32F103C8T6 m
   - UART for communication and firmware updates
   - GPIO for status indicators and control signals
   - RCC for reset & clock management
-  - IWDG for watchdog functionality
+  - AFIO for alternate function configuration
+  - EXTI for external interrupts (e.g., for power failure detection)
+  - NVIC for core interrupt management
   - I2C for LCD interfacing (optional)
+  - IWDG for fault management (marked as Deprecated due to Hardware Watchdog auto-implementation)
 - **Energy Metering**: ADE7758 IC for accurate energy measurement.
 - **Firmware Update**: XMODEM protocol with CRC checks for reliable updates.
 - **Power Monitoring**: Real-time measurement and reporting of power consumption.
@@ -54,4 +57,5 @@ Note that this sections can be expand with new requirements in the future.
 - L7805CV Voltage Regulator
 - BC547 Transistor
 - 4N35SM Optocoupler
+- MCP4728E to simulate the 3-phase voltage and current inputs for testing purposes.
 - Various resistors, capacitors, diodes, and connectors as per the schematic or PCB design.
