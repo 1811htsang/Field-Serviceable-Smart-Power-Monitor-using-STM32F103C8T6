@@ -51,17 +51,13 @@
    *   - assert_param() - Macro kiểm tra điều kiện
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  RETR_STAT AFIO_PinRemap(ui32 Peri) {
+  stinl RETR_STAT AFIO_PinRemap(ui32 Peri) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_PinRemap, DBG1: Check Peripheral parameter.\n");
-    }
+    // Kiểm tra giá trị tham số hợp lệ
 
       assert_param(IS_AFIO_PERI_REMAP(Peri));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_PinRemap, DBG2: Remapping peripheral with mask 0x%08lX.\n", Peri);
-    }
+    // Ghi giá trị Peri vào thanh ghi AFIO_MAPR để kích hoạt remap
 
       AFIO_REGS_PTR->AFIO_MAPR |= Peri;
 
@@ -92,33 +88,22 @@
    */
   RETR_STAT AFIO_EXTI_Line_Init(AFIO_EXTI_Init_Param *init_param) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Line_Init, DBG1: Check Null pointer.\n");
-    }
+    // Kiểm tra con trỏ đầu vào hợp lệ
 
       if (init_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("AFIO_EXTI_Line_Init, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Line_Init, DBG2: Assert parameter.\n");
-    }
+    // Kiểm tra giá trị tham số Port và Pin
 
       assert_param(IS_AFIO_EXTI_PORT(init_param->Port));
       assert_param(IS_GPIO_PIN(init_param->Pin));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf(
-        "AFIO_EXTI_Line_Init, DBG3: Initializing EXTI Line for Port %u with pin %u.\n", 
-        init_param->Port, init_param->Pin
-      );
-    }
+    // Tính toán index thanh ghi EXTICR cần cấu hình và vị trí bit shift
 
-      ui16 index = (GPIO_GetPinIndex(init_param->Pin) / 4u); // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui16 shift = (GPIO_GetPinIndex(init_param->Pin) % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui16 pin_index = GPIO_GetPinIndex(init_param->Pin);
+      ui16 reg_index = (pin_index / 4u); // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui16 shift = (pin_index % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       /**
        * Ghi chú:
@@ -127,9 +112,9 @@
        */
 
       // Xóa các bit cũ tại vị trí cần cấu hình
-      AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
+      AFIO_REGS_PTR->AFIO_EXTICR[reg_index] &= ~(0x0Fu << shift);
       // Ghi giá trị Port vào vị trí cần cấu hình
-      AFIO_REGS_PTR->AFIO_EXTICR[index] |= (init_param->Port << shift);
+      AFIO_REGS_PTR->AFIO_EXTICR[reg_index] |= (init_param->Port << shift);
 
       /**
        * Ghi chú:
@@ -138,7 +123,7 @@
        * - Ta sẽ xóa các bit cũ tại vị trí bit 8-11 của AFIO_EXTICR[1] rồi ghi giá trị 0x01 vào đó để cấu hình EXTI6 cho GPIOB.
        */
 
-      init_param->Line = GPIO_GetPinIndex(init_param->Pin); // Lưu thông tin Line vào cấu trúc tham số để sử dụng cho EXTI
+      init_param->Line = pin_index; // Lưu thông tin Line vào cấu trúc tham số để sử dụng cho EXTI
 
     return STAT_DONE;
   }
@@ -166,36 +151,25 @@
    */
   RETR_STAT AFIO_EXTI_Line_DeInit(AFIO_EXTI_Init_Param *init_param) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Line_DeInit, DBG1: Check Null pointer.\n");
-    }
+    // Kiểm tra con trỏ đầu vào hợp lệ
 
       if (init_param == NULL) {
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("AFIO_EXTI_Line_DeInit, ERR: Null pointer detected.\n");
-        }
         return STAT_ERROR;
       }
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("AFIO_EXTI_Line_DeInit, DBG2: Assert parameter.\n");
-    }
+    // Kiểm tra giá trị tham số Port và Pin
 
       assert_param(IS_AFIO_EXTI_PORT(init_param->Port));
       assert_param(IS_GPIO_PIN(init_param->Pin));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf(
-        "AFIO_EXTI_Line_DeInit, DBG3: Deinitializing EXTI for Port %u with pin %u.\n", 
-        init_param->Port, init_param->Pin)
-      ;
-    }
+    // Tính toán index thanh ghi EXTICR cần xóa cấu hình và vị trí bit shift
 
-      ui16 index = init_param->Port / 4u; // Xác định chỉ số của AFIO_EXTICR cần cấu hình
-      ui16 shift = (GPIO_GetPinIndex(init_param->Pin) % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
+      ui16 pin_index = GPIO_GetPinIndex(init_param->Pin);
+      ui16 reg_index = (pin_index / 4u); // Xác định chỉ số của AFIO_EXTICR cần cấu hình
+      ui16 shift = (pin_index % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
       // Xóa các bit tại vị trí cần cấu hình để vô hiệu hóa EXTI
-      AFIO_REGS_PTR->AFIO_EXTICR[index] &= ~(0x0Fu << shift);
+      AFIO_REGS_PTR->AFIO_EXTICR[reg_index] &= ~(0x0Fu << shift);
 
       init_param->Line = 15u; // Reset thông tin Line trong cấu trúc tham số
 

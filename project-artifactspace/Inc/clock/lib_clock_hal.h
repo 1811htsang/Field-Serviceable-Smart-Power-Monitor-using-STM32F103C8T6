@@ -64,34 +64,31 @@
   // Khai báo các hàm thành phần
 
 		// >> Hàm khởi tạo clock hệ thống
-		RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg);
+		RETR_STAT RCC_CLK_Init(
+			RCC_CLK_Init_Param *init_param, 
+			RCC_RDYFLG_Typdef *rdy_flg
+		);
 
 		// >> Hàm chuyển đổi SYSCLK
-		RETR_STAT RCC_SYSCLK_Switch(ui32 sysclk_source);
+		stinl RETR_STAT RCC_SYSCLK_Switch(ui32 sysclk_source);
 
 		// >> Hàm de-initialize clock hệ thống
-		RETR_STAT RCC_CLK_DeInit(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg);
+		RETR_STAT RCC_CLK_DeInit(
+			RCC_CLK_Init_Param *init_param, 
+			RCC_RDYFLG_Typdef *rdy_flg
+		);
 
 		// >> Hàm bật CSS
-		void RCC_CSS_Enable(void);
+		stinl void RCC_CSS_Enable(void);
 
 		// >> Hàm tắt CSS
-		void RCC_CSS_Disable(void);
-
-		// >> Hàm xử lý ngắt NMI do CSS
-		void RCC_NMI_IRQ_Handler(void);
-
-		// >> Hàm callback CSS weak
-		__weak void RCC_CSS_Callback(void);
+		stinl void RCC_CSS_Disable(void);
 
 		// >> Hàm kiểm tra clock HSI sẵn sàng
-		RETR_STAT RCC_IsHSIReady(void);
+		stinl RETR_STAT RCC_IsHSIReady(void);
 
 		// >> Hàm kiểm tra clock HSE sẵn sàng
-		RETR_STAT RCC_IsHSEReady(void);
-
-		// >> Hàm kiểm tra clock LSI sẵn sàng
-		RETR_STAT RCC_IsLSIReady(void);
+		stinl RETR_STAT RCC_IsHSEReady(void);
 
 		// >> Hàm hoạt hóa ngoại vi 
 		RETR_STAT RCC_PCLK_Enable(ul periph);

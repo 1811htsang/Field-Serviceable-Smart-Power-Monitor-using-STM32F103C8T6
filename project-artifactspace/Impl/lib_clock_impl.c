@@ -60,261 +60,212 @@
   RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
     
     // Kiểm tra con trỏ đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_Init, DBG1: Check Null pointer.\n");
-    }
-    if (__NULL_PTR_CHECK(init_param)) {
-      return STAT_ERROR;
-    }
-    if (__NULL_PTR_CHECK(rdy_flg)) {
-      return STAT_ERROR;
-    }
+
+      if (__NULL_PTR_CHECK(init_param)) {
+        return STAT_ERROR;
+      }
+      if (__NULL_PTR_CHECK(rdy_flg)) {
+        return STAT_ERROR;
+      }
 
     // Kiểm tra giá trị tham số đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_Init, DBG2: Assert parameter.\n");
-    }
-    assert_param(
-      IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source) || 
-      IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
-    );
+
+      assert_param(
+        IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source) || 
+        IS_RCC_IWDG_SOURCE(init_param->CLK_Source)
+      );
     
     // Làm mới biến cờ trạng thái
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_Init, DBG3: Refresh Clock ready flags kit.\n");
-    }
-    memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
+    
+      memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
 
 
     // Bật nguồn clock tương ứng
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_Init, DBG4: Turn on clock.\n");
-    }
 
     
-    /**
-     * Ghi chú:
-     * Trong thiết phần cứng, việc kiểm tra hoạt động của HSI/HSE/LSI
-     * được thực hiện thông qua các flag hoặc là ngắt.
-     * Do đó, trong hàm khởi tạo này, ta chỉ cần thiết lập
-     * và kiểm tra các flag tương ứng để đảm bảo nguồn clock được bật đúng cách.
-     */
-    switch (init_param->CLK_Source) {
+      /**
+       * Ghi chú:
+       * Trong thiết phần cứng, việc kiểm tra hoạt động của HSI/HSE/LSI
+       * được thực hiện thông qua các flag hoặc là ngắt.
+       * Do đó, trong hàm khởi tạo này, ta chỉ cần thiết lập
+       * và kiểm tra các flag tương ứng để đảm bảo nguồn clock được bật đúng cách.
+       */
+      switch (init_param->CLK_Source) {
 
-      case 0x00ul: // HSI
+        case 0x00ul: // HSI
 
-        /**
-         * Ghi chú:
-         * Trong thiết kế của STM32F1, HSI luôn được bật từ lúc khởi động (POW reset)
-         * nên được config sẵn là nguồn clock mặc định của SYSCLK.
-         * Do đó, khởi tạo HSI chỉ cần đảm bảo HSI được bật đúng cách.
-         */
+          /**
+           * Ghi chú:
+           * Trong thiết kế của STM32F1, HSI luôn được bật từ lúc khởi động (POW reset)
+           * nên được config sẵn là nguồn clock mặc định của SYSCLK.
+           * Do đó, khởi tạo HSI chỉ cần đảm bảo HSI được bật đúng cách.
+           */
 
-        /**
-         * Ghi chú: 
-         * Trong các thiết kế trước,
-         * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn trong trường hợp HSI không thể sẵn sàng,
-         * tuy nhiên, sau khi thực hiện HIL test thì
-         * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống
-         */
+          /**
+           * Ghi chú: 
+           * Trong các thiết kế trước,
+           * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn trong trường hợp HSI không thể sẵn sàng,
+           * tuy nhiên, sau khi thực hiện HIL test thì
+           * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống
+           */
 
           // Bật HSI
-          SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET);
 
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
-        }
-        
+            SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET);
+          
           // Chờ HSI sẵn sàng
-          while (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), RCC_CR_REG_HSIRDY_ON)) {
-            
-            /**
-             * Ghi chú:
-             * Ở đây, đã đảm bảo LSI sẵn sàng để IWDG hoạt động, 
-             * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSI ổn định.
-             */
 
-            #ifdef UNIT_TEST
+            while (
+              __DIFF_CHECK(
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), 
+                RCC_CR_REG_HSIRDY_ON
+              )
+            ) {
               
               /**
                * Ghi chú:
-               * Ở đây khu vực này sẽ giả lập việc HSI không thể sẵn sàng thì sẽ dừng lại
-               * Do trong unit sẽ có các hàm giả lập việc HSI sẵn sàng nên trường hợp HSI sẵn sàng sẽ bỏ qua vòng lặp này
+               * Ở đây không cần làm gì
                */
 
-              for (int i = 10; i >= 0; i--) {
-                // Feed IWDG định kỳ trong vòng chờ
-                printf("RCC_CLK_Init, DBG-UNIT TEST: Simulate waiting for HSI ready... %d\n", i);
-                IWDG_Reload();
-              }
-              break;
-              
-            #endif
-          }
+              #ifdef UNIT_TEST
+                
+                /**
+                 * Ghi chú:
+                 * Ở đây khu vực này sẽ giả lập việc HSI không thể sẵn sàng thì sẽ dừng lại,
+                 * Do trong unit sẽ có các hàm giả lập việc HSI sẵn sàng nên 
+                 * trường hợp HSI sẵn sàng sẽ bỏ qua vòng lặp này
+                 */
 
-          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), RCC_CR_REG_HSIRDY_ON)) {
-            return STAT_ERROR; // HSI không thể sẵn sàng
-          }
+                for (int i = 10; i >= 0; i--) {
+                  
+                }
+                break;
+                
+              #endif
 
+            }
+
+          // Kiểm tra HSI đã sẵn sàng chưa
+
+            if (
+              __DIFF_CHECK(
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), 
+                RCC_CR_REG_HSIRDY_ON
+              )
+            ) {
+              return STAT_ERROR; // HSI không thể sẵn sàng
+            }
+
+            /**
+             * Ghi chú:
+             * Lúc này cờ trạng thái sẵn sàng của HSI sẽ được thiết lập
+             * Thực hiện lưu cờ trạng thái vào biến trả về
+             */ 
+
+            // Lưu trạng thái sẵn sàng HSI
+            rdy_flg->HSI_RDY_FLG = SET;
+
+            /**
+             * Ghi chú:
+             * Khi khởi động hệ thống HSI được chọn làm SYSCLK mặc định,
+             * Do đó không cần phải thực hiện chuyển đổi nguồn SYSCLK
+             */
+
+            return STAT_OK;
+
+            break;
+
+        case 0x01ul: // HSE
+          
           /**
            * Ghi chú:
-           * Lúc này cờ trạng thái sẵn sàng của HSI sẽ được thiết lập
-           * Thực hiện lưu cờ trạng thái vào biến trả về
-           */ 
-
-          // Lưu trạng thái sẵn sàng HSI
-          rdy_flg->HSI_RDY_FLG = SET;
-
-          /**
-           * Ghi chú:
-           * Khi khởi động hệ thống HSI được chọn làm SYSCLK mặc định,
-           * Do đó không cần phải thực hiện chuyển đổi nguồn SYSCLK
+           * Bật CSS trước để đảm bảo hệ thống được bảo vệ ngay 
+           * khi HSE được kích hoạt
            */
+          
+          /**
+           * Ghi chú: 
+           * Trong các thiết kế trước,
+           * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn trong trường hợp HSE không thể sẵn sàng,
+           * tuy nhiên, sau khi thực hiện HIL test thì
+           * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống
+           */
+          
+          // Bật CSS trước khi bật HSE
 
-          return STAT_OK;
+            RCC_CSS_Enable();
 
-          break;
+          // Bật HSE
 
-      case 0x01ul: // HSE
-        
-        /**
-         * Ghi chú:
-         * Bật CSS trước để đảm bảo hệ thống được bảo vệ ngay 
-         * khi HSE được kích hoạt
-         */
-        
-        /**
-         * Ghi chú: 
-         * Trong các thiết kế trước,
-         * IWDG được sử dụng như 1 giải pháp đảm bảo an toàn trong trường hợp HSE không thể sẵn sàng,
-         * tuy nhiên, sau khi thực hiện HIL test thì
-         * IWDG không cần khởi động vì hệ thống tự động chọn HWDG để đảm bảo an toàn cho toàn hệ thống
-         */
-        
-        // Bật CSS trước khi bật HSE
-        RCC_CSS_Enable();
-
-        
-        // Bật HSE
-        SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
-
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
-        }
+            SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
 
           // Chờ HSE sẵn sàng
-          while (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), RCC_CR_REG_HSERDY_ON)) {
+
+            while (
+              __DIFF_CHECK(
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), 
+                RCC_CR_REG_HSERDY_ON
+              )
+            ) {
+
+              /**
+               * Ghi chú:
+               * Ở đây không cần làm gì.
+               */
+
+              #ifdef UNIT_TEST
+                
+                /**
+                 * Ghi chú:
+                 * Ở đây khu vực này sẽ giả lập việc HSE không thể sẵn sàng thì sẽ dừng lại,
+                 * Do trong unit sẽ có các hàm giả lập việc HSE sẵn sàng nên 
+                 * trường hợp HSE sẵn sàng sẽ bỏ qua vòng lặp này
+                 */
+
+                for (int i = 10; i >= 0; i--) {
+
+                }
+                break;
+                
+              #endif
+            }
+
+          // Kiểm tra HSE sẵn sàng hay chưa
+
+            if (
+              __DIFF_CHECK(
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), 
+                RCC_CR_REG_HSERDY_ON
+              )
+            ) {
+              return STAT_ERROR; // HSE không thể sẵn sàng
+            }
 
             /**
              * Ghi chú:
-             * Ở đây, đã đảm bảo LSI sẵn sàng để IWDG hoạt động, 
-             * chỉ cần thực hiện việc feed IWDG định kỳ trong vòng chờ HSE ổn định.
-             * Lưu ý rằng, ở các thiết kế trước IWDG được khởi động trong vòng chờ HSE,
-             * tuy nhiên sau khi xem xét thì có thể xảy ra trường hợp 
-             * HSE sẵn sàng rất nhanh trước khi IWDG kịp khởi động,
-             * dẫn đến việc hệ thống vẫn có thể bị treo nếu HSE gặp sự cố sau đó.
-             * Do đó, việc khởi động IWDG trước khi chờ HSE sẵn sàng
-             * sẽ giúp hệ thống an toàn hơn.
+             * Lúc này cờ trạng thái sẵn sàng của HSE sẽ được thiết lập
+             * Thực hiện lưu cờ trạng thái vào biến trả về
              */
 
-            #ifdef UNIT_TEST
-              
-              /**
-               * Ghi chú:
-               * Ở đây khu vực này sẽ giả lập việc HSE không thể sẵn sàng thì sẽ dừng lại,
-               * Do trong unit sẽ có các hàm giả lập việc HSE sẵn sàng nên 
-               * trường hợp HSE sẵn sàng sẽ bỏ qua vòng lặp này
-               */
+            // Lưu trạng thái sẵn sàng HSE
+            rdy_flg->HSE_RDY_FLG = SET;
 
-              for (int i = 10; i >= 0; i--) {
-                // Feed IWDG định kỳ trong vòng chờ
-                printf("RCC_CLK_Init, DBG-UNIT TEST: Simulate waiting for HSE ready... %d\n", i);
-                IWDG_Reload();
-              }
-              break;
-              
-            #endif
-          }
+          // Chuyển SYSCLK sang HSE sau khi HSE sẵn sàng
+            
+            if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSE))) {
+              return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
+            }
 
-          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), RCC_CR_REG_HSERDY_ON)) {
-            return STAT_ERROR; // HSE không thể sẵn sàng
-          }
+            return STAT_OK;
 
-          /**
-           * Ghi chú:
-           * Lúc này cờ trạng thái sẵn sàng của HSE sẽ được thiết lập
-           * Thực hiện lưu cờ trạng thái vào biến trả về
-           */
-
-          // Lưu trạng thái sẵn sàng HSE
-          rdy_flg->HSE_RDY_FLG = SET;
-
-          if (__DEBUG_GET_MODE(ENABLE)) {
-            printf("RCC_CLK_Init, DBG5-1: Select SYSCLK.\n");
-          }
-
-          if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSE))) {
-            return STAT_ERROR; // Chuyển đổi nguồn SYSCLK thất bại
-          }
-
-          return STAT_OK;
-
-          break;
-
-      case 0x0Ful: // LSI
-      
-        // Bật LSI
-        SET_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LSION_SET);
-
-        if (__DEBUG_GET_MODE(ENABLE)) {
-          printf("RCC_CLK_Init, DBG5: Wait for ready flag.\n");
-        }
-
-          // Chờ LSI sẵn sàng
-          while (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LSIRDY_ON), RCC_CSR_REG_LSIRDY_ON)) {
-
-            #ifdef UNIT_TEST
-              
-              /**
-               * Ghi chú:
-               * Ở đây khu vực này sẽ giả lập việc LSI không thể sẵn sàng thì sẽ dừng lại,
-               * Do trong unit sẽ có các hàm giả lập việc LSI sẵn sàng nên 
-               * trường hợp LSI sẵn sàng sẽ bỏ qua vòng lặp này
-               */
-
-              for (int i = 10; i >= 0; i--) {
-                // Feed IWDG định kỳ trong vòng chờ
-                printf("RCC_CLK_Init, DBG-UNIT TEST: Simulate waiting for LSI ready... %d\n", i);
-              }
-              break;
-              
-            #endif
-
-          }
-
-          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LSIRDY_ON), RCC_CSR_REG_LSIRDY_ON)) {
-            return STAT_ERROR; // LSI không thể sẵn sàng
-          }
-
-          /**
-           * Ghi chú:
-           * Lúc này cờ trạng thái sẵn sàng của LSI sẽ được thiết lập
-           * Thực hiện lưu cờ trạng thái vào biến trả về
-           */
-
-          // Lưu trạng thái sẵn sàng LSI
-          rdy_flg->LSI_RDY_FLG = SET;
-
-          return STAT_OK;
-
-          break;
-      
-      default:
-
-        return STAT_ERROR;
+            break;
         
-        break;
-    }
+        default:
+
+          return STAT_ERROR;
+          
+          break;
+      }
 
     /**
      * Ghi chú:
@@ -325,10 +276,6 @@
      */
 
     // Kết thúc quy trình khởi tạo
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_Init, DBG6: Setup procedure done.\n");
-    }
-
       return STAT_DONE;
   }
 
@@ -348,23 +295,17 @@
    * 
    * Phụ thuộc ngoài module Clock: Không có
    */
-  RETR_STAT RCC_SYSCLK_Switch(ui32 sysclk_source) {
-
-    // Kiểm tra tham số đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_SYSCLK_Switch, DBG1: Assert parameter.\n");
-    }
+  stinl RETR_STAT RCC_SYSCLK_Switch(ui32 sysclk_source) {
       
+    // Kiểm tra giá trị tham số đầu vào
+
       assert_param(IS_RCC_SYSCLK_SOURCE(sysclk_source));
 
-    // Gán giá trị chọn nguồn SYSCLK
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_SYSCLK_Switch, DBG2: Switch SYSCLK source.\n");
-    }
+    // Gán giá trị chọn nguồn SYSCLK vào thanh ghi cấu hình
       
       SET_BIT(RCC_REGS_PTR->CFGR, sysclk_source);
 
-      // Kiểm tra lại trạng thái đã chuyển đổi
+    // Kiểm tra lại trạng thái đã chuyển đổi
 
       /**
        * Ghi chú:
@@ -375,13 +316,24 @@
 
       switch (sysclk_source) {
         case RCC_SYSCLK_SOURCE_HSI:
-          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSI), RCC_CFGR_REG_SWS_HSI)) {
+
+          if (
+            __DIFF_CHECK(
+              READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSI), 
+              RCC_CFGR_REG_SWS_HSI
+            )
+          ) {
             return STAT_ERROR;
           }
           break;
 
         case RCC_SYSCLK_SOURCE_HSE:
-          if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSE), RCC_CFGR_REG_SWS_HSE)) {
+          if (
+            __DIFF_CHECK(
+              READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSE), 
+              RCC_CFGR_REG_SWS_HSE
+            )
+          ) {
             return STAT_ERROR;
           }
           break;
@@ -390,6 +342,8 @@
           return STAT_ERROR;
           break;
       }
+
+    // Kết thúc quy trình chuyển đổi
 
       return STAT_DONE;
   }
@@ -424,9 +378,6 @@
      */
 
     // Kiểm tra con trỏ đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_DeInit, DBG1: Check Null pointer.\n");
-    }
 
       if (__NULL_PTR_CHECK(init_param)) {
         return STAT_ERROR;
@@ -436,23 +387,14 @@
       }
 
     // Kiểm tra giá trị tham số đầu vào
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_DeInit, DBG2: Assert parameter.\n");
-    }
 
       assert_param(IS_RCC_SYSCLK_SOURCE(init_param->CLK_Source));
 
     // Làm mới biến cờ trạng thái
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_DeInit, DBG3: Clear Clock ready flags kit.\n");
-    }
       
       memset(rdy_flg, 0, sizeof(RCC_RDYFLG_Typdef));
 
     // Tắt nguồn clock tương ứng
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_CLK_DeInit, DBG4: Turn off clock.\n");
-    }
 
       /**
        * Ghi chú:
@@ -486,47 +428,38 @@
            */
 
           // Nếu HSI chưa sẵn sàng thì khởi tạo HSI trước khi tắt HSE
-          if (__NRDY_CHECK(RCC_IsHSIReady())) {
-            RCC_CLK_Init_Param rcc_hsi_init;
-            rcc_hsi_init.CLK_Source = RCC_SYSCLK_SOURCE_HSI;
-            RCC_RDYFLG_Typdef hsi_rdy_flg;
-            if (!__OK_CHECK(RCC_CLK_Init(&rcc_hsi_init, &hsi_rdy_flg))) {
-              return STAT_ERROR;
+            
+            if (__NRDY_CHECK(RCC_IsHSIReady())) {
+              RCC_CLK_Init_Param rcc_hsi_init;
+              rcc_hsi_init.CLK_Source = RCC_SYSCLK_SOURCE_HSI;
+              RCC_RDYFLG_Typdef hsi_rdy_flg;
+              if (!__OK_CHECK(RCC_CLK_Init(&rcc_hsi_init, &hsi_rdy_flg))) {
+                return STAT_ERROR;
+              }
             }
-          }
-
 
           // Chuyển SYSCLK về HSI
-          if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSI))) {
-            return STAT_ERROR;
-          }
+
+            if (!__DONE_CHECK(RCC_SYSCLK_Switch(RCC_SYSCLK_SOURCE_HSI))) {
+              return STAT_ERROR;
+            }
 
           
           // Tắt HSE
-          CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
-          break;
-        
-        case RCC_IWDG_SOURCE_LSI:
 
-          /**
-           * Ghi chú:
-           * Không thể tắt LSI sau khi đã khởi động IWDG
-           * Do đó, nếu LSI đang được sử dụng làm nguồn clock cho IWDG
-           * IWDG cũng không thể tắt
-           */
-
-          // Không thể tắt LSI nếu đang dùng cho IWDG
-          return STAT_ERROR;
-          break;
+            CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
+            break;
 
         default:
-          // Tham số không hợp lệ
-          return STAT_ERROR;
-          break;
+
+            return STAT_ERROR;
+
+            break;
       }
 
       // Kết thúc quy trình deinit
-      return STAT_DONE;
+     
+        return STAT_DONE;
   }
 
   /*
@@ -534,8 +467,7 @@
    * Không có tham số và không trả về giá trị.
    * Phụ thuộc ngoài module Clock: Không có
    */
-  void RCC_CSS_Enable(void) {
-    
+  stinl void RCC_CSS_Enable(void) {
     SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_CSSON_SET);
   }
 
@@ -544,51 +476,8 @@
    * Không có tham số và không trả về giá trị.
    * Phụ thuộc ngoài module Clock: Không có
    */
-  void RCC_CSS_Disable(void) {
-
+  stinl void RCC_CSS_Disable(void) {
     CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_CSSON_SET);
-  }
-
-  /*
-   * Hàm xử lý ngắt NMI do Clock Security System (CSS).
-   *
-   * Logic:
-   *   - Kiểm tra cờ CSSF (Clock Security System Failure).
-   *   - Nếu có lỗi clock (CSSF == SET):
-   *       + Gọi callback RCC_CSS_Callback() để user xử lý lỗi.
-   *       + Xóa cờ CSSF bằng cách ghi vào trường CSSC.
-   *
-   * Không có tham số và không trả về giá trị.
-   * 
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  void RCC_NMI_IRQ_Handler(void) {
-
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CIR, RCC_CIR_REG_CSSF_ON), RCC_CIR_REG_CSSF_ON)) {
-      // Xử lý sự kiện lỗi clock (CSS Failure)
-      RCC_CSS_Callback();
-      // Xóa cờ CSSF với CSSC
-      SET_BIT(RCC_REGS_PTR->CIR, RCC_CIR_REG_CSSC_SET);
-    }
-
-    while (1) {
-      // Vòng lặp vô hạn để tránh thoát khỏi hàm IRQ
-    }
-  }
-
-  /*
-   * Hàm callback yếu cho CSS (có thể override ở user code).
-   * Không có tham số và không trả về giá trị.
-   * 
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  __weak void RCC_CSS_Callback(void) {
-    /**
-     * Ghi chú:
-     * Ở đây chỉ là hàm callback yếu,
-     * Người dùng có thể override hàm này trong code của họ
-     * để xử lý sự kiện lỗi clock theo nhu cầu cụ thể.
-     */
   }
 
   /*
@@ -599,8 +488,13 @@
    * 
    * Phụ thuộc ngoài module Clock: Không có
    */
-  RETR_STAT RCC_IsHSIReady(void) {
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET), RCC_CR_REG_HSION_SET)) {
+  stinl RETR_STAT RCC_IsHSIReady(void) {
+    if (
+      __DIFF_CHECK(
+        READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET), 
+        RCC_CR_REG_HSION_SET
+      )
+    ) {
       return STAT_NRDY;
     } else {
       return STAT_RDY;
@@ -615,25 +509,13 @@
    * 
    * Phụ thuộc ngoài module Clock: Không có
    */
-  RETR_STAT RCC_IsHSEReady(void) {
-
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET), RCC_CR_REG_HSEON_SET)) {
-      return STAT_NRDY;
-    } else {
-      return STAT_RDY;
-    }
-  }
-
-  /*
-   * Hàm kiểm tra trạng thái sẵn sàng của nguồn clock LSI.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_RDY nếu LSI đã sẵn sàng, STAT_NRDY nếu chưa.
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  RETR_STAT RCC_IsLSIReady(void) {
-
-    if (__DIFF_CHECK(READ_BIT(RCC_REGS_PTR->CSR, RCC_CSR_REG_LSION_SET), RCC_CSR_REG_LSION_SET)) {
+  stinl RETR_STAT RCC_IsHSEReady(void) {
+    if (
+      __DIFF_CHECK(
+        READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET), 
+        RCC_CR_REG_HSEON_SET
+      )
+    ) {
       return STAT_NRDY;
     } else {
       return STAT_RDY;
@@ -670,63 +552,62 @@
    */
   RETR_STAT RCC_PCLK_Enable(ul periph) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_PCLK_Enable, DBG1: Assert parameter.\n");
-    }
+    // Kiểm tra tham số đầu vào
 
       assert_param(IS_RCC_PERIPH(periph));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_PCLK_Enable, DBG2: Enable peripheral clock.\n");
-    }
+    // Bật clock cho ngoại vi tương ứng
     
-    switch (periph) {
-      case AFIO:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, AFIO);
-        return STAT_OK;
-        break;
+      switch (periph) {
 
-      case GPIOA:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOA);
-        return STAT_OK;
-        break;
-      
-      case GPIOB:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOB);
-        return STAT_OK;
-        break;
-      
-      case GPIOC:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOC);
-        return STAT_OK;
-        break;
-      
-      case GPIOD:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOD);
-        return STAT_OK;
-        break;
+        case AFIO:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, AFIO);
+          return STAT_OK;
+          break;
 
-      case GPIOE:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOE);
-        return STAT_OK;
-        break;
+        case GPIOA:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOA);
+          return STAT_OK;
+          break;
+        
+        case GPIOB:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOB);
+          return STAT_OK;
+          break;
+        
+        case GPIOC:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOC);
+          return STAT_OK;
+          break;
+        
+        case GPIOD:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOD);
+          return STAT_OK;
+          break;
 
-      case GPIOF:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOF);
-        return STAT_OK;
-        break;
+        case GPIOE:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOE);
+          return STAT_OK;
+          break;
 
-      case GPIOG:
-        SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOG);
-        return STAT_OK;
-        break;
+        case GPIOF:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOF);
+          return STAT_OK;
+          break;
 
-      default:
-        return STAT_ERROR;
-        break;
-    }
+        case GPIOG:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOG);
+          return STAT_OK;
+          break;
 
-    return STAT_DONE;
+        default:
+          return STAT_ERROR;
+          break;
+      }
+
+    // Kết thúc quy trình kích hoạt
+
+      return STAT_DONE;
   }
 
   /*
@@ -759,61 +640,59 @@
    */
   RETR_STAT RCC_PCLK_Disable(ul periph) {
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_PCLK_Disable, DBG1: Assert parameter.\n");
-    }
+    // Kiểm tra tham số đầu vào
 
       assert_param(IS_RCC_PERIPH(periph));
 
-    if (__DEBUG_GET_MODE(ENABLE)) {
-      printf("RCC_PCLK_Disable, DBG2: Disable peripheral clock.\n");
-    }
+    // Khóa nguồn clock
 
-    switch (periph) {
-      case AFIO:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, AFIO);
-        return STAT_OK;
-        break;
+      switch (periph) {
+        case AFIO:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, AFIO);
+          return STAT_OK;
+          break;
 
-      case GPIOA:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOA);
-        return STAT_OK;
-        break;
-      
-      case GPIOB:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOB);
-        return STAT_OK;
-        break;
-      
-      case GPIOC:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOC);
-        return STAT_OK;
-        break;
-      
-      case GPIOD:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOD);
-        return STAT_OK;
-        break;
+        case GPIOA:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOA);
+          return STAT_OK;
+          break;
+        
+        case GPIOB:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOB);
+          return STAT_OK;
+          break;
+        
+        case GPIOC:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOC);
+          return STAT_OK;
+          break;
+        
+        case GPIOD:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOD);
+          return STAT_OK;
+          break;
 
-      case GPIOE:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOE);
-        return STAT_OK;
-        break;
+        case GPIOE:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOE);
+          return STAT_OK;
+          break;
 
-      case GPIOF:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOF);
-        return STAT_OK;
-        break;
+        case GPIOF:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOF);
+          return STAT_OK;
+          break;
 
-      case GPIOG:
-        CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOG);
-        return STAT_OK;
-        break;
+        case GPIOG:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOG);
+          return STAT_OK;
+          break;
 
-      default:
-        return STAT_ERROR;
-        break;
-    }
+        default:
+          return STAT_ERROR;
+          break;
+      }
 
-    return STAT_DONE;
+    // Kết thúc quá trình
+
+      return STAT_DONE;
   }

@@ -111,13 +111,6 @@
 
 		# define RCC_SYSCLK_SOURCE_HSI RCC_CFGR_REG_SW_SET_HSI
 		# define RCC_SYSCLK_SOURCE_HSE RCC_CFGR_REG_SW_SET_HSE
-		# define RCC_IWDG_SOURCE_LSI 0xFul
-
-		/**
-		 * Ghi chú:
-		 * RCC_IWDG_SOURCE_LSI là giá trị giả định để truyền vào hàm khởi tạo
-		 * LSI không được sử dụng làm SYSCLK select nên không có định nghĩa tương ứng
-		 */
 
 	// Khai báo các ngoại vi cần mở nguồn
 
