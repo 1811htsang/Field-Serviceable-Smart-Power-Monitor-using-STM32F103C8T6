@@ -1,0 +1,126 @@
+/*
+ * lib_exti_hal.h
+ *
+ *  Created on: Mar 1, 2026
+ *      Author: shanghuang
+ */
+
+#ifndef LIB_EXTI_HAL_H_
+  #define LIB_EXTI_HAL_H_
+
+  // Khai báo các thư viện sử dụng chung
+
+    #ifndef UNIT_TEST
+      #include "generic/lib_keyword_def.h"
+      #include "exti/lib_exti_def.h"
+      #include "gpio/lib_gpio_def.h"
+      #include "gpio/lib_gpio_hal.h"
+      #include "afio/lib_afio_def.h"
+      #include "afio/lib_afio_hal.h"
+    #else
+      #include "lib_keyword_def.h"
+      #include "lib_exti_def.h"
+      #include "header_dependency.h"
+    #endif
+
+    #include <stdint.h>
+
+  // Khai báo cấu trúc tham số hàm xử lý ngắt
+
+    #ifndef EXTI_HANDLE_PARAM_TYPE
+      #define EXTI_HANDLE_PARAM_TYPE
+        tdf_strc EXTI_Handle_Param{ // Cấu trúc quản lý thông tin handler xử lý ngắt cho mỗi line EXTI
+          ui16 Line;      // Chọn line EXTI cần xử lý
+          void (*Callback)(void); // Con trỏ hàm callback để gọi khi có ngắt EXTI xảy ra
+        } EXTI_Handle_Param;
+    #endif
+
+  // Khai báo cấu trúc quản lý đa sự kiện
+
+    #ifndef EXTI_CALLBACK_EVENT_PARAM_TYPE
+      #define EXTI_CALLBACK_EVENT_PARAM_TYPE
+        tdf_enum EXTI_Callback_Event_Param_Type {
+          EXTI_COMMON_CB_ID = 0xFFu // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
+        } EXTI_Callback_Event_Param_Type;
+    #endif
+
+  // Khai báo các kiểm tra tham số đầu vào nội bộ
+
+    /**
+     * Ghi chú:
+     * Hiện tại các hàm xử lý EXTI sẽ sử dụng trực tiếp các tham số 
+     * đã được kiểm tra trong hàm khởi tạo AFIO_EXTI_Line_Init
+     */
+    
+  // Khai báo các hàm thành phần 
+
+    // >> Hàm cấu hình tham số EXTI theo thông tin line đã khởi tạo trong AFIO
+    RETR_STAT EXTI_Config_Init(
+      GPIO_Init_Param *gpio_init_param,
+      AFIO_EXTI_Init_Param *afio_init_param
+    );
+
+    // >> Hàm vô hiệu hóa tham số EXTI theo thông tin line đã khởi tạo trong AFIO
+    RETR_STAT EXTI_Config_DeInit(
+      GPIO_Init_Param *gpio_init_param,
+      AFIO_EXTI_Init_Param *afio_init_param
+    );
+
+    // >> Hàm xử lý ngắt EXTI cấp handler
+    void EXTI_Generic_IRQHandler(EXTI_Handle_Param *handle_param);
+
+    // >> Hàm xử lý ngắt EXTI cấp chân 
+    void EXTI_IRQHandler(ui16 Pin);
+
+    // >> Hàm đăng ký callback xử lý ngắt EXTI
+    RETR_STAT EXTI_RegisterCallback(
+      EXTI_Handle_Param *handle_param,
+      EXTI_Callback_Event_Param_Type callback_event_type,
+      void (*callback_func)(void)
+    );
+
+    // >> Hàm đăng ký thông tin line EXTI vào bảng quản lý của module EXTI
+    RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param);
+
+    // >> Hàm tạo ngắt EXTI bằng phần mềm
+    /*
+     * Hàm tạo ngắt EXTI bằng phần mềm (Software Interrupt) cho một line cụ thể.
+     *
+     * Tham số:
+     *   handle_param - Con trỏ tới cấu trúc handle EXTI (chứa Line).
+     *
+     * Logic:
+     *   - Kiểm tra con trỏ handle_param hợp lệ.
+     *   - Kiểm tra giá trị tham số Line.
+     *   - Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm.
+     *   - Ngắt này sẽ kích hoạt EXTI_IRQHandler như ngắt thông thường.
+     *   - Hữu ích cho testing hoặc mô phỏng sự kiện EXTI.
+     *
+     * Trả về:
+     *   Không có (void).
+     *
+     * Phụ thuộc ngoài module EXTI:
+     *   - assert_param() - Macro kiểm tra điều kiện
+     *   - EXTI_Generic_IRQHandler() - Hàm xử lý ngắt được gọi
+     *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+     */
+    stinl void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param) {
+
+      // Kiểm tra con trỏ handle_param hợp lệ
+
+        if (handle_param == NULL) {
+          return;
+        }
+
+      // Kiểm tra giá trị tham số Line hợp lệ
+
+        if (handle_param->Line >= 16) {
+          return;
+        }
+
+      // Tạo ngắt EXTI bằng phần mềm bằng cách set bit tương ứng trong SWIER
+
+        EXTI_REGS_PTR->EXTI_SWIER |= (0x0001u << handle_param->Line); // Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm
+    }
+
+#endif /* LIB_EXTI_HAL_H_ */
