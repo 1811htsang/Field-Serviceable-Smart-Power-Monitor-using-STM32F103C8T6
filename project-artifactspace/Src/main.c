@@ -20,21 +20,29 @@
 
 	#include <stdio.h>
 	#include <stdint.h>
+
 	#include "generic/lib_keyword_def.h"
 	#include "generic/lib_condition_def.h"
 	#include "log/lib_log_def.h"
+
 	#include "clock/lib_clock_def.h"
 	#include "clock/lib_clock_hal.h"
+
 	#include "reset/lib_reset_def.h"
 	#include "reset/lib_reset_hal.h"
+
 	#include "iwdg/lib_iwdg_def.h"
 	#include "iwdg/lib_iwdg_hal.h"
+
 	#include "gpio/lib_gpio_def.h"
 	#include "gpio/lib_gpio_hal.h"
+
 	#include "afio/lib_afio_def.h"
 	#include "afio/lib_afio_hal.h"
+
 	#include "exti/lib_exti_def.h"
 	#include "exti/lib_exti_hal.h"
+
 	#include "nvic/lib_nvic_def.h"
 	#include "nvic/lib_nvic_hal.h"
 	
@@ -42,6 +50,11 @@
 	#if !defined(__SOFT_FP__) && defined(__ARM_FP)
 		#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 	#endif
+
+// Khai báo các define sử dụng
+
+	#define LED_ON    GPIO_PIN_RESET // PC13 Active Low
+	#define LED_OFF   GPIO_PIN_SET
 
 // Khai báo callback EXTI
 
@@ -108,24 +121,21 @@
 
 		// Khởi động mẫu GPIO kèm theo cấu hình ngắt AFIO, EXTI và NVIC
 
-			RCC_PCLK_Enable(GPIOB); // Bật clock cho GPIOB
+			RCC_PCLK_Enable(GPIOC); // Bật clock cho GPIOC
 
 			GPIO_Init_Param gpio_init_param = {
-				.Pin = GPIO_PIN_11,
-				.Mode = GPIO_MODE_INPUT_PU_PD,
-				.Pull = GPIO_PULLUP,
+				.Pin = GPIO_PIN_13,
+				.Mode = GPIO_MODE_OUTPUT_50MHz_PP,
+				.Pull = GPIO_NOPULL,
 				.Trigger = GPIO_TRIGGER_RISING
 			};
 
-			if (!__DONE_CHECK(GPIO_Init(GPIOB_REGS_PTR,&gpio_init_param))) {
+			if (!__DONE_CHECK(GPIO_Init(GPIOC_REGS_PTR, &gpio_init_param))) {
 				LOG_E("Main", "GPIO initialization failed.");
 				return -1;
 			}
 
-			/**
-			 * Ghi chú:
-			 * Bên trên đã bật clock cho AFIO khi cấu hình nên không cần bật lại ở đây.
-			 */
+			RCC_PCLK_Enable(AFIO);
 
 			AFIO_EXTI_Init_Param afio_exti_init_param = {
 				.Port = AFIO_EXTICR_PORTB,
@@ -144,7 +154,7 @@
 			}
 
 			EXTI_Handle_Param exti_handle_param = {
-				.Line = afio_exti_init_param.Line, // Giá trị mặc định, sẽ được cập nhật trong hàm AFIO_EXTI_Line_Init
+				.Line = afio_exti_init_param.Line, // Giá trị mặc định, đã được cập nhật trong hàm AFIO_EXTI_Line_Init
 				.Callback = callback_function // Đăng ký callback cho ngắt EXTI
 			};
 
@@ -152,7 +162,6 @@
 				LOG_E("Main", "EXTI parameter registration failed.");
 				return -1;
 			}
-
 
 			NVIC_INTR_Param nvic_init_param = {
 					.Position = NVIC_IRQ_POS_EXTI15_10,
@@ -167,6 +176,12 @@
 
 			ui32 nvic_activation = NVIC_INTR_GetActivation(NVIC_IRQ_POS_EXTI15_10);
 			LOG_D("Main", "NVIC activation status for EXTI15_10 - %s.", (nvic_activation == SET) ? "Enabled" : "Disabled");
+
+		// Thực hiện tắt chân PC13 
+
+			GPIO_WritePin(GPIOC_REGS_PTR, GPIO_PIN_13, LED_OFF);
+
+			LOG_D("Main", "Initial setup completed. Entering main loop.");
 
 		// Vòng lặp chính
 
