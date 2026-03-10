@@ -37,9 +37,9 @@
 	// Khai báo các hàm thành phần
 
 		// >> Hàm thực hiện reset phần mềm hệ thống
-		void RST_SYS_SW_Reset(void);
+		stinl void RST_SYS_SW_Reset(void);
 
 		// >> Hàm catch reset event sau khi khởi động lại hệ thống
-		void RST_SRC_Capture(RCC_RSTFLG_Typedef *reset_source);
+		stinl void RST_SRC_Capture(RCC_RSTFLG_Typedef *reset_source);
 
 #endif /* LIB_RESET_HAL_H_ */

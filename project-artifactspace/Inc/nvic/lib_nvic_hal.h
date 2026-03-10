@@ -90,17 +90,17 @@
 
     // >> Hàm cấu hình trạng thái kích hoạt của ngắt cấp hệ thống
 
-      void NVIC_INTR_Activation_Enable(NVIC_INTR_Param *intr_param);
-      void NVIC_INTR_Activation_Disable(NVIC_INTR_Param *intr_param);
+      stinl void NVIC_INTR_Activation_Enable(NVIC_INTR_Param *intr_param);
+      stinl void NVIC_INTR_Activation_Disable(NVIC_INTR_Param *intr_param);
 
     // >> Hàm cấu hình trạng thái pending của ngắt cấp hệ thống
 
-      void NVIC_INTR_Pending_Enable(NVIC_INTR_Param *intr_param);
-      void NVIC_INTR_Pending_Disable(NVIC_INTR_Param *intr_param);
+      stinl void NVIC_INTR_Pending_Enable(NVIC_INTR_Param *intr_param);
+      stinl void NVIC_INTR_Pending_Disable(NVIC_INTR_Param *intr_param);
 
     // >> Hàm cấu hình mức ưu tiên của ngắt cấp hệ thống
 
-      void NVIC_INTR_Priority_Config(NVIC_INTR_Param *intr_param);
+      stinl void NVIC_INTR_Priority_Config(NVIC_INTR_Param *intr_param);
 
     // >> Hàm cấu hình tổng quát trạng thái ngắt cấp hệ thống kích hoạt
 
@@ -108,10 +108,10 @@
 
     // >> Hàm kiểm tra trạng thái ngắt cấp hệ thống
 
-      ui32 NVIC_INTR_GetActivation(IRQ_POS_Enum_Type position);
+      stinl ui32 NVIC_INTR_GetActivation(IRQ_POS_Enum_Type position);
 
     // >> Hàm kiểm tra trạng thái pending của ngắt cấp hệ thống
 
-      ui32 NVIC_INTR_GetPending(IRQ_POS_Enum_Type position);
+      stinl ui32 NVIC_INTR_GetPending(IRQ_POS_Enum_Type position);
 
 #endif /* LIB_NVIC_HAL_H_ */
