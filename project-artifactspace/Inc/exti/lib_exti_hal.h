@@ -53,9 +53,6 @@
      */
     
   // Khai báo các hàm thành phần 
-  
-    // >> Hàm đăng ký thông tin line EXTI vào bảng quản lý của module EXTI
-    stinl RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param);
 
     // >> Hàm cấu hình tham số EXTI theo thông tin line đã khởi tạo trong AFIO
     RETR_STAT EXTI_Config_Init(
@@ -82,7 +79,48 @@
       void (*callback_func)(void)
     );
 
+    // >> Hàm đăng ký thông tin line EXTI vào bảng quản lý của module EXTI
+    RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param);
+
     // >> Hàm tạo ngắt EXTI bằng phần mềm
-    stinl void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param);
+    /*
+     * Hàm tạo ngắt EXTI bằng phần mềm (Software Interrupt) cho một line cụ thể.
+     *
+     * Tham số:
+     *   handle_param - Con trỏ tới cấu trúc handle EXTI (chứa Line).
+     *
+     * Logic:
+     *   - Kiểm tra con trỏ handle_param hợp lệ.
+     *   - Kiểm tra giá trị tham số Line.
+     *   - Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm.
+     *   - Ngắt này sẽ kích hoạt EXTI_IRQHandler như ngắt thông thường.
+     *   - Hữu ích cho testing hoặc mô phỏng sự kiện EXTI.
+     *
+     * Trả về:
+     *   Không có (void).
+     *
+     * Phụ thuộc ngoài module EXTI:
+     *   - assert_param() - Macro kiểm tra điều kiện
+     *   - EXTI_Generic_IRQHandler() - Hàm xử lý ngắt được gọi
+     *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+     */
+    stinl void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param) {
+
+      // Kiểm tra con trỏ handle_param hợp lệ
+
+        if (handle_param == NULL) {
+          return;
+        }
+
+      // Kiểm tra giá trị tham số Line hợp lệ
+
+        if (handle_param->Line >= 16) {
+          return;
+        }
+
+      // Tạo ngắt EXTI bằng phần mềm bằng cách set bit tương ứng trong SWIER
+
+        EXTI_REGS_PTR->EXTI_SWIER |= (0x0001u << handle_param->Line); // Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm
+    }
 
 #endif /* LIB_EXTI_HAL_H_ */

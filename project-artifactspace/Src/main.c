@@ -31,9 +31,6 @@
 	#include "reset/lib_reset_def.h"
 	#include "reset/lib_reset_hal.h"
 
-	#include "iwdg/lib_iwdg_def.h"
-	#include "iwdg/lib_iwdg_hal.h"
-
 	#include "gpio/lib_gpio_def.h"
 	#include "gpio/lib_gpio_hal.h"
 

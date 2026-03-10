@@ -33,38 +33,6 @@
 // Định nghĩa các hàm thành phần
 
   /*
-   * Hàm cấu hình remap chân cho các ngoại vi sử dụng AFIO.
-   *
-   * Tham số:
-   *   Peri - Mã định danh ngoại vi cần remap (bitmask từ AFIO_MAPR).
-   *
-   * Logic:
-   *   - Kiểm tra giá trị tham số Peri hợp lệ.
-   *   - Ghi giá trị Peri vào thanh ghi AFIO_MAPR để kích hoạt remap.
-   *   - Thanh ghi MAPR cho phép remap các chức năng alternate của ngoại vi
-   *     như USART, SPI, I2C, TIM sang các chân GPIO khác.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_DONE nếu remap thành công.
-   *
-   * Phụ thuộc ngoài module AFIO:
-   *   - assert_param() - Macro kiểm tra điều kiện
-   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
-   */
-  stinl RETR_STAT AFIO_PinRemap(ui32 Peri) {
-
-    // Kiểm tra giá trị tham số hợp lệ
-
-      assert_param(IS_AFIO_PERI_REMAP(Peri));
-
-    // Ghi giá trị Peri vào thanh ghi AFIO_MAPR để kích hoạt remap
-
-      AFIO_REGS_PTR->AFIO_MAPR |= Peri;
-
-    return STAT_DONE;
-  }
-
-  /*
    * Hàm khởi tạo EXTI line cho một chân GPIO cụ thể thông qua AFIO.
    *
    * Tham số:
@@ -111,21 +79,28 @@
        * Trong thiết kế code thì index-based là 0
        */
 
-      // Xóa các bit cũ tại vị trí cần cấu hình
-      AFIO_REGS_PTR->AFIO_EXTICR[reg_index] &= ~(0x0Fu << shift);
-      // Ghi giá trị Port vào vị trí cần cấu hình
-      AFIO_REGS_PTR->AFIO_EXTICR[reg_index] |= (init_param->Port << shift);
+      // >> Xóa các bit cũ tại vị trí cần cấu hình
 
-      /**
-       * Ghi chú:
-       * Ví dụ ta cần cấu hình cho chân GPIOB pin 6 (tương ứng với EXTI6):
-       * - Port = AFIO_EXTICR_PORTB (0x01), Shift = 6 % 4 = 2 → index = 1, shift = (6 % 4) * 4 = 2 * 4 = 8
-       * - Ta sẽ xóa các bit cũ tại vị trí bit 8-11 của AFIO_EXTICR[1] rồi ghi giá trị 0x01 vào đó để cấu hình EXTI6 cho GPIOB.
-       */
+      	AFIO_REGS_PTR->AFIO_EXTICR[reg_index] &= ~(0x0Fu << shift);
 
-      init_param->Line = pin_index; // Lưu thông tin Line vào cấu trúc tham số để sử dụng cho EXTI
+      // >> Ghi giá trị Port vào vị trí cần cấu hình
 
-    return STAT_DONE;
+      	AFIO_REGS_PTR->AFIO_EXTICR[reg_index] |= (init_param->Port << shift);
+
+				/**
+				 * Ghi chú:
+				 * Ví dụ ta cần cấu hình cho chân GPIOB pin 6 (tương ứng với EXTI6):
+				 * - Port = AFIO_EXTICR_PORTB (0x01), Shift = 6 % 4 = 2 → index = 1, shift = (6 % 4) * 4 = 2 * 4 = 8
+				 * - Ta sẽ xóa các bit cũ tại vị trí bit 8-11 của AFIO_EXTICR[1] rồi ghi giá trị 0x01 vào đó để cấu hình EXTI6 cho GPIOB.
+				 */
+
+		// Lưu thông tin Line vào cấu trúc tham số để sử dụng cho EXTI
+
+			init_param->Line = pin_index;
+
+    // Trả về trạng thái hoàn thành
+
+      return STAT_DONE;
   }
 
   /*
@@ -168,10 +143,16 @@
       ui16 reg_index = (pin_index / 4u); // Xác định chỉ số của AFIO_EXTICR cần cấu hình
       ui16 shift = (pin_index % 4u) * 4u; // Xác định vị trí bit cần cấu hình trong AFIO_EXTICR
 
-      // Xóa các bit tại vị trí cần cấu hình để vô hiệu hóa EXTI
-      AFIO_REGS_PTR->AFIO_EXTICR[reg_index] &= ~(0x0Fu << shift);
+      // >> Xóa các bit tại vị trí cần cấu hình để vô hiệu hóa EXTI
 
-      init_param->Line = 15u; // Reset thông tin Line trong cấu trúc tham số
+      	AFIO_REGS_PTR->AFIO_EXTICR[reg_index] &= ~(0x0Fu << shift);
 
-    return STAT_DONE;
+
+    // Reset thông tin Line trong cấu trúc tham số
+
+      init_param->Line = 15u;
+
+    // Trả về trạng thái hoàn thành
+
+      return STAT_DONE;
   }

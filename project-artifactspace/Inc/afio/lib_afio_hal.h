@@ -54,7 +54,36 @@
   // Khai báo các hàm thành phần
 
     // >> Hàm gọi xử lý mapping 
-    stinl RETR_STAT AFIO_PinRemap(ui32 Peri);
+		/*
+		 * Hàm cấu hình remap chân cho các ngoại vi sử dụng AFIO.
+		 *
+		 * Tham số:
+		 *   Peri - Mã định danh ngoại vi cần remap (bitmask từ AFIO_MAPR).
+		 *
+		 * Logic:
+		 *   - Kiểm tra giá trị tham số Peri hợp lệ.
+		 *   - Ghi giá trị Peri vào thanh ghi AFIO_MAPR để kích hoạt remap.
+		 *   - Thanh ghi MAPR cho phép remap các chức năng alternate của ngoại vi
+		 *     như USART, SPI, I2C, TIM sang các chân GPIO khác.
+		 *
+		 * Trả về:
+		 *   RETR_STAT - STAT_DONE nếu remap thành công.
+		 *
+		 * Phụ thuộc ngoài module AFIO:
+		 *   - assert_param() - Macro kiểm tra điều kiện
+		 *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
+		 */
+    stinl RETR_STAT AFIO_PinRemap(ui32 Peri) {
+    	// Kiểm tra giá trị tham số hợp lệ
+
+				assert_param(IS_AFIO_PERI_REMAP(Peri));
+
+			// Ghi giá trị Peri vào thanh ghi AFIO_MAPR để kích hoạt remap
+
+				AFIO_REGS_PTR->AFIO_MAPR |= Peri;
+
+			return STAT_DONE;
+    }
 
     // >> Hàm khởi tạo thông tin line ngắt ngoài
     RETR_STAT AFIO_EXTI_Line_Init(AFIO_EXTI_Init_Param *init_param);

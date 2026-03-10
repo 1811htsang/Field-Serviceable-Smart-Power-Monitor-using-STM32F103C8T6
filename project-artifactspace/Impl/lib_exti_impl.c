@@ -8,24 +8,24 @@
 // Khai báo các thư viện sử dụng chung
 
   #ifdef UNIT_TEST
-		#include "lib_keyword_def.h"
-		#include "lib_condition_def.h"
-		#include "lib_exti_def.h"
-		#include "lib_exti_hal.h"
+    #include "lib_keyword_def.h"
+    #include "lib_condition_def.h"
+    #include "lib_exti_def.h"
+    #include "lib_exti_hal.h"
     #include "header_dependency.h"
   #endif
 
   #include <stdint.h>
   #include <stdio.h>
-	#include <string.h>
+  #include <string.h>
 
   #ifndef UNIT_TEST
-		#include "generic/lib_keyword_def.h"
-  	#include "generic/lib_condition_def.h"
+    #include "generic/lib_keyword_def.h"
+    #include "generic/lib_condition_def.h"
     #include "exti/lib_exti_def.h"
     #include "exti/lib_exti_hal.h"
-  	#include "afio/lib_afio_def.h"
-  	#include "afio/lib_afio_hal.h"
+    #include "afio/lib_afio_def.h"
+    #include "afio/lib_afio_hal.h"
     #include "gpio/lib_gpio_def.h"
     #include "gpio/lib_gpio_hal.h"
   #endif
@@ -45,47 +45,6 @@
 // Định nghĩa các hàm thành phần
 
   /*
-   * Hàm đăng ký cấu trúc handle EXTI vào bảng quản lý các line EXTI.
-   *
-   * Tham số:
-   *   handle_param - Con trỏ tới cấu trúc handle EXTI (chứa Line và Callback).
-   *
-   * Logic:
-   *   - Kiểm tra con trỏ handle_param hợp lệ.
-   *   - Kiểm tra giá trị tham số Line (0-15).
-   *   - Lưu con trỏ handle_param vào bảng quản lý để sử dụng khi
-   *     EXTI_Generic_IRQHandler() được gọi từ EXTI_IRQHandler().
-   *   - Cho phép tìm kiếm nhanh handle tương ứng với mỗi line EXTI.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_DONE nếu đăng ký thành công, STAT_ERROR nếu có lỗi.
-   *
-   * Phụ thuộc ngoài module EXTI:
-   *   - assert_param() - Macro kiểm tra điều kiện
-   *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
-   */
-  stinl RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param) {
-
-    // Kiểm tra con trỏ handle_param hợp lệ
-
-      if (handle_param == NULL) {
-        return STAT_ERROR;
-      }
-
-    // Kiểm tra giá trị tham số Line hợp lệ (0-15)
-
-      assert_param(handle_param->Line < 16); // Kiểm tra thông tin line EXTI hợp lệ (0-15)
-
-    // Đăng ký con trỏ tới cấu trúc tham số vào bảng quản lý để sử dụng khi EXTI_Generic_IRQHandler() được gọi từ EXTI_IRQHandler()
-
-      EXTI_Handle_Table[handle_param->Line] = handle_param; // Đăng ký con trỏ tới cấu trúc tham số vào bảng quản lý
-
-    // Kết thúc quy trình
-      
-      return STAT_DONE;
-  }
-
-  /*
    * Hàm khởi tạo và cấu hình line EXTI theo tham số đầu vào.
    *
    * Tham số:
@@ -93,7 +52,7 @@
    *   afio_init_param - Con trỏ tới cấu trúc tham số AFIO EXTI (Port, Pin, Line).
    *
    * Logic:
-   *   - Kiểm tra con trỏ afio_init_param hợp lệ.
+   *   - Kiểm tra con trỏ đầu vào hợp lệ.
    *   - Kiểm tra giá trị tham số trigger (NONE, FALLING, RISING, BOTH).
    *   - Dựa vào loại trigger được chọn, cấu hình bit FTSR (falling) và RTSR (rising):
    *       + FALLING: Set FTSR, Clear RTSR
@@ -128,7 +87,7 @@
 
     /**
      * Ghi chú:
-     * Do AFIO_EXTI_Iinit_Param đã được kiểm tra kỹ lưỡng trong 
+    * Do AFIO_EXTI_Init_Param đã được kiểm tra kỹ lưỡng trong
      * hàm AFIO_EXTI_Line_Init nên ta sẽ không kiểm tra lại ở đây nữa.
      */
 
@@ -248,7 +207,7 @@
    *   - Nếu pending bit được set:
    *       + Clear pending bit bằng cách ghi 1 vào bit trong PR.
    *       + Gọi hàm callback đã đăng ký (nếu khác NULL).
-   *   - Nếu không có pending bit, in thông báo debug.
+   *   - Nếu không có pending bit, kết thúc hàm mà không xử lý thêm.
    *
    * Trả về:
    *   Không có (void).
@@ -293,7 +252,7 @@
    *   - Kiểm tra nếu handle tương ứng với line đó đã được đăng ký.
    *   - Nếu có handle, gọi hàm EXTI_Generic_IRQHandler() với handle đó.
    *   - Cho phép chia sẻ cùng một IRQ vector cho nhiều line EXTI
-   *     (vÝ dụ: EXTI9_5_IRQHandler, EXTI15_10_IRQHandler).
+   *     (ví dụ: EXTI9_5_IRQHandler, EXTI15_10_IRQHandler).
    *
    * Trả về:
    *   Không có (void).
@@ -304,6 +263,12 @@
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
   void EXTI_IRQHandler(ui16 Pin) {
+
+    // Kiểm tra giá trị line đầu vào hợp lệ
+
+      if (Pin >= 16u) {
+        return;
+      }
 
     // Tìm kiếm trong bảng quản lý để xác định line EXTI tương ứng với chân GPIO đã chọn
       for (ui16 line = 0; line < 16; line++) {
@@ -380,43 +345,44 @@
   }
 
   /*
-   * Hàm tạo ngắt EXTI bằng phần mềm (Software Interrupt) cho một line cụ thể.
+   * Hàm đăng ký cấu trúc handle EXTI vào bảng quản lý các line EXTI.
    *
    * Tham số:
-   *   handle_param - Con trỏ tới cấu trúc handle EXTI (chứa Line).
+   *   handle_param - Con trỏ tới cấu trúc handle EXTI (chứa Line và Callback).
    *
    * Logic:
    *   - Kiểm tra con trỏ handle_param hợp lệ.
-   *   - Kiểm tra giá trị tham số Line.
-   *   - Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm.
-   *   - Ngắt này sẽ kích hoạt EXTI_IRQHandler như ngắt thông thường.
-   *   - Hữu ích cho testing hoặc mô phỏng sự kiện EXTI.
+   *   - Kiểm tra giá trị tham số Line (0-15).
+   *   - Lưu con trỏ handle_param vào bảng quản lý để sử dụng khi
+   *     EXTI_Generic_IRQHandler() được gọi từ EXTI_IRQHandler().
+   *   - Cho phép tìm kiếm nhanh handle tương ứng với mỗi line EXTI.
    *
    * Trả về:
-   *   Không có (void).
+   *   RETR_STAT - STAT_DONE nếu đăng ký thành công, STAT_ERROR nếu có lỗi.
    *
    * Phụ thuộc ngoài module EXTI:
    *   - assert_param() - Macro kiểm tra điều kiện
-   *   - EXTI_Generic_IRQHandler() - Hàm xử lý ngắt được gọi
    *   - __DEBUG_GET_MODE() - Macro kiểm tra chế độ debug
    */
-  stinl void EXTI_GenerateSWI(EXTI_Handle_Param *handle_param) {
-    
+  RETR_STAT EXTI_RegisterParam(EXTI_Handle_Param *handle_param) {
+
     // Kiểm tra con trỏ handle_param hợp lệ
 
       if (handle_param == NULL) {
-        return;
+        return STAT_ERROR;
       }
 
-    // Kiểm tra giá trị tham số Line hợp lệ
+    // Kiểm tra giá trị tham số Line hợp lệ (0-15)
 
-      if (handle_param->Line >= 16) {
-        return;
-      }
+      assert_param(handle_param->Line < 16); // Kiểm tra thông tin line EXTI hợp lệ (0-15)
 
-    // Tạo ngắt EXTI bằng phần mềm bằng cách set bit tương ứng trong SWIER
+    // Đăng ký con trỏ tới cấu trúc tham số vào bảng quản lý để sử dụng khi EXTI_Generic_IRQHandler() được gọi từ EXTI_IRQHandler()
 
-      EXTI_REGS_PTR->EXTI_SWIER |= (0x0001u << handle_param->Line); // Set bit tương ứng trong SWIER để tạo ngắt EXTI bằng phần mềm
+      EXTI_Handle_Table[handle_param->Line] = handle_param; // Đăng ký con trỏ tới cấu trúc tham số vào bảng quản lý
+
+    // Kết thúc quy trình
+
+      return STAT_DONE;
   }
 
 // Định nghĩa các hàm xử lý IRQ nhóm weak
@@ -427,7 +393,7 @@
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 0.
    *   - Hàm này sẽ tìm kiếm trong bảng handle và gọi callback tương ứng.
-   *   - User có thể override hàm này để implement xử lý tụy chỉnh.
+   *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
    *   Không có (void).
@@ -456,7 +422,7 @@
    *
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 2.
-   *   - Hàm này sẽ tÌm kiếm trong bảng handle và gọi callback tương ứng.
+   *   - Hàm này sẽ tìm kiếm trong bảng handle và gọi callback tương ứng.
    *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
@@ -471,7 +437,7 @@
    *
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 3.
-   *   - Hàm này sẽ tÌm kiếm trong bảng handle và gọi callback tương ứng.
+   *   - Hàm này sẽ tìm kiếm trong bảng handle và gọi callback tương ứng.
    *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:
@@ -486,7 +452,7 @@
    *
    * Logic:
    *   - Gọi hàm EXTI_IRQHandler() với line = 4.
-   *   - Hàm này sẽ tÌm kiếm trong bảng handle và gọi callback tương ứng.
+   *   - Hàm này sẽ tìm kiếm trong bảng handle và gọi callback tương ứng.
    *   - User có thể override hàm này để implement xử lý tùy chỉnh.
    *
    * Kiểu trả về:

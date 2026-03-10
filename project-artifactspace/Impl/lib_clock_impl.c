@@ -8,29 +8,28 @@
 // Khai báo các thư viện sử dụng chung
 
   #ifdef UNIT_TEST
-		#include "lib_keyword_def.h"
-		#include "lib_condition_def.h"
-		#include "lib_clock_def.h"
-		#include "lib_clock_hal.h"
+    #include "lib_keyword_def.h"
+    #include "lib_condition_def.h"
+    #include "lib_clock_def.h"
+    #include "lib_clock_hal.h"
     #include "header_dependency.h"
   #endif
 
   #include <stdint.h>
   #include <stdio.h>
-	#include <string.h>
+  #include <string.h>
 
   #ifndef UNIT_TEST
-		#include "generic/lib_keyword_def.h"
-  	#include "generic/lib_condition_def.h"
-  	#include "clock/lib_clock_def.h"
-  	#include "clock/lib_clock_hal.h"
-    #include "iwdg/lib_iwdg_hal.h"
+    #include "generic/lib_keyword_def.h"
+    #include "generic/lib_condition_def.h"
+    #include "clock/lib_clock_def.h"
+    #include "clock/lib_clock_hal.h"
   #endif
 
 // Định nghĩa các hàm thành phần
 
   /*
-   * Hàm khởi tạo và cấu hình nguồn clock hệ thống (HSI, HSE, LSI).
+   * Hàm khởi tạo và cấu hình nguồn clock hệ thống (HSI, HSE).
    *
    * Tham số:
    *   init_param - Con trỏ tới cấu trúc tham số khởi tạo (chọn nguồn clock).
@@ -39,23 +38,17 @@
    * Logic:
    *   - Kiểm tra con trỏ và giá trị tham số đầu vào.
    *   - Làm mới biến cờ trạng thái sẵn sàng.
-   *   - Bật nguồn clock tương ứng, chờ sẵn sàng, xử lý watchdog nếu cần.
+   *   - Bật nguồn clock tương ứng và chờ cờ sẵn sàng.
    *   - Lưu trạng thái sẵn sàng vào biến trả về.
    *   - Đối với HSE: bật CSS trước, chuyển SYSCLK sang HSE sau khi sẵn sàng.
    *   - Đối với HSI: không cần chuyển SYSCLK vì mặc định đã là HSI.
-   *   - Đối với LSI: chỉ bật và chờ sẵn sàng.
-   *   - Trong quá trình chờ HSI/HSE, nếu LSI chưa sẵn sàng thì khởi tạo LSI và IWDG để tránh treo hệ thống.
    *
    * Trả về:
    *   RETR_STAT - STAT_OK nếu thành công, STAT_ERROR nếu lỗi, STAT_DONE nếu hoàn tất quy trình.
    * 
    * Phụ thuộc ngoài module Clock:
-   *   - IWDG_Init_Param
-   *   - IWDG_Init()
-   *   - IWDG_Start()
-   *   - IWDG_Reload()
-   *   - IWDG_PR_REG_PR_DIV_4
-   *   - IWDG_RLR_REG_RL_MAX
+   *   - RCC_CSS_Enable()
+   *   - RCC_SYSCLK_Switch()
    */
   RETR_STAT RCC_CLK_Init(RCC_CLK_Init_Param *init_param, RCC_RDYFLG_Typdef *rdy_flg) {
     
@@ -85,7 +78,7 @@
     
       /**
        * Ghi chú:
-       * Trong thiết phần cứng, việc kiểm tra hoạt động của HSI/HSE/LSI
+       * Trong thiết kế phần cứng, việc kiểm tra hoạt động của HSI/HSE
        * được thực hiện thông qua các flag hoặc là ngắt.
        * Do đó, trong hàm khởi tạo này, ta chỉ cần thiết lập
        * và kiểm tra các flag tương ứng để đảm bảo nguồn clock được bật đúng cách.
@@ -280,75 +273,6 @@
   }
 
   /*
-   * Hàm chuyển đổi nguồn SYSCLK của hệ thống.
-   *
-   * Tham số:
-   *   sysclk_source - Nguồn clock muốn chuyển sang (HSI hoặc HSE).
-   *
-   * Logic:
-   *   - Kiểm tra tham số đầu vào hợp lệ.
-   *   - Gán giá trị chọn nguồn SYSCLK vào thanh ghi cấu hình.
-   *   - Kiểm tra lại trạng thái đã chuyển đổi thành công chưa.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_DONE nếu thành công, STAT_ERROR nếu chuyển đổi thất bại.
-   * 
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  stinl RETR_STAT RCC_SYSCLK_Switch(ui32 sysclk_source) {
-      
-    // Kiểm tra giá trị tham số đầu vào
-
-      assert_param(IS_RCC_SYSCLK_SOURCE(sysclk_source));
-
-    // Gán giá trị chọn nguồn SYSCLK vào thanh ghi cấu hình
-      
-      SET_BIT(RCC_REGS_PTR->CFGR, sysclk_source);
-
-    // Kiểm tra lại trạng thái đã chuyển đổi
-
-      /**
-       * Ghi chú:
-       * Điều kiện kiểm tra là 
-       * đọc lại thanh ghi cấu hình để kiểm tra xem nguồn SYSCLK đã được chuyển đổi thành công chưa
-       * Nếu bit SWS (System Clock Switch Status) không phản ánh đúng nguồn SYSCLK đã chọn thì có thể coi là chuyển đổi thất bại
-       */
-
-      switch (sysclk_source) {
-        case RCC_SYSCLK_SOURCE_HSI:
-
-          if (
-            __DIFF_CHECK(
-              READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSI), 
-              RCC_CFGR_REG_SWS_HSI
-            )
-          ) {
-            return STAT_ERROR;
-          }
-          break;
-
-        case RCC_SYSCLK_SOURCE_HSE:
-          if (
-            __DIFF_CHECK(
-              READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSE), 
-              RCC_CFGR_REG_SWS_HSE
-            )
-          ) {
-            return STAT_ERROR;
-          }
-          break;
-        
-        default:
-          return STAT_ERROR;
-          break;
-      }
-
-    // Kết thúc quy trình chuyển đổi
-
-      return STAT_DONE;
-  }
-
-  /*
    * Hàm de-initialize (tắt) nguồn clock hệ thống.
    *
    * Tham số:
@@ -360,7 +284,6 @@
    *   - Làm mới biến cờ trạng thái.
    *   - Với HSE: chuyển SYSCLK về HSI trước khi tắt HSE.
    *   - Với HSI: không thể tắt HSI (nguồn dự phòng), trả về STAT_BUSY.
-   *   - Với LSI: không thể tắt LSI nếu đang dùng cho IWDG, trả về STAT_ERROR.
    *
    * Trả về:
    *   RETR_STAT - STAT_DONE nếu thành công, STAT_ERROR nếu lỗi, STAT_BUSY nếu không thể tắt HSI.
@@ -460,66 +383,6 @@
       // Kết thúc quy trình deinit
      
         return STAT_DONE;
-  }
-
-  /*
-   * Hàm bật Clock Security System (CSS) để bảo vệ khi HSE lỗi.
-   * Không có tham số và không trả về giá trị.
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  stinl void RCC_CSS_Enable(void) {
-    SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_CSSON_SET);
-  }
-
-  /*
-   * Hàm tắt Clock Security System (CSS).
-   * Không có tham số và không trả về giá trị.
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  stinl void RCC_CSS_Disable(void) {
-    CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_CSSON_SET);
-  }
-
-  /*
-   * Hàm kiểm tra trạng thái sẵn sàng của nguồn clock HSI.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_RDY nếu HSI đã sẵn sàng, STAT_NRDY nếu chưa.
-   * 
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  stinl RETR_STAT RCC_IsHSIReady(void) {
-    if (
-      __DIFF_CHECK(
-        READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET), 
-        RCC_CR_REG_HSION_SET
-      )
-    ) {
-      return STAT_NRDY;
-    } else {
-      return STAT_RDY;
-    }
-  }
-
-  /*
-   * Hàm kiểm tra trạng thái sẵn sàng của nguồn clock HSE.
-   *
-   * Trả về:
-   *   RETR_STAT - STAT_RDY nếu HSE đã sẵn sàng, STAT_NRDY nếu chưa.
-   * 
-   * Phụ thuộc ngoài module Clock: Không có
-   */
-  stinl RETR_STAT RCC_IsHSEReady(void) {
-    if (
-      __DIFF_CHECK(
-        READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET), 
-        RCC_CR_REG_HSEON_SET
-      )
-    ) {
-      return STAT_NRDY;
-    } else {
-      return STAT_RDY;
-    }
   }
 
   /*
