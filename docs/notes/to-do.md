@@ -37,10 +37,12 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Driver NVIC
 - [x] Viết Unit Test cho Driver NVIC
 - [x] Triển khai các driver lên mạch thực tế để kiểm tra hoạt động
-- [ ] Viết Driver SPI
+- [ ] Viết Driver SPI cho khả năng giao tiếp với ADE7758
 - [ ] Viết Unit Test cho Driver SPI
-- [ ] Viết Driver I2C
+- [ ] Viết Driver I2C cho khả năng giao tiếp với LCD 16x2, MCP4728
 - [ ] Viết Unit Test cho Driver I2C
+- [ ] Viết Driver UART cho khả năng giao tiếp với máy tính qua cổng UART
+- [ ] Viết Unit Test cho Driver UART
 - [ ] Triển khai Driver lên mạch thực tế
 
 ## Giai đoạn Cốt lõi
