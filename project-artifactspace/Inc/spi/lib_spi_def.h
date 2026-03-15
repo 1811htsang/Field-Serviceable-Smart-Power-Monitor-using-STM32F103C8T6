@@ -155,4 +155,57 @@
     #define SPI_TXCRCR_TXCRC_POS 0u
     #define SPI_TXCRCR_TXCRC_MASK (0xFFFFu << SPI_TXCRCR_TXCRC_POS)
 
+  // Khai báo chế độ Master / Slave
+
+    #define SPI_MODE_MASTER SPI_CR1_MSTR_MASK
+    #define SPI_MODE_SLAVE 0x00000000u
+
+  // Khai báo chế độ truyền dữ liệu 2 dây / 1 dây
+    
+    #define SPI_DIRECTION_2LINES 0x00000000u
+    #define SPI_DIRECTION_2LINES_RXONLY SPI_CR1_RXONLY_MASK
+    #define SPI_DIRECTION_1LINE SPI_CR1_BIDIMODE_MASK
+
+  // Khai báo kích thước dữ liệu 8-bit / 16-bit
+
+    #define SPI_DATASIZE_8BIT 0x00000000u
+    #define SPI_DATASIZE_16BIT SPI_CR1_DFF_MASK
+
+  // Khai báo pha xung clock
+
+    #define SPI_CLKPOLARITY_LOW 0x00000000u
+    #define SPI_CLKPOLARITY_HIGH SPI_CR1_CPOL_MASK
+
+  // Khai báo cực xung clock
+
+    #define SPI_CLKPHASE_1EDGE 0x00000000u
+    #define SPI_CLKPHASE_2EDGE SPI_CR1_CPHA_MASK
+
+  // Khai báo quản lý Slave Select
+
+    #define SPI_NSS_HARD_INPUT 0x00000000u
+    #define SPI_NSS_HARD_OUTPUT (SPI_CR2_SSOE_MASK << 16u)
+    #define SPI_NSS_SOFT SPI_CR1_SSM_MASK
+
+  // Khai báo tốc độ baudrate
+
+    #define SPI_BAUDRATEPRESCALER_2 0x00000000u
+    #define SPI_BAUDRATEPRESCALER_4 SPI_CR1_BR_MASK & (1u << SPI_CR1_BR_POS)
+    #define SPI_BAUDRATEPRESCALER_8 SPI_CR1_BR_MASK & (2u << SPI_CR1_BR_POS)
+    #define SPI_BAUDRATEPRESCALER_16 SPI_CR1_BR_MASK & (3u << SPI_CR1_BR_POS)
+    #define SPI_BAUDRATEPRESCALER_32 SPI_CR1_BR_MASK & (4u << SPI_CR1_BR_POS)
+    #define SPI_BAUDRATEPRESCALER_64 SPI_CR1_BR_MASK & (5u << SPI_CR1_BR_POS)
+    #define SPI_BAUDRATEPRESCALER_128 SPI_CR1_BR_MASK & (6u << SPI_CR1_BR_POS)
+    #define SPI_BAUDRATEPRESCALER_256 SPI_CR1_BR_MASK & (7u << SPI_CR1_BR_POS)
+
+  // Khai báo bit lựa chọn
+
+    #define SPI_FIRSTBIT_MSB 0x00000000u
+    #define SPI_FIRSTBIT_LSB SPI_CR1_LSBFIRST_MASK
+
+  // Khai báo kích hoạt CRC
+
+    #define SPI_CRCCALCULATION_DISABLE 0x00000000u
+    #define SPI_CRCCALCULATION_ENABLE SPI_CR1_CRCEN_MASK
+
 #endif /* LIB_SPI_DEF_H_ */
