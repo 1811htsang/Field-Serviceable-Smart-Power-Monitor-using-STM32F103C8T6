@@ -21,7 +21,7 @@
   RCC_REGS_Typedef MOCK_RCC_REGS;
   
   __vo ui32 mock_aircr_reg; 
-  __vo BLANK_REG* SCB_AIRCR_REG;
+  __vo BLANK_REG_32B* SCB_AIRCR_REG;
   
 
 // Gọi ủy quyền các biến và hàm mock từ source_dependency.c
@@ -43,7 +43,7 @@
 
     // Reset giá trị thanh ghi AIRCR giả về 0
     mock_aircr_reg = 0;
-    SCB_AIRCR_REG = (BLANK_REG *)&mock_aircr_reg;
+    SCB_AIRCR_REG = (BLANK_REG_32B *)&mock_aircr_reg;
   }
 
   void PINRSTF_set() {

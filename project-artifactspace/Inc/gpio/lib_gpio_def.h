@@ -31,13 +31,13 @@
   // Khai báo bộ thanh ghi của ngoại vi GPIO
 
     tdf_strc GPIO_REGS_Typedef {
-      __vo BLANK_REG GPIO_CRL;        // Offset 0x00, reset 0x4444 4444
-      __vo BLANK_REG GPIO_CRH;        // Offset 0x04, reset 0x4444 4444
-      __vo BLANK_REG GPIO_IDR;        // Offset 0x08, reset 0x0000 XXXX
-      __vo BLANK_REG GPIO_ODR;        // Offset 0x0C, reset 0x0000 0000
-      __vo BLANK_REG GPIO_BSRR;       // Offset 0x10, reset 0x0000 0000
-      __vo BLANK_REG GPIO_BRR;        // Offset 0x14, reset 0x0000 0000
-      __vo BLANK_REG GPIO_LCKR;       // Offset 0x18, reset 0x0000 0000
+      __vo BLANK_REG_32B GPIO_CRL;        // Offset 0x00, reset 0x4444 4444
+      __vo BLANK_REG_32B GPIO_CRH;        // Offset 0x04, reset 0x4444 4444
+      __vo BLANK_REG_32B GPIO_IDR;        // Offset 0x08, reset 0x0000 XXXX
+      __vo BLANK_REG_32B GPIO_ODR;        // Offset 0x0C, reset 0x0000 0000
+      __vo BLANK_REG_32B GPIO_BSRR;       // Offset 0x10, reset 0x0000 0000
+      __vo BLANK_REG_32B GPIO_BRR;        // Offset 0x14, reset 0x0000 0000
+      __vo BLANK_REG_32B GPIO_LCKR;       // Offset 0x18, reset 0x0000 0000
     } GPIO_REGS_Typedef;
 
 	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi

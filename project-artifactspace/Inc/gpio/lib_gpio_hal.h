@@ -332,7 +332,7 @@
 
       // Khóa cấu hình chân GPIO theo tham số đầu vào
 
-        BLANK_REG tmp = GPIO_LCKR_LCKK_MASK;
+        BLANK_REG_32B tmp = GPIO_LCKR_LCKK_MASK;
         SET_BIT(tmp, Pin); // Set bit tương ứng trong biến tạm để chuẩn bị cho chuỗi khóa
 
         GPIOx->GPIO_LCKR = tmp; // Viết giá trị biến tạm vào thanh ghi LCKR để bắt đầu chuỗi khóa

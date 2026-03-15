@@ -25,12 +25,12 @@
   // Khai báo bộ thanh ghi của ngoại vi EXTI
 
     tdf_strc EXTI_REGS_Typedef {
-      __vo BLANK_REG EXTI_IMR;        // Offset 0x00, reset 0x0000 0000
-      __vo BLANK_REG EXTI_EMR;        // Offset 0x04, reset 0x0000 0000
-      __vo BLANK_REG EXTI_RTSR;       // Offset 0x08, reset 0x0000 0000
-      __vo BLANK_REG EXTI_FTSR;       // Offset 0x0C, reset 0x0000 0000
-      __vo BLANK_REG EXTI_SWIER;      // Offset 0x10, reset 0x0000 0000
-      __vo BLANK_REG EXTI_PR;         // Offset 0x14, reset 0x0000 0000
+      __vo BLANK_REG_32B EXTI_IMR;        // Offset 0x00, reset 0x0000 0000
+      __vo BLANK_REG_32B EXTI_EMR;        // Offset 0x04, reset 0x0000 0000
+      __vo BLANK_REG_32B EXTI_RTSR;       // Offset 0x08, reset 0x0000 0000
+      __vo BLANK_REG_32B EXTI_FTSR;       // Offset 0x0C, reset 0x0000 0000
+      __vo BLANK_REG_32B EXTI_SWIER;      // Offset 0x10, reset 0x0000 0000
+      __vo BLANK_REG_32B EXTI_PR;         // Offset 0x14, reset 0x0000 0000
     } EXTI_REGS_Typedef;
 
   // >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi

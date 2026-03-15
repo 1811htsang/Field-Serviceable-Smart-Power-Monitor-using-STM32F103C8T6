@@ -46,14 +46,14 @@
 		*/
 
 		tdf_strc RCC_REGS {
-			__vo BLANK_REG CR;
-			__vo BLANK_REG CFGR;
-			__vo BLANK_REG CIR;
-			__vo BLANK_REG RCC_APB2RSTR;
-			__vo BLANK_REG RESERVED0[2];
-			__vo BLANK_REG RCC_APB2ENR;
-			__vo BLANK_REG RESERVED1[2];
-			__vo BLANK_REG CSR;
+			__vo BLANK_REG_32B CR;
+			__vo BLANK_REG_32B CFGR;
+			__vo BLANK_REG_32B CIR;
+			__vo BLANK_REG_32B RCC_APB2RSTR;
+			__vo BLANK_REG_32B RESERVED0[2];
+			__vo BLANK_REG_32B RCC_APB2ENR;
+			__vo BLANK_REG_32B RESERVED1[2];
+			__vo BLANK_REG_32B CSR;
 		} RCC_REGS_Typedef;
 
   // >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi

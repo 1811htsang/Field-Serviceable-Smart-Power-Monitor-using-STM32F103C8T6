@@ -31,10 +31,10 @@
 // Định nghĩa thanh ghi
 
   #ifndef UNIT_TEST
-    __vo BLANK_REG* SCB_AIRCR_REG_PTR = (__vo BLANK_REG *)SCB_AIRCR_REG_ADDR;
+    __vo BLANK_REG_32B* SCB_AIRCR_REG_PTR = (__vo BLANK_REG_32B *)SCB_AIRCR_REG_ADDR;
   #else
     __vo ui32 mock_aircr_reg = 0;
-    __vo BLANK_REG* SCB_AIRCR_REG_PTR = (__vo BLANK_REG *)&mock_aircr_reg;
+    __vo BLANK_REG_32B* SCB_AIRCR_REG_PTR = (__vo BLANK_REG_32B *)&mock_aircr_reg;
   #endif
 
 // Định nghĩa các hàm thành phần

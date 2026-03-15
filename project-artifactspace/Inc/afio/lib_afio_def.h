@@ -25,11 +25,11 @@
   // Khai báo bộ thanh ghi của ngoại vi AFIO
 
     tdf_strc AFIO_REGS_Typedef {
-      __vo BLANK_REG AFIO_EVCR;       // Offset 0x00
-      __vo BLANK_REG AFIO_MAPR;       // Offset 0x04
-      __vo BLANK_REG AFIO_EXTICR[4];  // Offset 0x08 - 0x14
-      __vo BLANK_REG RESERVED0;       // Offset 0x18
-      __vo BLANK_REG AFIO_MAPR2;      // Offset 0x1c
+      __vo BLANK_REG_32B AFIO_EVCR;       // Offset 0x00
+      __vo BLANK_REG_32B AFIO_MAPR;       // Offset 0x04
+      __vo BLANK_REG_32B AFIO_EXTICR[4];  // Offset 0x08 - 0x14
+      __vo BLANK_REG_32B RESERVED0;       // Offset 0x18
+      __vo BLANK_REG_32B AFIO_MAPR2;      // Offset 0x1c
     } AFIO_REGS_Typedef;
 
   // Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
