@@ -83,6 +83,9 @@
     // >> Hàm vô hiệu hóa ngoại vi
     RETR_STAT RCC_PCLK_Disable(ul periph);
 
+    // >> Hàm reset ngoại vi
+    RETR_STAT RCC_PCLK_Reset(ul periph);
+
     // >> Hàm chuyển đổi SYSCLK
     /*
      * Hàm chuyển đổi nguồn SYSCLK của hệ thống.

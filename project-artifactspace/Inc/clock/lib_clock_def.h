@@ -122,5 +122,6 @@
 		#define GPIOE (0x01ul << 6)
 		#define GPIOF (0x01ul << 7)
 		#define GPIOG (0x01ul << 8)
+		#define SPI1	(0x01ul << 12)
 		
 #endif /* LIB_CLOCK_DEF_H_ */

@@ -319,11 +319,7 @@
     
     // Kiểm tra con trỏ handle_param hợp lệ và con trỏ callback_func không NULL
 
-      if (handle_param == NULL) {
-        return STAT_ERROR;
-      }
-
-      if (callback_func == NULL) {
+      if (handle_param == NULL || callback_func == NULL) {
         return STAT_ERROR;
       }
 

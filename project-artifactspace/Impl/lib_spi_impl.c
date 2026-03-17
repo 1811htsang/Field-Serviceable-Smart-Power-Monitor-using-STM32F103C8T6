@@ -12,6 +12,8 @@
     #include "lib_condition_def.h"
     #include "lib_spi_def.h"
     #include "lib_spi_hal.h"
+    #include "lib_clock_def.h"
+    #include "lib_clock_hal.h"
     #include "header_dependency.h"
   #endif
 
@@ -24,9 +26,59 @@
     #include "generic/lib_condition_def.h"
     #include "spi/lib_spi_def.h"
     #include "spi/lib_spi_hal.h"
+    #include "clock/lib_clock_def.h"
+    #include "clock/lib_clock_hal.h"
   #endif
 
+// Khai báo hàm nội bộ
+
+  static void SPI_WaitBeforeDisable(SPI_Handle_Param *hspi);
+
 // Định nghĩa các hàm thành phần
+
+  static void SPI_WaitBeforeDisable(SPI_Handle_Param *hspi) {
+    ui32 direction = hspi->Init.Direction;
+    ui32 mode = hspi->Init.Mode;
+
+    // Trường hợp 1 & 2: Full-Duplex hoặc Transmit-only (2 dây hoặc 1 dây TX)
+
+      if (
+        direction == SPI_DIRECTION_2LINES 
+        || 
+        direction == SPI_DIRECTION_1LINE_TX
+      ) {
+        // 1. Đợi TXE = 1 (Bộ đệm truyền trống)
+        while (!READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK));
+        // 2. Đợi BSY = 0 (Giao tiếp vật lý kết thúc)
+        while (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_BSY_MASK));
+      }
+    
+    // Trường hợp 3: Master Receive-only (2 dây RXONLY hoặc 1 dây RX)
+
+      else if (
+        mode == SPI_MODE_MASTER 
+        && 
+        (
+          direction == SPI_DIRECTION_2LINES_RXONLY 
+          || 
+          direction == SPI_DIRECTION_1LINE_RX
+        )
+      ) {
+        /** 
+         * Quy trình đặc biệt: Tắt SPE ngay sau khi nhận byte n-1.
+         * Tuy nhiên, trong hàm DeInit tổng quát, ta thường đợi byte cuối cùng xong 
+         * để tránh để lại dữ liệu rác cho lần khởi động sau.
+         */
+        while (!READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK));
+        while (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_BSY_MASK));
+      }
+    
+    // Trường hợp 4: Slave Receive-only
+
+      else {
+        while (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_BSY_MASK));
+      }
+  }
 
   RETR_STAT SPI_Init(SPI_Handle_Param *hspi) {
 
@@ -92,7 +144,16 @@
        */
       
       #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
-        // Các callback sẽ được khởi tạo mặc định là NULL, người dùng có thể đăng ký sau khi hàm Init thành công
+        
+        /**
+         * Ghi chú:
+         * Ở đây sẽ khởi tạo tất cả các con trỏ hàm callback 
+         * về NULL để đảm bảo rằng nếu người dùng không đăng ký callback nào 
+         * thì sẽ không có lỗi khi gọi hàm callback.
+         * Thực hiện register callback sẽ được thực hiện thông qua hàm SPI_RegisterCallback
+         * nếu người dùng muốn sử dụng callback thay vì hàm MSP_Init mặc định.
+         */
+
         hspi->MSP_DeInit_Callback = NULL;
         hspi->Tx_Cplt_Callback = NULL;
         hspi->Rx_Cplt_Callback = NULL;
@@ -189,6 +250,51 @@
   }
 
   RETR_STAT SPI_DeInit(SPI_Handle_Param *hspi) {
+
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL) {
+        return STAT_ERROR;
+      }
+
+    // Kiểm tra giá trị các tham số hợp lệ
+
+      assert_param(hspi->Instance != NULL); // Kiểm tra con trỏ tới bộ thanh ghi của ngoại vi SPI hợp lệ
+
+    // Báo cấu hình là Busy để thực hiện cấu hình
+
+      hspi->State = SPI_BUSY;
+
+    // Đợi dừng an toàn trước khi vô hiệu hóa
+    
+      SPI_WaitBeforeDisable(hspi);
+
+    // Vô hiệu hóa SPI
+
+      CLEAR_BIT(
+        hspi->Instance->SPI_CR1,
+        SPI_CR1_SPE_MASK
+      );
+
+    // Reset ngoại vi
+
+      RCC_PCLK_Reset(SPI1); // Reset ngoại vi SPI1 thông qua RCC
+    
+    // Gọi MSP_DeInit
+
+      #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
+        if (hspi->MSP_DeInit_Callback != NULL) {
+          hspi->MSP_DeInit_Callback(hspi); // Gọi hàm callback giải phóng MSP nếu đã đăng ký
+        }
+      #else
+        SPI_MspDeInit(hspi); // Gọi hàm giải phóng MSP mặc định nếu callback không được kích hoạt
+      #endif
+
+    // Cập nhật trạng thái Handler
+
+      hspi->State = SPI_RESET;
+      hspi->ErrorCode = SPI_OK;
+
     return STAT_DONE;
   }
 
@@ -216,20 +322,167 @@
       SPI_CallbackIDTypeDef CallbackID, 
       pSPI_CallbackTypeDef pCallback
     ) {
-      // 
-      return STAT_DONE;
+
+      // Lưu trạng thải trả về, mặc định là STAT_OK, sẽ được cập nhật nếu có lỗi xảy ra trong quá trình đăng ký callback
+      
+        RETR_STAT status = STAT_OK;
+      
+      // Kiểm tra con trỏ hspi hợp lệ và pCallback hợp lệ
+
+        if (hspi == NULL || pCallback == NULL) {
+          return STAT_ERROR;
+        }
+
+      // Kiểm tra trạng thái
+
+        if (hspi->State == SPI_READY) { // Nếu ngoại vi đang ở trạng thái Ready thì mới cho phép đăng ký toàn bộ callback
+          switch (CallbackID) {
+            case SPI_TX_CPLT_CB_ID:
+              hspi->Tx_Cplt_Callback = pCallback;
+              break;
+            case SPI_RX_CPLT_CB_ID:
+              hspi->Rx_Cplt_Callback = pCallback;
+              break;
+            case SPI_TX_RX_CPLT_CB_ID:
+              hspi->TxRx_Cplt_Callback = pCallback;
+              break;
+            case SPI_TX_HALF_CPLT_CB_ID:
+              hspi->Tx_HalfCplt_Callback = pCallback;
+              break;
+            case SPI_RX_HALF_CPLT_CB_ID:
+              hspi->Rx_HalfCplt_Callback = pCallback;
+              break;
+            case SPI_TX_RX_HALF_CPLT_CB_ID:
+              hspi->TxRx_HalfCplt_Callback = pCallback;
+              break;
+            case SPI_ERROR_CB_ID:
+              hspi->Error_Callback = pCallback;
+              break;
+            case SPI_ABORT_CB_ID:
+              hspi->Abort_Callback = pCallback;
+              break;
+            case SPI_MSP_INIT_CB_ID:
+              hspi->MSP_Init_Callback = pCallback;
+              break;
+            case SPI_MSP_DEINIT_CB_ID:
+              hspi->MSP_DeInit_Callback = pCallback;
+              break;
+            default:
+              hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
+              status = STAT_ERROR; // CallbackID không hợp lệ
+              break;
+          }
+        }
+
+        else if (hspi->State == SPI_RESET) { // Nếu ngoại vi đang ở trạng thái Reset thì chỉ cho phép đăng ký callback khởi tạo và giải phóng MSP
+          switch (CallbackID) {
+            case SPI_MSP_INIT_CB_ID:
+              hspi->MSP_Init_Callback = pCallback;
+              break;
+            case SPI_MSP_DEINIT_CB_ID:
+              hspi->MSP_DeInit_Callback = pCallback;
+              break;
+            default:
+              hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
+              status = STAT_ERROR; // CallbackID không hợp lệ
+              break;
+          }
+        } 
+        
+        else { // Ngoại vi đang ở trạng thái khác Ready hoặc Reset thì không cho phép đăng ký callback nào cả
+          hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
+          status = STAT_ERROR; // Ngoại vi đang ở trạng thái không cho phép đăng ký callback
+        }
+
+      // Kết thúc quy trình đăng ký callback
+
+        return status;
     }
 
     RETR_STAT SPI_UnRegisterCallback(
       SPI_Handle_Param *hspi, 
       SPI_CallbackIDTypeDef CallbackID
     ) {
-      return STAT_DONE;
+
+      // Lưu trạng thải trả về, mặc định là STAT_OK, sẽ được cập nhật nếu có lỗi xảy ra trong quá trình đăng ký callback
+      
+        RETR_STAT status = STAT_OK;
+      
+      // Kiểm tra con trỏ hspi hợp lệ và pCallback hợp lệ
+
+        if (hspi == NULL || pCallback == NULL) {
+          return STAT_ERROR;
+        }
+
+      // Kiểm tra trạng thái
+
+        if (hspi->State == SPI_READY) { // Nếu ngoại vi đang ở trạng thái Ready thì mới cho phép đăng ký toàn bộ callback mặc định
+          switch (CallbackID) {
+            case SPI_TX_CPLT_CB_ID:
+              hspi->Tx_Cplt_Callback = Tx_Cplt_Callback;
+              break;
+            case SPI_RX_CPLT_CB_ID:
+              hspi->Rx_Cplt_Callback = Rx_Cplt_Callback;
+              break;
+            case SPI_TX_RX_CPLT_CB_ID:
+              hspi->TxRx_Cplt_Callback = TxRx_Cplt_Callback;
+              break;
+            case SPI_TX_HALF_CPLT_CB_ID:
+              hspi->Tx_HalfCplt_Callback = Tx_HalfCplt_Callback;
+              break;
+            case SPI_RX_HALF_CPLT_CB_ID:
+              hspi->Rx_HalfCplt_Callback = Rx_HalfCplt_Callback;
+              break;
+            case SPI_TX_RX_HALF_CPLT_CB_ID:
+              hspi->TxRx_HalfCplt_Callback = TxRx_HalfCplt_Callback;
+              break;
+            case SPI_ERROR_CB_ID:
+              hspi->Error_Callback = Error_Callback;
+              break;
+            case SPI_ABORT_CB_ID:
+              hspi->Abort_Callback = Abort_Callback;
+              break;
+            case SPI_MSP_INIT_CB_ID:
+              hspi->MSP_Init_Callback = MSP_Init_Callback;
+              break;
+            case SPI_MSP_DEINIT_CB_ID:
+              hspi->MSP_DeInit_Callback = MSP_DeInit_Callback;
+              break;
+            default:
+              hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
+              status = STAT_ERROR; // CallbackID không hợp lệ
+              break;
+          }
+        }
+
+        else if (hspi->State == SPI_RESET) { // Nếu ngoại vi đang ở trạng thái Reset thì chỉ cho phép đăng ký callback khởi tạo và giải phóng MSP mặc định
+          switch (CallbackID) {
+            case SPI_MSP_INIT_CB_ID:
+              hspi->MSP_Init_Callback = MSP_Init_Callback;
+              break;
+            case SPI_MSP_DEINIT_CB_ID:
+              hspi->MSP_DeInit_Callback = MSP_DeInit_Callback;
+              break;
+            default:
+              hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
+              status = STAT_ERROR; // CallbackID không hợp lệ
+              break;
+          }
+        } 
+        
+        else { // Ngoại vi đang ở trạng thái khác Ready hoặc Reset thì không cho phép đăng ký callback nào cả
+          hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
+          status = STAT_ERROR; // Ngoại vi đang ở trạng thái không cho phép đăng ký callback
+        }
+
+      // Kết thúc quy trình đăng ký callback
+
+        return status;
     }
   #endif
 
   void SPI_IRQHandler(SPI_Handle_Param *hspi) {
-
+    
   }
 
   RETR_STAT SPI_Transmit(
@@ -238,6 +491,32 @@
     ui16 size, 
     ui32 timeout
   ) {
+
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL || pdata == NULL || size == 0) {
+        return STAT_ERROR;
+      }
+
+    // Kiểm tra giá trị các tham số hợp lệ
+
+      assert_param(hspi->Instance != NULL); // Kiểm tra con trỏ tới bộ thanh ghi của ngoại vi SPI hợp lệ
+      assert_param(hspi->State == SPI_READY); // Ngoại vi phải ở trạng thái Ready mới cho phép truyền dữ liệu
+      assert_param(
+        hspi->Init.Direction == SPI_DIRECTION_2LINES 
+        || 
+        hspi->Init.Direction == SPI_DIRECTION_1LINE_TX
+      ); // Chỉ cho phép truyền dữ liệu khi ở chế độ Full-Duplex hoặc Transmit-only
+      assert_param(size <= 0xFFFF); // Kích thước dữ liệu cần truyền phải nhỏ hơn hoặc bằng 65535 phần tử
+      assert_param(timeout > 0); // Thời gian chờ phải lớn hơn 0
+
+    // Kiểm tra trạng thái
+
+      if (hspi->State != SPI_READY) {
+        return STAT_BUSY;
+      }
+
+    // 
 
   }
 
@@ -328,6 +607,14 @@
 
   RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi) {
     
+  }
+
+  SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi) {
+
+  }
+
+  ui32 SPI_GetError(SPI_Handle_Param *hspi) {
+
   }
 
 // Định nghĩa các hàm callback weak mặc định (nếu được kích hoạt)

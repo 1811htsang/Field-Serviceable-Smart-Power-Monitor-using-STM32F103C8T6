@@ -69,7 +69,9 @@
           SPI_BUSY_RX     = 0x04u,
           SPI_BUSY_TX_RX  = 0x05u,
           SPI_ERROR       = 0x06u,
-          SPI_ABORT       = 0x07u
+          SPI_ABORT       = 0x07u,
+          SPI_TIMEOUT     = 0x08u,
+          SPI_RESET       = 0x09u
         } SPI_STAT_Enum;
     #endif
 
@@ -83,7 +85,8 @@
           SPI_ERROR_CRC = (ui32)(1u << SPI_SR_CRCERR_POS),  // Lỗi CRC
           SPI_ERROR_OVR = (ui32)(1u << SPI_SR_OVR_POS),     // Lỗi Overrun
           SPI_ERROR_UDR = (ui32)(1u << SPI_SR_UDR_POS),     // Lỗi Underrun
-          SPI_ERROR_BSY = (ui32)(1u << SPI_SR_BSY_POS)      // Lỗi Busy (thường xảy ra khi có lỗi khác và ngoại vi đang bận xử lý)
+          SPI_ERROR_BSY = (ui32)(1u << SPI_SR_BSY_POS),     // Lỗi Busy (thường xảy ra khi có lỗi khác và ngoại vi đang bận xử lý)
+          SPI_ERROR_INV_CALLBACK = (ui32)(1u << 8u)         // Lỗi ID callback không hợp lệ khi đăng ký callback
         } SPI_ERR_Enum;
     #endif
 
@@ -159,7 +162,7 @@
           void (*TxISR)(struct SPI_Handle_Param *hspi); // Con trỏ tới hàm xử lý ngắt truyền dữ liệu
 
           __vo SPI_STAT_Enum State; // Trạng thái hiện tại của ngoại vi SPI
-          __vo ui32 ErrorCode;      // Mã lỗi nếu có lỗi xảy ra
+          __vo SPI_ERR_Enum ErrorCode;      // Mã lỗi nếu có lỗi xảy ra
 
           // Quản lý callback cho các sự kiện khác nhau của SPI (nếu được kích hoạt)
           #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
@@ -314,5 +317,9 @@
     // >> Các hàm quản lý abort quá trình truyền nhận dữ liệu
     RETR_STAT SPI_Abort(SPI_Handle_Param *hspi);
     RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi);
+
+    // >> Hàm thu thập trạng thái
+    SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi);
+    ui32 SPI_GetError(SPI_Handle_Param *hspi);
 
 #endif /* LIB_SPI_HAL_H_ */
