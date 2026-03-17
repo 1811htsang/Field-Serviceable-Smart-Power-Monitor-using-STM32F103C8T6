@@ -86,7 +86,8 @@
           SPI_ERROR_OVR = (ui32)(1u << SPI_SR_OVR_POS),     // Lỗi Overrun
           SPI_ERROR_UDR = (ui32)(1u << SPI_SR_UDR_POS),     // Lỗi Underrun
           SPI_ERROR_BSY = (ui32)(1u << SPI_SR_BSY_POS),     // Lỗi Busy (thường xảy ra khi có lỗi khác và ngoại vi đang bận xử lý)
-          SPI_ERROR_INV_CALLBACK = (ui32)(1u << 8u)         // Lỗi ID callback không hợp lệ khi đăng ký callback
+          SPI_ERROR_INV_CALLBACK = (ui32)(1u << 8u),        // Lỗi ID callback không hợp lệ khi đăng ký callback
+          SPI_ERROR_DATASIZE = (ui32)(1u << 9u),            // Lỗi kích thước dữ liệu không hợp lệ khi khởi tạo
         } SPI_ERR_Enum;
     #endif
 

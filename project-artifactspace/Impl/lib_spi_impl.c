@@ -510,13 +510,90 @@
       assert_param(size <= 0xFFFF); // Kích thước dữ liệu cần truyền phải nhỏ hơn hoặc bằng 65535 phần tử
       assert_param(timeout > 0); // Thời gian chờ phải lớn hơn 0
 
+    // Khai báo quản lý thời gian
+
+      ui32 tickstart = 0;
+
     // Kiểm tra trạng thái
 
       if (hspi->State != SPI_READY) {
         return STAT_BUSY;
       }
 
-    // 
+    // Kiểm tra tham số hợp lệ
+
+      if (pdata == NULL || size == 0u) {
+        return STAT_ERROR;
+      }
+
+    // Cấu hình thông tin truyền nhận
+
+      // Cập nhật trạng thái và lỗi
+      hspi->State = SPI_BUSY_TX;
+      hspi->ErrorCode = SPI_OK;
+
+      // Cấu hình thông tin truyền 
+      hspi->Tx_Buff_Ptr = (ui8*)pdata;
+      hspi->Tx_Xfer_Size = size;
+      hspi->Tx_Xfer_Count = size;
+
+      // Cấu hình thông tin nhận
+      hspi->Rx_Buff_Ptr = (ui8*)NULL;
+      hspi->Rx_Xfer_Size = 0u;
+      hspi->Rx_Xfer_Count = 0u;
+
+      // Cấu hình ISR
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    /**
+     * Ghi chú:
+     * Ở khu vực này trong HAL sẽ có bổ sung thêm cấu hình Direction,
+     * Tuy nhiên do trong khai báo của driver này đã đảm bảo cấu hình
+     * và khai báo đầy đủ các tùy chọn Direction nên 
+     * sẽ không cần phải cấu hình lại ở đây nữa.
+     */
+
+    // Reset CRC
+
+      #if (SPI_CRC_ENABLE == 1U)
+        if (hspi->Init.CRCCalculation == SPI_CRCCALCULATION_ENABLE) {
+          CLEAR_BIT(
+            hspi->Instance->SPI_CR1,
+            SPI_CR1_CRCEN_MASK
+          );
+        }
+      #endif
+
+    // Kích hoạt SPI nếu chưa được kích hoạt 
+
+      if (!READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK)) {
+        SET_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Truyền dữ liệu
+
+      switch (hspi->Init.DataSize)
+      {
+      case SPI_DATASIZE_16BIT:
+        /* code */
+        break;
+      
+      case SPI_DATASIZE_8BIT:
+        /* code */
+        break;
+
+      default:
+        hspi->ErrorCode = SPI_ERROR_DATASIZE; // Cập nhật mã lỗi vào handle_param
+        hspi->State = SPI_RESET; // Cập nhật trạng thái về Reset để cho phép người dùng khởi tạo lại cấu hình
+        return STAT_ERROR; // Kích thước dữ liệu không hợp lệ
+        break;
+      }
+
+    return STAT_DONE;
 
   }
 
