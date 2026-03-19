@@ -588,12 +588,6 @@
         return STAT_BUSY;
       }
 
-    // Kiểm tra tham số hợp lệ
-
-      if (pdata == NULL || size == 0u) {
-        return STAT_ERROR;
-      }
-
     // Cấu hình thông tin truyền nhận
 
       // Cập nhật trạng thái và lỗi
@@ -644,147 +638,146 @@
 
     // Truyền dữ liệu
 
-      switch (hspi->Init.DataSize)
-      {
-      case SPI_DATASIZE_16BIT:
+      switch (hspi->Init.DataSize) {
+        case SPI_DATASIZE_16BIT:
+          
+          // Xử lý Preload
+
+            /**
+             * Ghi chú:
+             * Thực hiện preload để Slave đảm bảo phản ứng tức thì 
+             * khi Master gửi xung clock đầu tiên, dữ liệu Master
+             * thu được không phải là dữ liệu rác.
+             * Ngoài ra xử lý reload sẽ đảm bảo cover trường hợp
+             * chỉ gửi 1 phần tử dữ liệu thì vẫn có dữ liệu hợp lệ để gửi đi
+             * và loại bỏ kiểm tra cờ TXE dư thừa.
+             */
+
+            if (
+              hspi->Init.Mode == SPI_MODE_SLAVE 
+              || 
+              initial_TxXferCount == 0x01u
+            ) {
+              hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
+              hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+              hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
+            }
+
+            // Truyền phần dữ liệu còn lại
+
+              while (hspi->Tx_Xfer_Count > 0) {
+                
+                // Đợi cờ TXE
+                
+                  if (
+                    __DIFF_CHECK(
+                      READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
+                    ) // Đảm bảo TXE != 0 báo TxBuf trống
+                  ) {
+                    hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
+                    hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+                    hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+                  } else {
+
+                    // Kiểm tra timeout
+
+                      /**
+                       * Ghi chú:
+                       * Kiểm tra dựa trên 2 điều kiện:
+                       * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ TXE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
+                       * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
+                       * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ TXE không được set.
+                       */
+
+                      if (
+                        (
+                          ((SYSTICK_GetTick() - tickstart) >= timeout)
+                          &&
+                          (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
+                        ) || (
+                          timeout == 0x0u
+                        )
+                      ) {
+                        hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+                      }
+                  }
+              }
+          break;
         
-        // Xử lý Preload
+        case SPI_DATASIZE_8BIT:
 
-          /**
-           * Ghi chú:
-           * Thực hiện preload để Slave đảm bảo phản ứng tức thì 
-           * khi Master gửi xung clock đầu tiên, dữ liệu Master
-           * thu được không phải là dữ liệu rác.
-           * Ngoài ra xử lý reload sẽ đảm bảo cover trường hợp
-           * chỉ gửi 1 phần tử dữ liệu thì vẫn có dữ liệu hợp lệ để gửi đi
-           * và loại bỏ kiểm tra cờ TXE dư thừa.
-           */
+          // Xử lý Preload
 
-          if (
-            hspi->Init.Mode == SPI_MODE_SLAVE 
-            || 
-            initial_TxXferCount == 0x01u
-          ) {
-            hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
-            hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
-            hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
-          }
+            /**
+             * Ghi chú:
+             * Thực hiện preload để Slave đảm bảo phản ứng tức thì 
+             * khi Master gửi xung clock đầu tiên, dữ liệu Master
+             * thu được không phải là dữ liệu rác.
+             * Ngoài ra xử lý reload sẽ đảm bảo cover trường hợp
+             * chỉ gửi 1 phần tử dữ liệu thì vẫn có dữ liệu hợp lệ để gửi đi
+             * và loại bỏ kiểm tra cờ TXE dư thừa.
+             */
 
-          // Truyền phần dữ liệu còn lại
-
-            while (hspi->Tx_Xfer_Count > 0) {
-              
-              // Đợi cờ TXE
-              
-                if (
-                  __DIFF_CHECK(
-                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
-                  ) // Đảm bảo TXE != 0 báo TxBuf trống
-                ) {
-                  hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
-                  hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
-                  hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
-                } else {
-
-                  // Kiểm tra timeout
-
-                    /**
-                     * Ghi chú:
-                     * Kiểm tra dựa trên 2 điều kiện:
-                     * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ TXE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
-                     * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
-                     * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ TXE không được set.
-                     */
-
-                    if (
-                      (
-                        ((SYSTICK_GetTick() - tickstart) >= timeout)
-                        &&
-                        (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
-                      ) || (
-                        timeout == 0x0u
-                      )
-                    ) {
-                      hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
-                      hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
-                      return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
-                    }
-                }
+            if (
+              hspi->Init.Mode == SPI_MODE_SLAVE 
+              || 
+              initial_TxXferCount == 0x01u
+            ) {
+              *((__vo ui8*)&hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
+              hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+              hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
             }
-        break;
-      
-      case SPI_DATASIZE_8BIT:
 
-        // Xử lý Preload
+            // Truyền phần dữ liệu còn lại
 
-          /**
-           * Ghi chú:
-           * Thực hiện preload để Slave đảm bảo phản ứng tức thì 
-           * khi Master gửi xung clock đầu tiên, dữ liệu Master
-           * thu được không phải là dữ liệu rác.
-           * Ngoài ra xử lý reload sẽ đảm bảo cover trường hợp
-           * chỉ gửi 1 phần tử dữ liệu thì vẫn có dữ liệu hợp lệ để gửi đi
-           * và loại bỏ kiểm tra cờ TXE dư thừa.
-           */
+              while (hspi->Tx_Xfer_Count > 0) {
+                
+                // Đợi cờ TXE
+                
+                  if (
+                    __DIFF_CHECK(
+                      READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
+                    ) // Đảm bảo TXE != 0 báo TxBuf trống
+                  ) {
+                    *((__vo ui8*)&hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
+                    hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+                    hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+                  } else {
 
-          if (
-            hspi->Init.Mode == SPI_MODE_SLAVE 
-            || 
-            initial_TxXferCount == 0x01u
-          ) {
-            *((__vo ui8*)&hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
-            hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
-            hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
-          }
+                    // Kiểm tra timeout
 
-          // Truyền phần dữ liệu còn lại
+                      /**
+                       * Ghi chú:
+                       * Kiểm tra dựa trên 2 điều kiện:
+                       * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ TXE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
+                       * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
+                       * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ TXE không được set.
+                       */
 
-            while (hspi->Tx_Xfer_Count > 0) {
-              
-              // Đợi cờ TXE
-              
-                if (
-                  __DIFF_CHECK(
-                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
-                  ) // Đảm bảo TXE != 0 báo TxBuf trống
-                ) {
-                  *((__vo ui8*)&hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
-                  hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
-                  hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
-                } else {
+                      if (
+                        (
+                          ((SYSTICK_GetTick() - tickstart) >= timeout)
+                          &&
+                          (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
+                        ) || (
+                          timeout == 0x0u
+                        )
+                      ) {
+                        hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+                      }
+                  }
+              }
+          break;
 
-                  // Kiểm tra timeout
-
-                    /**
-                     * Ghi chú:
-                     * Kiểm tra dựa trên 2 điều kiện:
-                     * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ TXE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
-                     * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
-                     * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ TXE không được set.
-                     */
-
-                    if (
-                      (
-                        ((SYSTICK_GetTick() - tickstart) >= timeout)
-                        &&
-                        (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
-                      ) || (
-                        timeout == 0x0u
-                      )
-                    ) {
-                      hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
-                      hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
-                      return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
-                    }
-                }
-            }
-        break;
-
-      default:
-        hspi->ErrorCode = SPI_ERROR_DATASIZE; // Cập nhật mã lỗi vào handle_param
-        hspi->State = SPI_RESET; // Cập nhật trạng thái về Reset để cho phép người dùng khởi tạo lại cấu hình
-        return STAT_ERROR; // Kích thước dữ liệu không hợp lệ
-        break;
+        default:
+          hspi->ErrorCode = SPI_ERROR_DATASIZE; // Cập nhật mã lỗi vào handle_param
+          hspi->State = SPI_RESET; // Cập nhật trạng thái về Reset để cho phép người dùng khởi tạo lại cấu hình
+          return STAT_ERROR; // Kích thước dữ liệu không hợp lệ
+          break;
       }
 
     // Kiểm tra timeout cờ TXE
@@ -863,6 +856,234 @@
     ui32 timeout
   ) {
     
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL || pdata == NULL || size == 0u) {
+        return STAT_ERROR;
+      }
+
+    // Khai báo quản lý thời gian
+
+      ui32 tickstart = 0;
+
+    // Kiểm tra trạng thái
+
+      if (hspi->State != SPI_READY) {
+        return STAT_BUSY;
+      }
+
+    // Kiểm tra chế độ và tạo xung
+
+      if (
+        hspi->Init.Mode == SPI_MODE_MASTER
+        &&
+        hspi->Init.Direction == SPI_DIRECTION_2LINES
+      ) {
+        hspi->State = SPI_BUSY_RX; // Cập nhật trạng thái về Busy_RX để báo đang nhận dữ liệu
+        return SPI_TransmitReceive( // Hàm này được gọi để sử dụng data tạo xung và thực hiện chức năng như SPI_Receive
+          hspi,
+          pdata, 
+          pdata,
+          size,
+          timeout
+        );
+      }
+
+    // Đánh dấu timing
+
+      tickstart = SYSTICK_GetTick();
+
+    // Cấu hình thông tin truyền nhận
+
+      // Cập nhật trạng thái và lỗi
+      hspi->State = SPI_BUSY_RX;
+      hspi->ErrorCode = SPI_OK;
+
+      // Cấu hình thông tin nhận
+      hspi->Rx_Buff_Ptr = (ui8*)pdata;
+      hspi->Rx_Xfer_Size = size;
+      hspi->Rx_Xfer_Count = size;
+
+      // Cấu hình thông tin truyền 
+      /**
+       * Ghi chú:
+       * Mặc dù không set tham số cho TxBuf nhưng
+       * khi hoạt động thì vẫn sẽ có sự tham gia của TxBuf
+       * dẫn đến việc tạo xung clock để Slave có thể gửi dữ liệu,
+       * do đó sẽ có xử lý để đảm bảo TxBuf vẫn hoạt động 
+       * ngay cả khi không có dữ liệu thực tế để truyền đi.
+       */
+      hspi->Tx_Buff_Ptr = (ui8*)NULL;
+      hspi->Tx_Xfer_Size = 0u;
+      hspi->Tx_Xfer_Count = 0u;
+
+      // Cấu hình ISR
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    // Kích hoạt SPI nếu chưa được kích hoạt 
+
+      if (!READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK)) {
+        SET_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Nhận dữ liệu
+
+      switch (hspi->Init.DataSize) {
+        case SPI_DATASIZE_16BIT:
+
+          // Nhận dữ liệu
+
+            while (hspi->Rx_Xfer_Count > 0u) {
+
+              // Đợi cờ RXNE
+
+                if (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK)) { // Đảm bảo RXNE != 0 báo RxBuf có dữ liệu
+                  *((ui16*)hspi->Rx_Buff_Ptr) = hspi->Instance->SPI_DR; // Đọc dữ liệu ràng buộc casting 16-bit
+                  hspi->Rx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer nhận vào (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+                  hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
+                } else {
+
+                  // Kiểm tra timeout
+
+                    /**
+                     * Ghi chú:
+                     * Kiểm tra dựa trên 2 điều kiện:
+                     * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ RXNE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
+                     * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
+                     * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ RXNE không được set.
+                     */
+
+                    if (
+                      (
+                        ((SYSTICK_GetTick() - tickstart) >= timeout)
+                        &&
+                        (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
+                      ) || (
+                        timeout == 0x0u
+                      )
+                    ) {
+                      hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                      hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                      return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+                    }
+                }
+            }
+
+          break;
+        
+        case SPI_DATASIZE_8BIT:
+
+          // Nhận dữ liệu
+
+            while (hspi->Rx_Xfer_Count > 0u) {
+
+              // Đợi cờ RXNE
+
+                if (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK)) { // Đảm bảo RXNE != 0 báo RxBuf có dữ liệu
+                  *((ui8*)hspi->Rx_Buff_Ptr) = *((__vo ui8*)&hspi->Instance->SPI_DR); // Đọc dữ liệu ràng buộc casting 8-bit
+                  hspi->Rx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer nhận vào (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+                  hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
+                } else {
+
+                  // Kiểm tra timeout
+
+                    /**
+                     * Ghi chú:
+                     * Kiểm tra dựa trên 2 điều kiện:
+                     * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ RXNE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
+                     * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
+                     * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ RXNE không được set.
+                     */
+
+                    if (
+                      (
+                        ((SYSTICK_GetTick() - tickstart) >= timeout)
+                        &&
+                        (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
+                      ) || (
+                        timeout == 0x0u
+                      )
+                    ) {
+                      hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                      hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                      return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+                    }
+                }
+            }
+
+          break;
+
+        default:
+          hspi->ErrorCode = SPI_ERROR_DATASIZE; // Cập nhật mã lỗi vào handle_param
+          hspi->State = SPI_RESET; // Cập nhật trạng thái về Reset để cho phép người dùng khởi tạo lại cấu hình
+          return STAT_ERROR; // Kích thước dữ liệu không hợp lệ
+          break;
+      }
+
+    // Tắt SPI để đảm bảo không nhận thêm dữ liệu
+
+      if (
+        hspi->Init.Mode == SPI_MODE_MASTER
+        &&
+        (
+          hspi->Init.Direction == SPI_DIRECTION_2LINES 
+          || 
+          hspi->Init.Direction == SPI_DIRECTION_1LINE_RX
+        )
+      ) {
+        CLEAR_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Báo trạng thái hoàn thành
+
+      hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình nếu cần thiết
+
+    // Kiểm tra cờ RXNE ở Master Receiver
+
+      if (
+        hspi->Init.Mode == SPI_MODE_MASTER 
+        && 
+        hspi->Init.Direction == SPI_DIRECTION_2LINES_RXONLY
+      ) {
+        // Kiểm tra cờ RXNE
+
+          if (
+            SPI_WaitFlag(
+              hspi,
+              SPI_SR_RXNE_MASK,
+              RESET,
+              timeout,
+              tickstart
+            ) != STAT_OK
+          ) {
+            hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+            return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+          }
+      } else {
+        // Kiểm tra cờ BSY
+
+          if (
+            SPI_WaitFlag(
+              hspi,
+              SPI_SR_BSY_MASK,
+              RESET,
+              timeout,
+              tickstart
+            ) != STAT_OK
+          ) {
+            hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+            return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+          }
+      }
+
+    return STAT_OK; // Nhận dữ liệu thành công
   }
 
   RETR_STAT SPI_TransmitReceive(

@@ -3644,11 +3644,12 @@ static HAL_StatusTypeDef SPI_EndRxTransaction(SPI_HandleTypeDef *hspi,  uint32_t
 {
   if ((hspi->Init.Mode == SPI_MODE_MASTER) && ((hspi->Init.Direction == SPI_DIRECTION_1LINE)
                                                || (hspi->Init.Direction == SPI_DIRECTION_2LINES_RXONLY)))
-  {
+  { // In case of Master Receiver, the SPI must be disabled before to check the RXNE flag status
     /* Disable SPI peripheral */
     __HAL_SPI_DISABLE(hspi);
   }
 
+  // In case of Master Receiver, the RXNE flag is set only at the end of the reception (when SPI is disabled) and if the received data has been read.
   if ((hspi->Init.Mode == SPI_MODE_MASTER) && (hspi->Init.Direction == SPI_DIRECTION_2LINES_RXONLY))
   {
     /* Wait the RXNE reset */
