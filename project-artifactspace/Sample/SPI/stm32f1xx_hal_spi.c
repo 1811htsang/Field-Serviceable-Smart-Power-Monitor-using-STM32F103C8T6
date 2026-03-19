@@ -857,7 +857,7 @@ HAL_StatusTypeDef HAL_SPI_Transmit(SPI_HandleTypeDef *hspi, const uint8_t *pData
   /* Transmit data in 16 Bit mode */
   if (hspi->Init.DataSize == SPI_DATASIZE_16BIT)
   {
-    if ((hspi->Init.Mode == SPI_MODE_SLAVE) || (initial_TxXferCount == 0x01U))
+    if ((hspi->Init.Mode == SPI_MODE_SLAVE) || (initial_TxXferCount == 0x01U)) 
     {
       hspi->Instance->DR = *((const uint16_t *)hspi->pTxBuffPtr);
       hspi->pTxBuffPtr += sizeof(uint16_t);
@@ -876,7 +876,15 @@ HAL_StatusTypeDef HAL_SPI_Transmit(SPI_HandleTypeDef *hspi, const uint8_t *pData
       else
       {
         /* Timeout management */
-        if ((((HAL_GetTick() - tickstart) >=  Timeout) && (Timeout != HAL_MAX_DELAY)) || (Timeout == 0U))
+        if (
+          (
+            ((HAL_GetTick() - tickstart) >=  Timeout) // Check if timeout has elapsed 
+            && 
+            (Timeout != HAL_MAX_DELAY) // Check if timeout is not set to maximum value (indicating infinite timeout
+          ) 
+          || 
+          (Timeout == 0U) // Check if timeout is set to zero (indicating no wait)
+        )
         {
           hspi->State = HAL_SPI_STATE_READY;
           __HAL_UNLOCK(hspi);

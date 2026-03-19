@@ -19,12 +19,6 @@
       #include "lib_keyword_def.h"
       #include "lib_spi_def.h"
     #endif
-  
-  // Khai báo quản lý sử dụng CRC
-
-    #ifndef SPI_CRC_ENABLE
-      #define SPI_CRC_ENABLE 0U // Mặc định không kích hoạt tính năng CRC
-    #endif
 
   // Khai báo cấu trúc tham số hàm khởi tạo
 
@@ -39,8 +33,6 @@
           ui32 NSS;               // Chọn chế độ quản lý tín hiệu Slave Select (Software/Hardware)
           ui32 BaudRatePrescaler; // Chọn hệ số chia tốc độ clock để tạo baud rate
           ui32 FirstBit;          // Chọn thứ tự bit khi truyền dữ liệu (MSB/LSB)
-          ui32 CRCCalculation;    // Chọn có kích hoạt tính toán CRC hay không (Enable/Disable)
-          ui32 CRCPolynomial;     // Chọn đa thức CRC nếu tính toán CRC được kích hoạt
         } SPI_Init_Param;
     #endif
 
@@ -54,7 +46,6 @@
      * - NSS ảnh hưởng bit 9, 8, 2 (SSOE - CR2)
      * - BaudRatePrescaler ảnh hưởng bit 5:3
      * - FirstBit ảnh hưởng bit 7
-     * - CRCCalculation ảnh hưởng bit 13
      */
 
   // Khai báo trạng thái trả về
@@ -82,12 +73,12 @@
         tdf_enum SPI_ERR_Enum {
           SPI_OK = (ui32)0x0000u,                           // Không có lỗi
           SPI_ERROR_MODF = (ui32)(1u << SPI_SR_MODF_POS),   // Lỗi MODF (Mode Fault)
-          SPI_ERROR_CRC = (ui32)(1u << SPI_SR_CRCERR_POS),  // Lỗi CRC
           SPI_ERROR_OVR = (ui32)(1u << SPI_SR_OVR_POS),     // Lỗi Overrun
           SPI_ERROR_UDR = (ui32)(1u << SPI_SR_UDR_POS),     // Lỗi Underrun
           SPI_ERROR_BSY = (ui32)(1u << SPI_SR_BSY_POS),     // Lỗi Busy (thường xảy ra khi có lỗi khác và ngoại vi đang bận xử lý)
           SPI_ERROR_INV_CALLBACK = (ui32)(1u << 8u),        // Lỗi ID callback không hợp lệ khi đăng ký callback
           SPI_ERROR_DATASIZE = (ui32)(1u << 9u),            // Lỗi kích thước dữ liệu không hợp lệ khi khởi tạo
+          SPI_ERROR_TIMEOUT = (ui32)(1u << 10u)             // Lỗi timeout khi truyền nhận dữ liệu
         } SPI_ERR_Enum;
     #endif
 
@@ -214,13 +205,6 @@
 
     #define IS_SPI_FIRSTBIT(FIRSTBIT) (((FIRSTBIT) == SPI_FIRSTBIT_MSB) || \
                                       ((FIRSTBIT) == SPI_FIRSTBIT_LSB))
-
-    #define IS_SPI_CRCENABLE(CRCCALCULATION) (((CRCCALCULATION) == SPI_CRCCALCULATION_DISABLE) || \
-                                                ((CRCCALCULATION) == SPI_CRCCALCULATION_ENABLE))
-
-    #define IS_SPI_CRCPOLYNOMIAL(CRCPOLYNOMIAL) (((CRCPOLYNOMIAL) >= 0x1U) && \
-                                                ((CRCPOLYNOMIAL) <= 0xFFFFU) && \
-                                                (((CRCPOLYNOMIAL) & 0x1U) != 0U))
 
   // Khai báo các hàm thành phần
 

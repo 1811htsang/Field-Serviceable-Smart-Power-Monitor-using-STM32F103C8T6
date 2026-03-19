@@ -82,12 +82,6 @@
     #define SPI_CR1_DFF_POS 11u
     #define SPI_CR1_DFF_MASK (1u << SPI_CR1_DFF_POS)
 
-    #define SPI_CR1_CRCEN_POS 13u
-    #define SPI_CR1_CRCEN_MASK (1u << SPI_CR1_CRCEN_POS)
-
-    #define SPI_CR1_CRCNEXT_POS 14u
-    #define SPI_CR1_CRCNEXT_MASK (1u << SPI_CR1_CRCNEXT_POS)
-
     #define SPI_CR1_BIDIOE_POS 14u
     #define SPI_CR1_BIDIOE_MASK (1u << SPI_CR1_BIDIOE_POS)
 
@@ -128,9 +122,6 @@
     #define SPI_SR_UDR_POS 3u
     #define SPI_SR_UDR_MASK (1u << SPI_SR_UDR_POS)
 
-    #define SPI_SR_CRCERR_POS 4u
-    #define SPI_SR_CRCERR_MASK (1u << SPI_SR_CRCERR_POS)
-
     #define SPI_SR_MODF_POS 5u
     #define SPI_SR_MODF_MASK (1u << SPI_SR_MODF_POS)
 
@@ -139,21 +130,6 @@
 
     #define SPI_SR_BSY_POS 7u
     #define SPI_SR_BSY_MASK (1u << SPI_SR_BSY_POS)
-
-  // Khai báo các định nghĩa bit cần sử dụng trên thanh ghi SPI_CRCPR
-
-    #define SPI_CRCPR_CRCPOLY_POS 0u
-    #define SPI_CRCPR_CRCPOLY_MASK (0xFFFFu << SPI_CRCPR_CRCPOLY_POS)
-
-  // Khai báo các định nghĩa bit cần sử dụng trên thanh ghi SPI_RXCRCR
-
-    #define SPI_RXCRCR_RXCRC_POS 0u
-    #define SPI_RXCRCR_RXCRC_MASK (0xFFFFu << SPI_RXCRCR_RXCRC_POS)
-
-  // Khai báo các định nghĩa bit cần sử dụng trên thanh ghi SPI_TXCRCR
-
-    #define SPI_TXCRCR_TXCRC_POS 0u
-    #define SPI_TXCRCR_TXCRC_MASK (0xFFFFu << SPI_TXCRCR_TXCRC_POS)
 
   // Khai báo chế độ Master / Slave
 
@@ -203,10 +179,5 @@
 
     #define SPI_FIRSTBIT_MSB 0x00000000u
     #define SPI_FIRSTBIT_LSB SPI_CR1_LSBFIRST_MASK
-
-  // Khai báo kích hoạt CRC
-
-    #define SPI_CRCCALCULATION_DISABLE 0x00000000u
-    #define SPI_CRCCALCULATION_ENABLE SPI_CR1_CRCEN_MASK
 
 #endif /* LIB_SPI_DEF_H_ */
