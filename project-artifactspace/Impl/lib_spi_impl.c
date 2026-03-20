@@ -625,7 +625,12 @@
 
     // Kích hoạt SPI nếu chưa được kích hoạt 
 
-      if (!READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK)) {
+      if (
+        __DIFF_CHECK(
+          READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK),
+          SPI_CR1_SPE_MASK
+        ) // Nếu SPI chưa được kích hoạt (SPE = 0) thì mới kích hoạt
+      ) {
         SET_BIT(
           hspi->Instance->SPI_CR1,
           SPI_CR1_SPE_MASK
@@ -923,7 +928,12 @@
 
     // Kích hoạt SPI nếu chưa được kích hoạt 
 
-      if (!READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK)) {
+      if (
+        __DIFF_CHECK(
+          READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK),
+          SPI_CR1_SPE_MASK
+        ) // Nếu SPI chưa được kích hoạt (SPE = 0) thì mới kích hoạt
+      ) {
         SET_BIT(
           hspi->Instance->SPI_CR1,
           SPI_CR1_SPE_MASK
@@ -941,7 +951,11 @@
 
               // Đợi cờ RXNE
 
-                if (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK)) { // Đảm bảo RXNE != 0 báo RxBuf có dữ liệu
+                if (
+                  __DIFF_CHECK(
+                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK), 0
+                  )
+                ) { // Đảm bảo RXNE != 0 báo RxBuf có dữ liệu
                   *((ui16*)hspi->Rx_Buff_Ptr) = hspi->Instance->SPI_DR; // Đọc dữ liệu ràng buộc casting 16-bit
                   hspi->Rx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer nhận vào (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
                   hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
@@ -1094,6 +1108,355 @@
     ui32 timeout
   ) {
 
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL || pdata_tx == NULL || pdata_rx == NULL || size == 0u) {
+        return STAT_ERROR;
+      }
+
+    // Khai báo quản lý thời gian
+
+      ui32 tickstart = 0;
+
+    // Khai báo lưu trạng thái cục bộ
+
+      ui32 tmp_state = hspi->State;
+      ui32 tmp_mode = hspi->Init.Mode;
+      ui32 tmp_direction = hspi->Init.Direction;
+
+    // Khai báo lưu số lần truyền nhận dữ liệu đã thực hiện
+
+      ui16 initial_TxXferCount = size;
+      ui16 initial_RxXferCount = size;
+
+    // Khai báo biến xác định chuyển đổi TX và RX
+
+      ui8 is_TxPhase = 1u; // Biến cờ để xác định đang ở pha truyền (1) hay pha nhận (0), mặc định bắt đầu ở pha truyền
+
+    // Kiểm tra chế độ truyền
+
+      assert_param(hspi->Init.Direction == SPI_DIRECTION_2LINES); // Chỉ cho phép truyền nhận dữ liệu khi ở chế độ Full-Duplex
+
+    // Kiểm tra trạng thái
+
+      if (!(
+        tmp_state == SPI_READY 
+        ||
+        (
+          (tmp_state == SPI_BUSY_RX) 
+          && 
+          (tmp_mode == SPI_MODE_MASTER) 
+          && 
+          (tmp_direction == SPI_DIRECTION_2LINES)
+        )
+      )) {
+        return STAT_BUSY;
+      }
+
+    // Đảm bảo không overwrite state nếu sử dụng hàm này sau khi gọi SPI_Receive
+
+      if (hspi->State != SPI_BUSY_RX) {
+        hspi->State = SPI_BUSY_TX_RX; // Cập nhật trạng thái về Busy_TX_RX để báo đang truyền nhận dữ liệu
+      }
+
+    // Cấu hình thông tin truyền nhận
+
+      // Cập nhật lỗi
+      hspi->ErrorCode = SPI_OK;
+
+      // Cấu hình thông tin truyền 
+      hspi->Tx_Buff_Ptr = (const ui8*)pdata_tx; // enforce const để đảm bảo dữ liệu truyền đi không bị thay đổi
+      hspi->Tx_Xfer_Size = size;
+      hspi->Tx_Xfer_Count = size;
+
+      // Cấu hình thông tin nhận
+      hspi->Rx_Buff_Ptr = (ui8*)pdata_rx;
+      hspi->Rx_Xfer_Size = size;
+      hspi->Rx_Xfer_Count = size;
+
+      // Cấu hình ISR
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    // Kích hoạt SPI nếu chưa được kích hoạt 
+
+      if (
+        __DIFF_CHECK(
+          READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK),
+          SPI_CR1_SPE_MASK
+        ) // Nếu SPI chưa được kích hoạt (SPE = 0) thì mới kích hoạt
+      ) {
+        SET_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Cập nhật thời điểm bắt đầu truyền nhận dữ liệu để phục vụ cho việc kiểm tra timeout sau này
+
+      tickstart = SYSTICK_GetTick();
+
+    // Truyền nhận dữ liệu
+
+      switch (hspi->Init.DataSize) {
+        case SPI_DATASIZE_16BIT:
+          
+          // Xử lý Preload
+
+            /**
+             * Ghi chú:
+             * Thực hiện preload để Slave đảm bảo phản ứng tức thì 
+             * khi Master gửi xung clock đầu tiên, dữ liệu Master
+             * thu được không phải là dữ liệu rác.
+             * Ngoài ra xử lý reload sẽ đảm bảo cover trường hợp
+             * chỉ gửi 1 phần tử dữ liệu thì vẫn có dữ liệu hợp lệ để gửi đi
+             * và loại bỏ kiểm tra cờ TXE dư thừa.
+             */
+
+            if (
+              (hspi->Init.Mode == SPI_MODE_SLAVE) 
+              || 
+              (initial_TxXferCount == 0x01u)
+            ) {
+              hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
+              hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+              hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
+            }
+
+          // Xử lý truyền nhận
+
+            while (
+              (hspi->Tx_Xfer_Count > 0) 
+              || 
+              (hspi->Rx_Xfer_Count > 0)
+            ) {
+              // Kiểm tra cờ TXE
+
+                if (
+                  __DIFF_CHECK(
+                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
+                  ) // Đảm bảo TXE != 0 báo TxBuf trống
+                  &&
+                  (hspi->Tx_Xfer_Count > 0) // Chỉ truyền dữ liệu khi vẫn còn dữ liệu cần truyền
+                  &&
+                  is_TxPhase // Chỉ truyền dữ liệu khi đang ở pha truyền
+                ) {
+                  hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
+                  hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+                  hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+                  is_TxPhase = 0u; // Chuyển sang pha nhận sau khi truyền đi 1 phần tử dữ liệu
+                }
+
+              // Kiểm tra cờ RXNE
+
+                if (
+                  __DIFF_CHECK(
+                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK), 0
+                  ) // Đảm bảo RXNE != 0 báo RxBuf có dữ liệu
+                  &&
+                  (hspi->Rx_Xfer_Count > 0) // Chỉ nhận dữ liệu khi vẫn còn dữ liệu cần nhận
+                  &&
+                  !is_TxPhase // Chỉ nhận dữ liệu khi đang ở pha nhận
+                ) { 
+                  *((ui16*)hspi->Rx_Buff_Ptr) = hspi->Instance->SPI_DR; // Đọc dữ liệu ràng buộc casting 16-bit
+                  hspi->Rx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer nhận vào (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+                  hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
+                  is_TxPhase = 1u; // Chuyển sang pha truyền sau khi nhận được 1 phần tử dữ liệu
+                }
+
+              // Kiểm tra timeout
+
+                if (
+                  (
+                    ((SYSTICK_GetTick() - tickstart) >= timeout)
+                    &&
+                    (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
+                  ) || (
+                    timeout == 0x0u
+                  )
+                ) {
+                  hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                  hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                  return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+                }
+            }
+
+          break;
+        
+        case SPI_DATASIZE_8BIT:
+
+          // Xử lý Preload
+
+            /**
+             * Ghi chú:
+             * Thực hiện preload để Slave đảm bảo phản ứng tức thì 
+             * khi Master gửi xung clock đầu tiên, dữ liệu Master
+             * thu được không phải là dữ liệu rác.
+             * Ngoài ra xử lý reload sẽ đảm bảo cover trường hợp
+             * chỉ gửi 1 phần tử dữ liệu thì vẫn có dữ liệu hợp lệ để gửi đi
+             * và loại bỏ kiểm tra cờ TXE dư thừa.
+             */
+
+            if (
+              (hspi->Init.Mode == SPI_MODE_SLAVE) 
+              || 
+              (initial_TxXferCount == 0x01u)
+            ) {
+              *((__vo ui8*)hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
+              hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+              hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
+            }
+
+          // Xử lý truyền nhận
+
+            while (
+              (hspi->Tx_Xfer_Count > 0) 
+              || 
+              (hspi->Rx_Xfer_Count > 0)
+            ) {
+              // Kiểm tra cờ TXE
+
+                if (
+                  __DIFF_CHECK(
+                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
+                  ) // Đảm bảo TXE != 0 báo TxBuf trống
+                  &&
+                  (hspi->Tx_Xfer_Count > 0) // Chỉ truyền dữ liệu khi vẫn còn dữ liệu cần truyền
+                  &&
+                  is_TxPhase // Chỉ truyền dữ liệu khi đang ở pha truyền
+                ) {
+                  *((__vo ui8*)hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
+                  hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+                  hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+                  is_TxPhase = 0u; // Chuyển sang pha nhận sau khi truyền đi 1 phần tử dữ liệu
+                }
+
+              // Kiểm tra cờ RXNE
+
+                if (
+                  __DIFF_CHECK(
+                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK), 0
+                  ) // Đảm bảo RXNE != 0 báo RxBuf có dữ liệu
+                  &&
+                  (hspi->Rx_Xfer_Count > 0) // Chỉ nhận dữ liệu khi vẫn còn dữ liệu cần nhận
+                  &&
+                  !is_TxPhase // Chỉ nhận dữ liệu khi đang ở pha nhận
+                ) { 
+                  *((ui8*)hspi->Rx_Buff_Ptr) = hspi->Instance->SPI_DR; // Đọc dữ liệu ràng buộc casting 8-bit
+                  hspi->Rx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer nhận vào (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+                  hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
+                  is_TxPhase = 1u; // Chuyển sang pha truyền sau khi nhận được 1 phần tử dữ liệu
+                }
+
+              // Kiểm tra timeout
+
+                if (
+                  (
+                    ((SYSTICK_GetTick() - tickstart) >= timeout)
+                    &&
+                    (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
+                  ) || (
+                    timeout == 0x0u
+                  )
+                ) {
+                  hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                  hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                  return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+                }
+            }
+
+          break;
+
+        default:
+          hspi->ErrorCode = SPI_ERROR_DATASIZE; // Cập nhật mã lỗi vào handle_param
+          hspi->State = SPI_RESET; // Cập nhật trạng thái về Reset để cho phép người dùng khởi tạo lại cấu hình
+          return STAT_ERROR; // Kích thước dữ liệu không hợp lệ
+          break;
+      }
+
+      /**
+       * Ghi chú:
+       * Vì sao phải có cơ chế ping-pong khi nhận, không làm TX/RX “độc lập”?
+       * - SPI là đồng bộ theo xung clock từ Master,
+       * Không có clock thì Slave không thể đẩy bit ra MISO.
+       * - Mỗi lần Master dịch 1 bit ra MOSI thì đồng thời cũng dịch 1 bit vào MISO,
+       * Nghĩa là về phần cứng, TX và RX luôn ghép cặp theo từng khung.
+       * - Nếu chỉ “chờ RXNE” mà không tạo clock (bằng ghi DR) sẽ treo vì dữ liệu không bao giờ đến.
+       * - Nếu chỉ TX liên tục mà không đọc RX kịp, RX buffer đầy gây OVR; 
+       * khi OVR set thì luồng truyền tiếp theo có thể bị kẹt/timeout.
+       * - Ping-pong giải quyết cả hai:
+       *  - Đảm bảo luôn có clock để nhận.
+       *  - Đảm bảo đọc RX ngay sau mỗi nhịp TX để tránh OVR.
+       *  - Giữ tiến trình full-duplex ổn định theo từng frame.
+       * - Nói ngắn gọn: “Receive-only” trên SPI Master 2-lines là khái niệm ở API, còn ở mức bus vật lý thì vẫn phải phát dữ liệu giả để kéo clock, nên bắt buộc dùng mô hình transmit-receive theo kiểu ping-pong.
+       */
+
+      // Kiểm tra timeout cờ TXE
+
+        if (
+          SPI_WaitFlag(
+            hspi,
+            SPI_SR_TXE_MASK,
+            SET,
+            timeout,
+            tickstart
+          ) != STAT_OK
+        ) {
+          hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+        }
+
+      // Kiểm tra cờ BSY
+
+        if (
+          SPI_WaitFlag(
+            hspi,
+            SPI_SR_BSY_MASK,
+            RESET,
+            timeout,
+            tickstart
+          ) != STAT_OK
+        ) {
+          hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+        }
+
+      // Xử lý cờ OVR nếu là truyền dữ liệu ở chế độ Full-Duplex
+
+        /**
+         * Ghi chú:
+         * Đối với hàm Transmit ở bất kỳ chế độ nào,
+         * thì cả TxBuf và RxBuf luôn hoạt động.
+         * RxBuf sẽ thu dữ liệu rác làm cờ RXNE luôn được set 
+         * sau khi truyền đi 1 phần tử dữ liệu.
+         * Khi truyền ở lần thứ 2 mà dữ liệu RxBuf vẫn chưa đọc ra
+         * thì cờ OVR sẽ được set, nếu không xử lý cờ OVR thì 
+         * sẽ không thể tiếp tục truyền dữ liệu được nữa
+         * vì cờ OVR sẽ ngăn cản việc set lại cờ TXE để báo TxBuf trống, 
+         * dẫn đến tình trạng treo ở vòng đợi cờ TXE ở lần truyền thứ 2 trở đi.
+          * Do đó, cần phải xử lý cờ OVR sau khi truyền xong dữ liệu 
+          * để đảm bảo có thể tiếp tục truyền dữ liệu được nữa nếu cần thiết.
+        */
+
+        if (
+          hspi->Init.Direction == SPI_DIRECTION_2LINES 
+        ) {
+          __vo ui32 tmp = 0x0u;
+          tmp = hspi->Instance->SPI_DR; // Đọc DR
+          tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+        }
+
+      // Báo trạng thái hoàn thành
+
+        hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình nếu cần thiết
+
+      // Kiểm tra mã lỗi
+
+        if (hspi->ErrorCode != SPI_OK) {
+          return STAT_ERROR; // Truyền dữ liệu thất bại do lỗi đã được cập nhật vào handle_param
+        }
+
+      // Truyền dữ liệu thành công
+
+        return STAT_OK;
   }
 
   RETR_STAT SPI_Transmit_IT(
@@ -1101,7 +1464,8 @@
     const ui8* pdata, 
     ui16 size
   ) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_Receive_IT(
@@ -1109,7 +1473,8 @@
     ui8* pdata, 
     ui16 size
   ) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_TransmitReceive_IT(
@@ -1118,7 +1483,8 @@
     ui8* pdata_rx, 
     ui16 size
   ) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_Transmit_DMA(
@@ -1126,7 +1492,8 @@
     const ui8* pdata, 
     ui16 size
   ) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_Receive_DMA(
@@ -1134,7 +1501,8 @@
     ui8* pdata, 
     ui16 size
   ) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_TransmitReceive_DMA(
@@ -1143,31 +1511,37 @@
     ui8* pdata_rx, 
     ui16 size
   ) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_DMA_Pause(SPI_Handle_Param *hspi) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_DMA_Resume(SPI_Handle_Param *hspi) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_DMA_Stop(SPI_Handle_Param *hspi) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_Abort(SPI_Handle_Param *hspi) {
-
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi) {
-    
+    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    return STAT_OK;
   }
 
   SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi) {
-
+    
   }
 
   ui32 SPI_GetError(SPI_Handle_Param *hspi) {
