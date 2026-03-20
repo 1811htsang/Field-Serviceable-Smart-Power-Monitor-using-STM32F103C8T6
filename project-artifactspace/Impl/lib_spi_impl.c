@@ -250,10 +250,7 @@
 
     // Vô hiệu hóa SPI tạm thời
 
-      CLEAR_BIT(
-        hspi->Instance->SPI_CR1,
-        SPI_CR1_SPE_MASK
-      );
+      SPI_Disable(hspi);
 
     // Khai báo thanh ghi tạm để tính toán cấu hình
 
@@ -295,10 +292,7 @@
 
     // Kích hoạt SPI
 
-      SET_BIT(
-        hspi->Instance->SPI_CR1,
-        SPI_CR1_SPE_MASK
-      );
+      SPI_Enable(hspi);
 
     // Set trạng thái 
 
@@ -330,10 +324,7 @@
 
     // Vô hiệu hóa SPI
 
-      CLEAR_BIT(
-        hspi->Instance->SPI_CR1,
-        SPI_CR1_SPE_MASK
-      );
+      SPI_Disable(hspi);
 
     // Reset ngoại vi
 
@@ -354,7 +345,7 @@
       hspi->State = SPI_RESET;
       hspi->ErrorCode = SPI_OK;
 
-    return STAT_DONE;
+    return STAT_OK;
   }
 
   __weak void SPI_MSP_Init(SPI_Handle_Param *hspi) {
@@ -542,6 +533,11 @@
 
   void SPI_IRQHandler(SPI_Handle_Param *hspi) {
     
+    /**
+     * Ghi chú:
+     * Phần này sẽ được implement bên cạnh với phần truyền sử dụng Interrupt.
+     */
+
   }
 
   RETR_STAT SPI_Transmit(
@@ -1464,7 +1460,7 @@
     const ui8* pdata, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
@@ -1473,7 +1469,7 @@
     ui8* pdata, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
@@ -1483,7 +1479,7 @@
     ui8* pdata_rx, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
@@ -1492,7 +1488,7 @@
     const ui8* pdata, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
@@ -1501,7 +1497,7 @@
     ui8* pdata, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
@@ -1511,41 +1507,41 @@
     ui8* pdata_rx, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
   RETR_STAT SPI_DMA_Pause(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
   RETR_STAT SPI_DMA_Resume(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
   RETR_STAT SPI_DMA_Stop(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
   RETR_STAT SPI_Abort(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
   RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau khi hoàn thành phần cơ bản của hàm Transmit và Receive Blocking
+    // Hàm này sẽ được implement sau 
     return STAT_OK;
   }
 
   SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi) {
-    
+    return hspi->State;
   }
 
   ui32 SPI_GetError(SPI_Handle_Param *hspi) {
-
+    return hspi->ErrorCode;
   }
 
 // Định nghĩa các hàm callback weak mặc định (nếu được kích hoạt)

@@ -208,6 +208,22 @@
 
   // Khai báo các hàm thành phần
 
+    // >> Khai báo hàm vô hiệu hóa SPI
+    
+    stinl void SPI_Disable(SPI_Handle_Param *hspi) {
+      CLEAR_BIT(
+        hspi->Instance->SPI_CR1,
+        SPI_CR1_SPE_MASK
+      );
+    }
+
+    stinl void SPI_Enable(SPI_Handle_Param *hspi) {
+      SET_BIT(
+        hspi->Instance->SPI_CR1,
+        SPI_CR1_SPE_MASK
+      );
+    }
+
     // >> Các hàm khởi tạo và giải phóng ngoại vi
     RETR_STAT SPI_Init(SPI_Handle_Param *hspi);
     RETR_STAT SPI_DeInit(SPI_Handle_Param *hspi);
