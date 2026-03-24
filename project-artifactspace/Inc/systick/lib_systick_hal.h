@@ -22,7 +22,7 @@
 
   // Khai báo biến tham chiếu toàn cục
 
-    __vo ui32 ms_ticks = 0; // Biến đếm số lượng tick đã trôi qua kể từ khi khởi động hệ thống, được cập nhật trong hàm xử lý ngắt của SysTick
+    extern __vo ui32 ms_ticks; // Biến đếm số lượng tick đã trôi qua kể từ khi khởi động hệ thống, được cập nhật trong hàm xử lý ngắt của SysTick
 
   // Khai báo các kiểm tra nội bộ
 
@@ -45,7 +45,7 @@
     }
 
     // >> Hàm xử lý ngắt của SysTick, được gọi khi có ngắt từ SysTick, sẽ gọi SYSTICK_IncTick để cập nhật biến ms_ticks
-    void SYSTICK_Handler(void) {
+    stinl void SYSTICK_Handler(void) {
       SYSTICK_IncTick();
     }
 

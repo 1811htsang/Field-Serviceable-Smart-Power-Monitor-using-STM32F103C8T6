@@ -10,12 +10,8 @@
   #ifdef UNIT_TEST
     #include "lib_keyword_def.h"
     #include "lib_condition_def.h"
-    #include "lib_systick_def.h"
-    #include "lib_systick_hal.h"
     #include "lib_spi_def.h"
     #include "lib_spi_hal.h"
-    #include "lib_clock_def.h"
-    #include "lib_clock_hal.h"
     #include "header_dependency.h"
   #endif
 
@@ -33,6 +29,10 @@
     #include "clock/lib_clock_def.h"
     #include "clock/lib_clock_hal.h"
   #endif
+
+// Khai báo biến quản lý thời gian
+
+	__vo ui32 ms_ticks = 0;
 
 // Khai báo hàm nội bộ
 
@@ -239,7 +239,7 @@
           hspi->MSP_Init_Callback(hspi); // Gọi hàm callback khởi tạo MSP nếu đã đăng ký
         }
       #else
-        SPI_MspInit(hspi); // Gọi hàm khởi tạo MSP mặc định nếu callback không được kích hoạt
+        SPI_MSP_Init(hspi); // Gọi hàm khởi tạo MSP mặc định nếu callback không được kích hoạt
       #endif
       
       /**
@@ -297,7 +297,7 @@
     // Set trạng thái 
 
       hspi->State = SPI_READY;
-      hspi->ErrorCode = SPI_OK;
+      hspi->ErrorCode = SPI_ERR_OK;
 
     return STAT_OK;
   }
@@ -337,13 +337,13 @@
           hspi->MSP_DeInit_Callback(hspi); // Gọi hàm callback giải phóng MSP nếu đã đăng ký
         }
       #else
-        SPI_MspDeInit(hspi); // Gọi hàm giải phóng MSP mặc định nếu callback không được kích hoạt
+        SPI_MSP_DeInit(hspi); // Gọi hàm giải phóng MSP mặc định nếu callback không được kích hoạt
       #endif
 
     // Cập nhật trạng thái Handler
 
       hspi->State = SPI_RESET;
-      hspi->ErrorCode = SPI_OK;
+      hspi->ErrorCode = SPI_ERR_OK;
 
     return STAT_OK;
   }
@@ -588,7 +588,7 @@
 
       // Cập nhật trạng thái và lỗi
       hspi->State = SPI_BUSY_TX;
-      hspi->ErrorCode = SPI_OK;
+      hspi->ErrorCode = SPI_ERR_OK;
 
       // Cấu hình thông tin truyền 
       hspi->Tx_Buff_Ptr = (ui8*)pdata;
@@ -832,6 +832,7 @@
         __vo ui32 tmp = 0x0u;
         tmp = hspi->Instance->SPI_DR; // Đọc DR
         tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+        tmp = 0u;
       }
 
     // Báo trạng thái hoàn thành
@@ -840,7 +841,7 @@
 
     // Kiểm tra mã lỗi
 
-      if (hspi->ErrorCode != SPI_OK) {
+      if (hspi->ErrorCode != SPI_ERR_OK) {
         return STAT_ERROR; // Truyền dữ liệu thất bại do lỗi đã được cập nhật vào handle_param
       }
 
@@ -898,7 +899,7 @@
 
       // Cập nhật trạng thái và lỗi
       hspi->State = SPI_BUSY_RX;
-      hspi->ErrorCode = SPI_OK;
+      hspi->ErrorCode = SPI_ERR_OK;
 
       // Cấu hình thông tin nhận
       hspi->Rx_Buff_Ptr = (ui8*)pdata;
@@ -1120,10 +1121,9 @@
       ui32 tmp_mode = hspi->Init.Mode;
       ui32 tmp_direction = hspi->Init.Direction;
 
-    // Khai báo lưu số lần truyền nhận dữ liệu đã thực hiện
+    // Khai báo lưu số lần truyền dữ liệu đã thực hiện
 
       ui16 initial_TxXferCount = size;
-      ui16 initial_RxXferCount = size;
 
     // Khai báo biến xác định chuyển đổi TX và RX
 
@@ -1158,7 +1158,7 @@
     // Cấu hình thông tin truyền nhận
 
       // Cập nhật lỗi
-      hspi->ErrorCode = SPI_OK;
+      hspi->ErrorCode = SPI_ERR_OK;
 
       // Cấu hình thông tin truyền 
       hspi->Tx_Buff_Ptr = (const ui8*)pdata_tx; // enforce const để đảm bảo dữ liệu truyền đi không bị thay đổi
@@ -1438,6 +1438,7 @@
           __vo ui32 tmp = 0x0u;
           tmp = hspi->Instance->SPI_DR; // Đọc DR
           tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+          tmp = 0u;
         }
 
       // Báo trạng thái hoàn thành
@@ -1446,7 +1447,7 @@
 
       // Kiểm tra mã lỗi
 
-        if (hspi->ErrorCode != SPI_OK) {
+        if (hspi->ErrorCode != SPI_ERR_OK) {
           return STAT_ERROR; // Truyền dữ liệu thất bại do lỗi đã được cập nhật vào handle_param
         }
 
@@ -1534,14 +1535,6 @@
   RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi) {
     // Hàm này sẽ được implement sau 
     return STAT_OK;
-  }
-
-  SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi) {
-    return hspi->State;
-  }
-
-  ui32 SPI_GetError(SPI_Handle_Param *hspi) {
-    return hspi->ErrorCode;
   }
 
 // Định nghĩa các hàm callback weak mặc định (nếu được kích hoạt)

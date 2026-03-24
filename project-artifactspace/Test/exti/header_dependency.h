@@ -27,9 +27,9 @@
 
       #ifndef EXTI_CALLBACK_EVENT_PARAM_TYPE
         #define EXTI_CALLBACK_EVENT_PARAM_TYPE
-          tdf_enum EXTI_Callback_Event_Param_Type {
+          tdf_enum EXTI_Callback_Event_Param {
             EXTI_COMMON_CB_ID = 0xFFU // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
-          } EXTI_Callback_Event_Param_Type;
+          } EXTI_Callback_Event_Param;
       #endif
 
     // >> Từ lib_afio_hal

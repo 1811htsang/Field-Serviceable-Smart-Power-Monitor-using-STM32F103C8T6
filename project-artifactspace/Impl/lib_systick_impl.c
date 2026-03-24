@@ -90,3 +90,7 @@
         // Vòng lặp chờ, không làm gì trong khi chờ đợi
       }
   }
+
+  void SysTick_Handler() {
+  	SYSTICK_Handler();
+  }

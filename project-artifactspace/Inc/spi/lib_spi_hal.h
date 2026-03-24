@@ -53,7 +53,7 @@
     #ifndef SPI_STAT_ENUM_TYPE
       #define SPI_STAT_ENUM_TYPE
         tdf_enum SPI_STAT_Enum {
-          SPI_OK          = 0x00u,
+          SPI_STAT_OK     = 0x00u,
           SPI_READY       = 0x01u,
           SPI_BUSY        = 0x02u,
           SPI_BUSY_TX     = 0x03u,
@@ -71,7 +71,7 @@
     #ifndef SPI_ERR_ENUM_TYPE
       #define SPI_ERR_ENUM_TYPE
         tdf_enum SPI_ERR_Enum {
-          SPI_OK = (ui32)0x0000u,                           // Không có lỗi
+          SPI_ERR_OK = (ui32)0x0000u,                           // Không có lỗi
           SPI_ERROR_MODF = (ui32)(1u << SPI_SR_MODF_POS),   // Lỗi MODF (Mode Fault)
           SPI_ERROR_OVR = (ui32)(1u << SPI_SR_OVR_POS),     // Lỗi Overrun
           SPI_ERROR_UDR = (ui32)(1u << SPI_SR_UDR_POS),     // Lỗi Underrun
@@ -320,7 +320,11 @@
     RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi);
 
     // >> Hàm thu thập trạng thái
-    SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi);
-    ui32 SPI_GetError(SPI_Handle_Param *hspi);
+    stinl SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi) {
+      return hspi->State;
+    }
+    stinl ui32 SPI_GetError(SPI_Handle_Param *hspi) {
+      return hspi->ErrorCode;
+    }
 
 #endif /* LIB_SPI_HAL_H_ */
