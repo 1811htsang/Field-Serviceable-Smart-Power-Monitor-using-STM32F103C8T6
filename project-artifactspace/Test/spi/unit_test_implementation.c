@@ -38,6 +38,14 @@
     // Hàm callback giả để kiểm tra việc đăng ký callback
   }
 
+  void setup() {
+
+    // Hàm này được gọi trước mỗi test case để khởi tạo lại trạng thái cho unit test
+
+    // Reset thanh ghi SPI giả về các giá trị reset
+    memset(&MOCK_SPI_REGS, 0, sizeof(SPI_REGS_Typedef));
+  }
+
   void test_SPI_Init_NULLPointer_ShouldReturnError() {
     setup();
     printf("TC1: Check Null Pointer...\n");
@@ -104,14 +112,6 @@
       assert(MOCK_SPI_REGS.SPI_CR1 == expected_cr1); // Thanh ghi CR1 phải được cấu hình đúng
 
     printf("-> PASSED\n");
-  }
-
-  void setup() {
-
-    // Hàm này được gọi trước mỗi test case để khởi tạo lại trạng thái cho unit test
-
-    // Reset thanh ghi SPI giả về các giá trị reset
-    memset(&MOCK_SPI_REGS, 0, sizeof(SPI_REGS_Typedef));
   }
 
   void test_SPI_DeInit_NULLPointer_ShouldReturnError() {
@@ -355,6 +355,161 @@
        */
   }
 
+  void test_SPI_Receive_InvalidParameters_ShouldReturnError() {
+    setup();
+    printf("TC16: Check Receive with Invalid Parameters...\n");
+    
+    assert(__ERROR_CHECK(SPI_Receive(NULL, NULL, 0, 0))); // Hàm sẽ trả về lỗi do con trỏ hspi và pdata không hợp lệ, size bằng 0
+
+    printf("-> PASSED\n");
+  }
+
+  void test_SPI_Receive_ValidParameters_ShouldReceiveData() {
+    setup();
+    printf("TC17: Check Transmit with Valid Parameters...\n");
+    
+    SPI_Handle_Param hspi_tx8bit = { 
+      .Instance = &MOCK_SPI_REGS, // Con trỏ Instance hợp lệ
+      .Init = { 
+        .Mode = SPI_MODE_MASTER, // Chế độ Master hợp lệ
+        .Direction = SPI_DIRECTION_2LINES, // Chế độ Full-Duplex hợp lệ
+        .DataSize = SPI_DATASIZE_8BIT, // Kích thước dữ liệu 8-bit hợp lệ
+        .CLKPolarity = SPI_CLKPOLARITY_LOW, // Clock polarity Low hợp lệ
+        .CLKPhase = SPI_CLKPHASE_1EDGE, // Clock phase 1st edge hợp lệ
+        .NSS = SPI_NSS_SOFT, // Quản lý NSS bằng phần mềm hợp lệ
+        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16, // Hệ số chia baud rate hợp lệ cho chế độ Master
+        .FirstBit = SPI_FIRSTBIT_MSB // Thứ tự bit MSB first hợp lệ
+      },
+      .State = SPI_READY // Trạng thái cho phép truyền dữ liệu
+    };
+
+    SPI_Handle_Param hspi_rx8bit = { 
+      .Instance = &MOCK_SPI_REGS, // Con trỏ Instance hợp lệ
+      .Init = { 
+        .Mode = SPI_MODE_MASTER, // Chế độ Master hợp lệ
+        .Direction = SPI_DIRECTION_2LINES, // Chế độ Full-Duplex hợp lệ
+        .DataSize = SPI_DATASIZE_8BIT, // Kích thước dữ liệu 8-bit hợp lệ
+        .CLKPolarity = SPI_CLKPOLARITY_LOW, // Clock polarity Low hợp lệ
+        .CLKPhase = SPI_CLKPHASE_1EDGE, // Clock phase 1st edge hợp lệ
+        .NSS = SPI_NSS_SOFT, // Quản lý NSS bằng phần mềm hợp lệ
+        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16, // Hệ số chia baud rate hợp lệ cho chế độ Master
+        .FirstBit = SPI_FIRSTBIT_MSB // Thứ tự bit MSB first hợp lệ
+      },
+      .State = SPI_READY // Trạng thái cho phép truyền dữ liệu
+    };
+
+    ui8 data_to_transmit = 0xAA; // Dữ liệu mẫu để truyền
+
+    // Pha truyền
+    assert(__OK_CHECK(SPI_Transmit(&hspi_tx8bit, &data_to_transmit, 1, 1000))); // Truyền từng byte một, size = 1
+    assert(MOCK_SPI_REGS.SPI_DR == data_to_transmit); // Thanh ghi DR phải chứa đúng dữ liệu đã truyền
+
+    // Pha nhận
+    ui8* pdata_rx = NULL;
+    assert(__OK_CHECK(SPI_Receive(&hspi_rx8bit, &pdata_rx, 1, 1000))); // Nhận từng byte một, size = 1
+    assert(pdata_rx == MOCK_SPI_REGS.SPI_DR);
+
+    SPI_Handle_Param hspi_tx16bit = { 
+      .Instance = &MOCK_SPI_REGS, // Con trỏ Instance hợp lệ
+      .Init = { 
+        .Mode = SPI_MODE_MASTER, // Chế độ Master hợp lệ
+        .Direction = SPI_DIRECTION_2LINES, // Chế độ Full-Duplex hợp lệ
+        .DataSize = SPI_DATASIZE_16BIT, // Kích thước dữ liệu 16-bit hợp lệ
+        .CLKPolarity = SPI_CLKPOLARITY_LOW, // Clock polarity Low hợp lệ
+        .CLKPhase = SPI_CLKPHASE_1EDGE, // Clock phase 1st edge hợp lệ
+        .NSS = SPI_NSS_SOFT, // Quản lý NSS bằng phần mềm hợp lệ
+        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16, // Hệ số chia baud rate hợp lệ cho chế độ Master
+        .FirstBit = SPI_FIRSTBIT_MSB // Thứ tự bit MSB first hợp lệ
+      },
+      .State = SPI_READY // Trạng thái cho phép truyền dữ liệu
+    };
+
+    SPI_Handle_Param hspi_rx16bit = { 
+      .Instance = &MOCK_SPI_REGS, // Con trỏ Instance hợp lệ
+      .Init = { 
+        .Mode = SPI_MODE_MASTER, // Chế độ Master hợp lệ
+        .Direction = SPI_DIRECTION_2LINES, // Chế độ Full-Duplex hợp lệ
+        .DataSize = SPI_DATASIZE_16BIT, // Kích thước dữ liệu 8-bit hợp lệ
+        .CLKPolarity = SPI_CLKPOLARITY_LOW, // Clock polarity Low hợp lệ
+        .CLKPhase = SPI_CLKPHASE_1EDGE, // Clock phase 1st edge hợp lệ
+        .NSS = SPI_NSS_SOFT, // Quản lý NSS bằng phần mềm hợp lệ
+        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16, // Hệ số chia baud rate hợp lệ cho chế độ Master
+        .FirstBit = SPI_FIRSTBIT_MSB // Thứ tự bit MSB first hợp lệ
+      },
+      .State = SPI_READY // Trạng thái cho phép truyền dữ liệu
+    };
+
+    ui16 data_to_transmit_16bit[3] = { 0xAABB, 0xCCDD, 0xEEFF }; // Dữ liệu mẫu 16-bit để truyền
+
+    // Vòng lặp dữ liệu mẫu để truyền từng phần tử 16-bit một, kiểm tra thanh ghi DR sau mỗi lần truyền
+
+      for (ui16 i = 0; i < 3; i++) {
+        // Pha truyền
+        assert(__OK_CHECK(SPI_Transmit(&hspi_tx16bit, (ui8*)&data_to_transmit_16bit[i], 1, 1000))); // Truyền từng phần tử 16-bit một, size = 1 (tính theo số lượng phần tử)
+        assert(MOCK_SPI_REGS.SPI_DR == data_to_transmit_16bit[i]); // Thanh ghi DR phải chứa đúng dữ liệu đã truyền
+
+        // Pha nhận
+        ui16* pdata_rx = NULL;
+        assert(__OK_CHECK(SPI_Receive(&hspi_rx16bit, &pdata_rx, 1, 1000))); // Nhận từng byte một, size = 1
+        assert(pdata_rx == MOCK_SPI_REGS.SPI_DR);
+      }
+
+    printf("-> PASSED\n");
+  }
+
+  void test_SPI_Receive_Timeout_ShouldReturnError() {
+    setup();
+    printf("TC18: Check Transmit with Valid Parameters...\n");
+
+    SPI_Handle_Param hspi = { 
+      .Instance = &MOCK_SPI_REGS, // Con trỏ Instance hợp lệ
+      .Init = { 
+        .Mode = SPI_MODE_MASTER, // Chế độ Master hợp lệ
+        .Direction = SPI_DIRECTION_2LINES, // Chế độ Full-Duplex hợp lệ
+        .DataSize = SPI_DATASIZE_8BIT, // Kích thước dữ liệu 8-bit hợp lệ
+        .CLKPolarity = SPI_CLKPOLARITY_LOW, // Clock polarity Low hợp lệ
+        .CLKPhase = SPI_CLKPHASE_1EDGE, // Clock phase 1st edge hợp lệ
+        .NSS = SPI_NSS_SOFT, // Quản lý NSS bằng phần mềm hợp lệ
+        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16, // Hệ số chia baud rate hợp lệ cho chế độ Master
+        .FirstBit = SPI_FIRSTBIT_MSB // Thứ tự bit MSB first hợp lệ
+      },
+      .State = SPI_READY // Trạng thái cho phép truyền dữ liệu
+    };
+
+    ui8 data_to_transmit = 0xAA; // Dữ liệu mẫu để truyền
+
+    // Giả lập tình trạng bận của SPI bằng cách không cho phép thanh ghi SR sẵn sàng để truyền dữ liệu
+
+      MOCK_SPI_REGS.SPI_SR = 0; // Thanh ghi SR không có cờ TXE (Transmit buffer empty) được set, giả lập tình trạng bận
+
+      ui32 timeout_adjusted = 1000; // Timeout ban đầu (có thể điều chỉnh nếu cần)
+
+      while (timeout_adjusted > 0) {
+        if (__OK_CHECK(SPI_Transmit(&hspi, &data_to_transmit, 1, timeout_adjusted))) {
+          // Nếu hàm trả về STAT_OK thì đã truyền thành công, không còn bận nữa
+            break;
+        } else {
+          // Nếu hàm trả về lỗi, kiểm tra nếu là lỗi timeout thì dừng lại và trả về lỗi timeout
+
+            if (hspi.ErrorCode == SPI_ERROR_TIMEOUT) {
+              // Trả về lỗi timeout nếu đã hết thời gian chờ
+              hspi.ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+              printf("-> PASSED (Timeout occurred as expected)\n");
+              return; // Kết thúc test case sau khi đã xác nhận lỗi timeout xảy ra
+            }
+        }
+        timeout_adjusted--; // Giảm timeout để tiếp tục thử truyền lại
+      }
+
+      /**
+       * Ghi chú:
+       * Nếu vòng lặp kết thúc mà vẫn chưa truyền được dữ liệu thành công, 
+       * thì có thể do timeout đã xảy ra hoặc do tình trạng bận vẫn còn tiếp diễn.
+       * Trong trường hợp này, cần kiểm tra mã lỗi trong handle_param để xác nhận nếu là lỗi timeout đã được cập nhật đúng.
+       * Nếu là lỗi timeout thì test case sẽ được coi là passed vì đã xác nhận được tình trạng bận dẫn đến timeout như mong đợi.
+       * Nếu không phải lỗi timeout thì có thể có vấn đề khác cần được điều tra thêm.
+       */
+  }
                     
   
 // Thực thi tất cả các test case
