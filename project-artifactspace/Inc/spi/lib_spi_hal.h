@@ -82,6 +82,16 @@
         } SPI_ERR_Enum;
     #endif
 
+  // Khai báo bộ tập hợp lựa chọn chế độ 
+
+    #ifndef SPI_TRANS_ENUM_TYPE
+      #define SPI_TRANS_ENUM_TYPE
+        tdf_enum SPI_TRANS_Enum {
+          SPI_TRANS_NORM = 0,  // Chế độ Normal (đợi cho đến khi xong)
+          SPI_TRANS_INTR = 1   // Chế độ Interrupt (trả về ngay, xử lý trong ngắt)
+        } SPI_TRANS_Enum;
+    #endif
+
   // Khai báo cấu trúc quản lý đa sự kiện và callback (nếu được kích hoạt)
 
     #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
@@ -258,66 +268,27 @@
       SPI_Handle_Param *hspi, 
       const ui8* pdata, 
       ui16 size, 
-      ui32 timeout
+      ui32 timeout,
+      SPI_TRANS_Enum trans
     );
     RETR_STAT SPI_Receive(
       SPI_Handle_Param *hspi, 
       ui8* pdata, 
       ui16 size, 
-      ui32 timeout
+      ui32 timeout,
+      SPI_TRANS_Enum trans
     );
     RETR_STAT SPI_TransmitReceive(
       SPI_Handle_Param *hspi, 
       const ui8* pdata_tx, 
       ui8* pdata_rx, 
       ui16 size, 
-      ui32 timeout
+      ui32 timeout,
+      SPI_TRANS_Enum trans
     );
-
-    // >> Các hàm truyền nhận dữ liệu không đồng bộ (non-blocking mode) sử dụng ngắt
-    RETR_STAT SPI_Transmit_IT(
-      SPI_Handle_Param *hspi, 
-      const ui8* pdata, 
-      ui16 size
-    );
-    RETR_STAT SPI_Receive_IT(
-      SPI_Handle_Param *hspi, 
-      ui8* pdata, 
-      ui16 size
-    );
-    RETR_STAT SPI_TransmitReceive_IT(
-      SPI_Handle_Param *hspi, 
-      const ui8* pdata_tx, 
-      ui8* pdata_rx, 
-      ui16 size
-    );
-
-    // >> Các hàm truyền nhận dữ liệu không đồng bộ (non-blocking mode) sử dụng DMA
-    RETR_STAT SPI_Transmit_DMA(
-      SPI_Handle_Param *hspi, 
-      const ui8* pdata, 
-      ui16 size
-    );
-    RETR_STAT SPI_Receive_DMA(
-      SPI_Handle_Param *hspi, 
-      ui8* pdata, 
-      ui16 size
-    );
-    RETR_STAT SPI_TransmitReceive_DMA(
-      SPI_Handle_Param *hspi, 
-      const ui8* pdata_tx, 
-      ui8* pdata_rx, 
-      ui16 size
-    );
-
-    // >> Các hàm kiểm soát quá trình truyền nhận dữ liệu DMA
-    RETR_STAT SPI_DMA_Pause(SPI_Handle_Param *hspi);
-    RETR_STAT SPI_DMA_Resume(SPI_Handle_Param *hspi);
-    RETR_STAT SPI_DMA_Stop(SPI_Handle_Param *hspi);
 
     // >> Các hàm quản lý abort quá trình truyền nhận dữ liệu
-    RETR_STAT SPI_Abort(SPI_Handle_Param *hspi);
-    RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi);
+    RETR_STAT SPI_Abort(SPI_Handle_Param *hspi, SPI_TRANS_Enum trans);
 
     // >> Hàm thu thập trạng thái
     stinl SPI_STAT_Enum SPI_GetState(SPI_Handle_Param *hspi) {

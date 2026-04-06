@@ -36,23 +36,94 @@
 
 // Khai báo hàm nội bộ
 
-  static void SPI_WaitBeforeDisable(SPI_Handle_Param *hspi);
+  // >> Hàm vô hiệu hóa với polling
+  sta void SPI_DisablePolling(SPI_Handle_Param *hspi);
   
-  static RETR_STAT SPI_WaitFlag(
+  // >> Hàm chờ cờ với timeout, trả về STAT_OK nếu cờ đạt trạng thái mong muốn, trả về STAT_TIMEOUT nếu timeout xảy ra
+  sta RETR_STAT SPI_FlagTimeout(
     SPI_Handle_Param *hspi, 
-    ui32 flag_mask, // Mặt nạ bit của cờ cần chờ
+    ui32 flag_mask,      // Mặt nạ bit của cờ cần chờ
     ui32 desired_status, // Trạng thái mong muốn của cờ sau khi chờ (0 hoặc != 0)
-    ui32 timeout, // Thời gian chờ tối đa tính bằng ms
-    ui32 tickstart // Thời điểm bắt đầu chờ tính bằng tick của SysTick
+    ui32 timeout,        // Thời gian chờ tối đa tính bằng ms
+    ui32 tickstart       // Thời điểm bắt đầu chờ tính bằng tick của SysTick
   );
+
+  // >> API nội bộ sử dụng cho norm mode
+  sta RETR_STAT SPI_Transmit_Norm(
+    SPI_Handle_Param *hspi, 
+    const ui8* pdata, 
+    ui16 size, 
+    ui32 timeout
+  );
+  sta RETR_STAT SPI_Receive_Norm(
+    SPI_Handle_Param *hspi, 
+    ui8* pdata, 
+    ui16 size, 
+    ui32 timeout
+  );
+  sta RETR_STAT SPI_TransmitReceive_Norm(
+    SPI_Handle_Param *hspi, 
+    const ui8* pdata_tx, 
+    ui8* pdata_rx, 
+    ui16 size, 
+    ui32 timeout
+  );
+
+  // >> API nội bộ sử dụng cho intr mode
+  sta RETR_STAT SPI_Transmit_Intr(
+    SPI_Handle_Param *hspi, 
+    const ui8 *pdata, 
+    ui16 size
+  );
+  sta RETR_STAT SPI_Receive_Intr(
+    SPI_Handle_Param *hspi, 
+    ui8 *pdata, 
+    ui16 size
+  );
+  sta RETR_STAT SPI_TransmitReceive_Intr(
+    SPI_Handle_Param *hspi, 
+    const ui8 *ptx, ui8 *prx, 
+    ui16 size
+  );
+
+  // >> API nội bộ cho xử lý ISR 1 line TX/RX
+  sta void SPI_1lineTxISR_8BIT(SPI_Handle_Param *hspi);
+  sta void SPI_1lineTxISR_16BIT(SPI_Handle_Param *hspi);
+  sta void SPI_1lineRxISR_8BIT(SPI_Handle_Param *hspi);
+  sta void SPI_1lineRxISR_16BIT(SPI_Handle_Param *hspi);
+
+  // >> API nội bộ cho xử lý ISR 2 line TX/RX
+  sta void SPI_2lineTxISR_8BIT(SPI_Handle_Param *hspi);
+  sta void SPI_2lineTxISR_16BIT(SPI_Handle_Param *hspi);
+  sta void SPI_2lineRxISR_8BIT(SPI_Handle_Param *hspi);
+  sta void SPI_2lineRxISR_16BIT(SPI_Handle_Param *hspi);
+
+  // >> API nội bộ cho đóng giao tiếp và thu thập trạng thái cuối cùng khi kết thúc quá trình truyền nhận
+  sta void SPI_CloseTx_ISR(SPI_Handle_Param *hspi);
+  sta void SPI_CloseRx_ISR(SPI_Handle_Param *hspi);
+  sta void SPI_CloseRxTx_ISR(SPI_Handle_Param *hspi);
+
+  // >> API nội bộ cho thu thập trạng thái cuối cùng và callback khi kết thúc quá trình truyền nhận
+  sta RETR_STAT SPI_EndTxTransaction(SPI_Handle_Param *hspi, ui32 timeout, ui32 tickstart);
+  sta RETR_STAT SPI_EndRxTransaction(SPI_Handle_Param *hspi, ui32 timeout, ui32 tickstart);
+  sta RETR_STAT SPI_EndRxTxTransaction(SPI_Handle_Param *hspi, ui32 timeout, ui32 tickstart);
+
+  // >> API nội bộ cho gọi callback khi kết thúc quá trình truyền nhận hoặc có lỗi xảy ra
+  sta void SPI_Invoke_TxCplt_Callback(SPI_Handle_Param *hspi);
+  sta void SPI_Invoke_RxCplt_Callback(SPI_Handle_Param *hspi);
+  sta void SPI_Invoke_TxRxCplt_Callback(SPI_Handle_Param *hspi);
+  sta void SPI_Invoke_Error_Callback(SPI_Handle_Param *hspi);
 
 // Định nghĩa các hàm thành phần
 
-  static void SPI_WaitBeforeDisable(SPI_Handle_Param *hspi) {
-    ui32 direction = hspi->Init.Direction;
-    ui32 mode = hspi->Init.Mode;
+  sta void SPI_DisablePolling(SPI_Handle_Param *hspi) {
 
-    // Trường hợp 1 & 2: Full-Duplex hoặc Transmit-only (2 dây hoặc 1 dây TX)
+    // Xác định chế độ truyền nhận để biết cần chờ cờ nào trước khi tắt SPI
+
+      ui32 direction = hspi->Init.Direction;
+      ui32 mode = hspi->Init.Mode;
+
+    // Trường hợp 1 & 2: Full-Duplex hoặc Transmit-only (2 dây TX/RX hoặc 1 dây TX)
 
       if (
         direction == SPI_DIRECTION_2LINES 
@@ -65,7 +136,7 @@
         while (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_BSY_MASK));
       }
     
-    // Trường hợp 3: Master Receive-only (2 dây RXONLY hoặc 1 dây RX)
+    // Trường hợp 3: Master Receive-only (2 dây RX hoặc 1 dây RX)
 
       else if (
         mode == SPI_MODE_MASTER 
@@ -81,18 +152,21 @@
          * Tuy nhiên, trong hàm DeInit tổng quát, ta thường đợi byte cuối cùng xong 
          * để tránh để lại dữ liệu rác cho lần khởi động sau.
          */
+        // 1. Đợi RXNE = 1 (Bộ đệm nhận đầy)
         while (!READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK));
+        // 2. Đợi BSY = 0 (Giao tiếp vật lý kết thúc)
         while (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_BSY_MASK));
       }
     
     // Trường hợp 4: Slave Receive-only
 
       else {
+        // Chỉ cần đợi BSY = 0 (Giao tiếp vật lý kết thúc) vì Slave sẽ không có cờ TXE hoặc RXNE để chờ
         while (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_BSY_MASK));
       }
   }
 
-  static RETR_STAT SPI_WaitFlag(
+  sta RETR_STAT SPI_FlagTimeout(
     SPI_Handle_Param *hspi, 
     ui32 flag_mask, // Mặt nạ bit của cờ cần chờ
     ui32 desired_status, // Trạng thái mong muốn của cờ sau khi chờ (0 hoặc != 0)
@@ -121,13 +195,13 @@
         ((READ_BIT(hspi->Instance->SPI_SR, flag_mask) == flag_mask) ? SET: RESET) != desired_status
       ) {
         if (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE) {
-          elapsed = SYSTICK_GetTick() - tickstart;
+          elapsed = SYSTICK_GetTick() - tickstart; // Tính thời gian đã trôi qua kể từ khi bắt đầu chờ
           if (
-            (elapsed >= timeout)
+            (elapsed >= timeout) // Nếu thời gian đã trôi qua lớn hơn hoặc bằng timeout ban đầu thì trả về lỗi timeout
             ||
             (timeout == 0u) // Trường hợp timeout ban đầu là 0, tức là không chờ, sẽ trả về timeout ngay lập tức
             ||
-            (timeout_adjusted == 0u)
+            (timeout_adjusted == 0u) // Nếu timeout đã được điều chỉnh về 0 do Systick bị tắt thì trả về timeout ngay lập tức
           ) {
             
             // Tắt SPI
@@ -155,7 +229,7 @@
            * Ghi chú:
            * Nếu Systick không hoạt động thì tắt timeout để trả về lỗi timeout ngay lập tức,
            */
-          timeout_adjusted--;
+          timeout_adjusted--; // Giảm timeout đã điều chỉnh để tiếp tục chờ nếu Systick vẫn hoạt động
         }
       }
 
@@ -180,6 +254,7 @@
        */
 
       assert_param(IS_SPI_MODE(hspi->Init.Mode)); 
+
       if (hspi->Init.Mode == SPI_MODE_MASTER) {
         assert_param(IS_SPI_BAUDRATEPRESCALER(hspi->Init.BaudRatePrescaler));
       } else {
@@ -252,6 +327,31 @@
 
       SPI_Disable(hspi);
 
+    /**
+     * Ghi chú:
+     * Quy trình cấu hình SPI cho master và Slave đều tuân thủ các quá trình như sau:
+     * - Cấu hình CPOL & CPHA
+     * - Cấu hình DFF
+     * - Cấu hình NSS
+     * - Cấu hình SPE
+     * 
+     * Trong đó, cụ thể hơn đối với Slave:
+     * - Khi dùng NSS Hardware thì SSM = 0, SSI = 0, SSOE = 0
+     * - Khi dùng NSS Software thì SSM = 1, SSI = 0, SSOE = 0
+     * - Xóa MSTR để đảm bảo ở chế độ Slave.
+     * 
+     * Đối với Master:
+     * - Cấu hình thêm baud rate với BR[2:0]
+     * - Khi dùng NSS Hardware Input thì NSS = 1
+     * - Khi dùng NSS Software Input thì SSM = 1, SSI = 1, SSOE = 0
+     * - Khi dùng NSS Software Output thì SSM = 1, SSI = 1, SSOE = 1
+     * 
+     * Lưu ý rằng việc cấu hình các bit này sẽ được thực hiện thông qua việc ghi vào thanh ghi CR1 và CR2,
+     * trong đó một số bit sẽ được cấu hình trong CR1 (như CPOL, CPHA, DFF, SSM, SSI) 
+     * và một số bit sẽ được cấu hình trong CR2 (như SSOE).
+     * Việc tách biệt này giúp cho quá trình cấu hình trở nên rõ ràng hơn và dễ dàng quản lý hơn.
+     */
+
     // Khai báo thanh ghi tạm để tính toán cấu hình
 
       ui32 tmp_cr1 = 0;
@@ -272,7 +372,7 @@
       } else if (hspi->Init.NSS == SPI_NSS_SOFT) {
         tmp_cr1 |= SPI_CR1_SSM_MASK; // Kích hoạt SSM để quản lý tín hiệu NSS bằng phần mềm
         if (hspi->Init.Mode == SPI_MODE_MASTER) {
-          tmp_cr1 |= SPI_CR1_SSI_MASK; // Master cần SSI=1
+          tmp_cr1 |= SPI_CR1_SSI_MASK; // Master cần SSI=1, Slave thì xóa SSI 
         }
       }
 
@@ -320,7 +420,7 @@
 
     // Đợi dừng an toàn trước khi vô hiệu hóa
     
-      SPI_WaitBeforeDisable(hspi);
+      SPI_DisablePolling(hspi);
 
     // Vô hiệu hóa SPI
 
@@ -466,7 +566,7 @@
 
       // Kiểm tra trạng thái
 
-        if (hspi->State == SPI_READY) { // Nếu ngoại vi đang ở trạng thái Ready thì mới cho phép đăng ký toàn bộ callback mặc định
+        if (hspi->State == SPI_READY) { // Nếu ngoại vi đang ở trạng thái Ready thì mới cho phép xóa đăng ký callback
           switch (CallbackID) {
             case SPI_TX_CPLT_CB_ID:
               hspi->Tx_Cplt_Callback = Tx_Cplt_Callback;
@@ -505,7 +605,7 @@
           }
         }
 
-        else if (hspi->State == SPI_RESET) { // Nếu ngoại vi đang ở trạng thái Reset thì chỉ cho phép đăng ký callback khởi tạo và giải phóng MSP mặc định
+        else if (hspi->State == SPI_RESET) { // Nếu ngoại vi đang ở trạng thái Reset thì chỉ cho phép xóa đăng ký callback khởi tạo và giải phóng MSP
           switch (CallbackID) {
             case SPI_MSP_INIT_CB_ID:
               hspi->MSP_Init_Callback = MSP_Init_Callback;
@@ -525,7 +625,7 @@
           status = STAT_ERROR; // Ngoại vi đang ở trạng thái không cho phép đăng ký callback
         }
 
-      // Kết thúc quy trình đăng ký callback
+      // Kết thúc quy trình xóa đăng ký callback
 
         return status;
     }
@@ -540,7 +640,7 @@
 
   }
 
-  RETR_STAT SPI_Transmit(
+  RETR_STAT SPI_Transmit_Norm(
     SPI_Handle_Param *hspi, 
     const ui8* pdata, 
     ui16 size, 
@@ -585,6 +685,15 @@
       }
 
     // Cấu hình thông tin truyền nhận
+
+      /**
+       * Ghi chú:
+       * size này nghĩa là số phần tử dữ liệu cần truyền, không phải số byte,
+       * kích thước phần tử dữ liệu sẽ được xác định bởi cấu hình DataSize trong Init.
+       * Do đó, khi cập nhật con trỏ buffer truyền đi và số lượng phần tử cần truyền 
+       * thì cần phải tính toán dựa trên kích thước phần tử dữ liệu để đảm bảo truyền đúng dữ liệu 
+       * và tránh lỗi tràn bộ đệm hoặc truyền dữ liệu rác.
+       */
 
       // Cập nhật trạng thái và lỗi
       hspi->State = SPI_BUSY_TX;
@@ -642,7 +751,7 @@
       switch (hspi->Init.DataSize) {
         case SPI_DATASIZE_16BIT:
           
-          // Xử lý Preload
+          // Xử lý Preload = Truyền mồi để đảm bảo Slave phản ứng kịp thời với xung clock đầu tiên của Master
 
             /**
              * Ghi chú:
@@ -664,52 +773,53 @@
               hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
             }
 
-            // Truyền phần dữ liệu còn lại
+          // Truyền phần dữ liệu còn lại
 
-              while (hspi->Tx_Xfer_Count > 0) {
-                
-                // Đợi cờ TXE
-                
-                  if (
-                    __DIFF_CHECK(
-                      READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
-                    ) // Đảm bảo TXE != 0 báo TxBuf trống
-                  ) {
-                    hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
-                    hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
-                    hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
-                  } else {
+            while (hspi->Tx_Xfer_Count > 0) {
+              
+              // Đợi cờ TXE
+              
+                if (
+                  __DIFF_CHECK(
+                    READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK), 0
+                  ) // Đảm bảo TXE != 0 báo TxBuf trống
+                ) {
+                  hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
+                  hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+                  hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+                } else {
 
-                    // Kiểm tra timeout
+                  // Kiểm tra timeout
 
-                      /**
-                       * Ghi chú:
-                       * Kiểm tra dựa trên 2 điều kiện:
-                       * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ TXE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
-                       * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
-                       * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ TXE không được set.
-                       */
+                    /**
+                     * Ghi chú:
+                     * Kiểm tra dựa trên 2 điều kiện:
+                     * 1. Thời gian đã trôi qua kể từ khi bắt đầu đợi cờ TXE vượt quá giá trị timeout được chỉ định (SYSTICK_GetTick() - tickstart >= timeout) 
+                     * và timeout không phải là giá trị đặc biệt SYSTICK_LOAD_MAX_RELOAD_VALUE (được sử dụng để biểu thị chờ vô hạn).
+                     * 2. Giá trị timeout được chỉ định là 0, có nghĩa là không chờ đợi và trả về lỗi timeout ngay lập tức nếu cờ TXE không được set.
+                     */
 
-                      if (
-                        (
-                          ((SYSTICK_GetTick() - tickstart) >= timeout)
-                          &&
-                          (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE)
-                        ) || (
-                          timeout == 0x0u
-                        )
-                      ) {
-                        hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
-                        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
-                        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
-                      }
-                  }
-              }
+                    if (
+                      (
+                        ((SYSTICK_GetTick() - tickstart) >= timeout) // Nếu thời gian đã trôi qua lớn hơn hoặc bằng timeout ban đầu thì trả về lỗi timeout
+                        &&
+                        (timeout != SYSTICK_LOAD_MAX_RELOAD_VALUE) // Trường hợp timeout ban đầu là giá trị đặc biệt biểu thị chờ vô hạn thì không trả về timeout ngay lập tức mà tiếp tục chờ
+                      ) || (
+                        timeout == 0x0u // Trường hợp timeout ban đầu là 0, tức là không chờ, sẽ trả về timeout ngay lập tức nếu cờ TXE không được set
+                      )
+                    ) {
+                      hspi->State = SPI_READY; // Cập nhật trạng thái về Ready để cho phép người dùng khởi tạo lại cấu hình
+                      hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+                      return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+                    }
+                }
+            }
+
           break;
         
-        case SPI_DATASIZE_8BIT:
+        case SPI_DATASIZE_8BIT: // Xử lý tương tự như trường hợp 16-bit nhưng với kích thước dữ liệu là 8-bit
 
-          // Xử lý Preload
+          // Xử lý Preload = Truyền mồi để đảm bảo Slave phản ứng kịp thời với xung clock đầu tiên của Master
 
             /**
              * Ghi chú:
@@ -784,7 +894,7 @@
     // Kiểm tra timeout cờ TXE
 
       if (
-        SPI_WaitFlag(
+        SPI_FlagTimeout(
           hspi,
           SPI_SR_TXE_MASK,
           SET,
@@ -798,7 +908,7 @@
     // Kiểm tra cờ BSY
 
       if (
-        SPI_WaitFlag(
+        SPI_FlagTimeout(
           hspi,
           SPI_SR_BSY_MASK,
           RESET,
@@ -851,7 +961,7 @@
 
   }
 
-  RETR_STAT SPI_Receive(
+  RETR_STAT SPI_Receive_Norm(
     SPI_Handle_Param *hspi, 
     ui8* pdata, 
     ui16 size, 
@@ -882,7 +992,7 @@
         hspi->Init.Direction == SPI_DIRECTION_2LINES
       ) {
         hspi->State = SPI_BUSY_RX; // Cập nhật trạng thái về Busy_RX để báo đang nhận dữ liệu
-        return SPI_TransmitReceive( // Hàm này được gọi để sử dụng data tạo xung và thực hiện chức năng như SPI_Receive
+        return SPI_TransmitReceive_Norm( // Hàm này được gọi để sử dụng data tạo xung và thực hiện chức năng như SPI_Receive
           hspi,
           pdata, 
           pdata,
@@ -1066,7 +1176,7 @@
         // Kiểm tra cờ RXNE
 
           if (
-            SPI_WaitFlag(
+            SPI_FlagTimeout(
               hspi,
               SPI_SR_RXNE_MASK,
               RESET,
@@ -1081,7 +1191,7 @@
         // Kiểm tra cờ BSY
 
           if (
-            SPI_WaitFlag(
+            SPI_FlagTimeout(
               hspi,
               SPI_SR_BSY_MASK,
               RESET,
@@ -1097,7 +1207,7 @@
     return STAT_OK; // Nhận dữ liệu thành công
   }
 
-  RETR_STAT SPI_TransmitReceive(
+  RETR_STAT SPI_TransmitReceive_Norm(
     SPI_Handle_Param *hspi, 
     const ui8* pdata_tx, 
     ui8* pdata_rx, 
@@ -1390,7 +1500,7 @@
       // Kiểm tra timeout cờ TXE
 
         if (
-          SPI_WaitFlag(
+          SPI_FlagTimeout(
             hspi,
             SPI_SR_TXE_MASK,
             SET,
@@ -1404,7 +1514,7 @@
       // Kiểm tra cờ BSY
 
         if (
-          SPI_WaitFlag(
+          SPI_FlagTimeout(
             hspi,
             SPI_SR_BSY_MASK,
             RESET,
@@ -1456,83 +1566,514 @@
         return STAT_OK;
   }
 
-  RETR_STAT SPI_Transmit_IT(
+  sta RETR_STAT SPI_Transmit_Intr(
     SPI_Handle_Param *hspi, 
-    const ui8* pdata, 
+    const ui8 *pdata, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL || pdata == NULL || size == 0u) {
+        return STAT_ERROR;
+      }
+
+    // Kiểm tra trạng thái
+
+      if (hspi->State != SPI_READY) {
+        return STAT_BUSY;
+      }
+
+    // Kiểm tra direction
+
+      if (
+        (hspi->Init.Direction != SPI_DIRECTION_2LINES) 
+        && 
+        (hspi->Init.Direction != SPI_DIRECTION_1LINE_TX)
+      ) {
+        return STAT_ERROR; // Chỉ cho phép truyền dữ liệu khi ở chế độ Full-Duplex hoặc Half-Duplex TX
+      }
+
+    // Cấu hình thông tin truyền nhận
+
+      // Cập nhật trạng thái và lỗi
+      hspi->State = SPI_BUSY_TX; // Cập nhật trạng thái về Busy_TX để báo đang truyền dữ liệu
+      hspi->ErrorCode = SPI_ERR_OK;
+
+      // Cấu hình thông tin truyền 
+      hspi->Tx_Buff_Ptr = (const ui8*)pdata; // enforce const để đảm bảo dữ liệu truyền đi không bị thay đổi
+      hspi->Tx_Xfer_Size = size;
+      hspi->Tx_Xfer_Count = size;
+
+      // Cấu hình thông tin nhận 
+      /**
+       * Ghi chú:
+       * Mặc dù không set tham số cho RxBuf nhưng
+       * khi hoạt động thì vẫn sẽ có sự tham gia của RxBuf
+       * dẫn đến việc thu dữ liệu rác làm cờ RXNE luôn được set 
+       * sau khi truyền đi 1 phần tử dữ liệu, do đó sẽ có xử lý để đảm bảo RxBuf vẫn hoạt động 
+       * ngay cả khi không có dữ liệu thực tế để nhận vào.
+       */
+      hspi->Rx_Buff_Ptr = (ui8*)NULL;
+      hspi->Rx_Xfer_Size = 0u;
+      hspi->Rx_Xfer_Count = 0u;
+
+      // Cấu hình ISR
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    // Gán ISR theo DFF
+
+      if (hspi->Init.DataSize == SPI_DATASIZE_16BIT) {
+        hspi->TxISR = SPI_1lineTxISR_16BIT;
+      } else {
+        hspi->TxISR = SPI_1lineTxISR_8BIT;
+      }
+
+    /**
+     * Ghi chú:
+     * Trong HAL tham khảo sẽ có thêm phần xử lý đường truyền 1 line, 
+     * nhưng ở đây vì đã kiểm tra direction ở trên nên chỉ cần bỏ qua.
+     */
+
+    // Kích hoạt SPI nếu chưa được kích hoạt 
+
+      if (
+        __DIFF_CHECK(
+          READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK),
+          SPI_CR1_SPE_MASK
+        ) // Nếu SPI chưa được kích hoạt (SPE = 0) thì mới kích hoạt
+      ) {
+        SET_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Kích hoạt interrupt TXE 
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_TXEIE_MASK
+      );
+
+    // Kích hoạt interrupt Error 
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_ERRIE_MASK
+      );
+
+    // Trả về trạng thái đã khởi động truyền dữ liệu bằng interrupt
+
+      return STAT_OK;
+
   }
 
-  RETR_STAT SPI_Receive_IT(
+  sta RETR_STAT SPI_Receive_Intr(
     SPI_Handle_Param *hspi, 
-    ui8* pdata, 
+    ui8 *pdata, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL || pdata == NULL || size == 0u) {
+        return STAT_ERROR;
+      }
+
+    // Kiểm tra trạng thái
+
+      if (hspi->State != SPI_READY) {
+        return STAT_BUSY;
+      }
+
+    // Kiểm tra direction
+
+      if ((hspi->Init.Direction == SPI_DIRECTION_2LINES) && (hspi->Init.Mode == SPI_MODE_MASTER)) {
+        hspi->State = SPI_BUSY_RX; // Cập nhật trạng thái về Busy_RX để báo đang nhận dữ liệu
+        return SPI_TransmitReceive_IT(
+          hspi,
+          (const ui8*)NULL, // Không có dữ liệu thực tế để truyền đi, chỉ cần tạo xung clock
+          pdata,
+          size
+        );
+      }
+
+    // Cấu hình thông tin truyền nhận
+
+      // Cập nhật trạng thái và lỗi
+      hspi->State = SPI_BUSY_RX; // Cập nhật trạng thái về Busy_RX để báo đang nhận dữ liệu
+      hspi->ErrorCode = SPI_ERR_OK;
+
+      // Cấu hình thông tin nhận
+      hspi->Rx_Buff_Ptr = (ui8*)pdata;
+      hspi->Rx_Xfer_Size = size;
+      hspi->Rx_Xfer_Count = size;
+
+      // Cấu hình thông tin truyền 
+      /**
+       * Ghi chú:
+       * Mặc dù không set tham số cho TxBuf nhưng
+       * khi hoạt động thì vẫn sẽ có sự tham gia của TxBuf
+       * dẫn đến việc tạo xung clock để Slave có thể gửi dữ liệu,
+       * do đó sẽ có xử lý để đảm bảo TxBuf vẫn hoạt động 
+       * ngay cả khi không có dữ liệu thực tế để truyền đi.
+       */
+      hspi->Tx_Buff_Ptr = (ui8*)NULL;
+      hspi->Tx_Xfer_Size = 0u;
+      hspi->Tx_Xfer_Count = 0u;
+
+      // Cấu hình ISR
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    // Gán ISR theo DFF
+
+      if (hspi->Init.DataSize == SPI_DATASIZE_16BIT) {
+        hspi->RxISR = SPI_1lineRxISR_16BIT;
+      } else {
+        hspi->RxISR = SPI_1lineRxISR_8BIT;
+      }
+
+    // Kích hoạt SPI nếu chưa được kích hoạt 
+
+      if (
+        __DIFF_CHECK(
+          READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK),
+          SPI_CR1_SPE_MASK
+        ) // Nếu SPI chưa được kích hoạt (SPE = 0) thì mới kích hoạt
+      ) {
+        SET_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Kích hoạt interrupt RXNE
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_RXNEIE_MASK
+      );
+
+    // Kích hoạt interrupt Error
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_ERRIE_MASK
+      );
+    
+    // Trả về trạng thái đã khởi động nhận dữ liệu bằng interrupt
+
+      return STAT_OK;
   }
 
-  RETR_STAT SPI_TransmitReceive_IT(
+  sta RETR_STAT SPI_TransmitReceive_Intr(
     SPI_Handle_Param *hspi, 
-    const ui8* pdata_tx, 
-    ui8* pdata_rx, 
+    const ui8 *ptx, ui8 *prx, 
     ui16 size
   ) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL || ptx == NULL || prx == NULL || size == 0u) {
+        return STAT_ERROR;
+      }
+    
+    // Kiểm tra trạng thái
+
+      if (hspi->State != SPI_READY) {
+        return STAT_BUSY;
+      }
+
+    // Kiểm tra direction
+
+      if (hspi->Init.Direction != SPI_DIRECTION_2LINES) {
+        return STAT_ERROR; // Chỉ cho phép truyền nhận dữ liệu khi ở chế độ Full-Duplex
+      }
+
+    // Lưu cấu hình tạm thời
+
+      ui32 tmp_mode = hspi->Init.Mode;
+      ui32 tmp_direction = hspi->Init.Direction;
+      ui32 tmp_state = hspi->State;
+
+    // Kiểm tra trạng thái và cấu hình để đảm bảo có thể sử dụng hàm TransmitReceive_Intr ngay sau khi gọi hàm Receive_Intr mà không bị lỗi busy
+
+      if (!(
+        tmp_state == SPI_READY 
+        ||
+        (
+          (tmp_state == SPI_BUSY_RX) 
+          && 
+          (tmp_mode == SPI_MODE_MASTER) 
+          && 
+          (tmp_direction == SPI_DIRECTION_2LINES)
+        )
+      )) {
+        return STAT_BUSY;
+      }
+
+    // Cấu hình thông tin truyền nhận
+
+      // Cập nhật trạng thái và lỗi
+      if (hspi->State != SPI_BUSY_RX) {
+        hspi->State = SPI_BUSY_TX_RX; // Cập nhật trạng thái về Busy_TX_RX để báo đang truyền nhận dữ liệu
+      }
+      hspi->ErrorCode = SPI_ERR_OK;
+
+      // Cấu hình thông tin truyền 
+      hspi->Tx_Buff_Ptr = (const ui8*)ptx; // enforce const để đảm bảo dữ liệu truyền đi không bị thay đổi
+      hspi->Tx_Xfer_Size = size;
+      hspi->Tx_Xfer_Count = size;
+
+      // Cấu hình thông tin nhận
+      hspi->Rx_Buff_Ptr = (ui8*)prx;
+      hspi->Rx_Xfer_Size = size;
+      hspi->Rx_Xfer_Count = size;
+
+      // Cấu hình ISR
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+    
+    // Gán ISR theo DFF
+
+      if (hspi->Init.DataSize == SPI_DATASIZE_16BIT) {
+        hspi->TxISR = SPI_2lineTxISR_16BIT;
+        hspi->RxISR = SPI_2lineRxISR_16BIT;
+      } else {
+        hspi->TxISR = SPI_2lineTxISR_8BIT;
+        hspi->RxISR = SPI_2lineRxISR_8BIT;
+      }
+
+    // Kích hoạt SPI nếu chưa được kích hoạt 
+
+      if (
+        __DIFF_CHECK(
+          READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK),
+          SPI_CR1_SPE_MASK
+        ) // Nếu SPI chưa được kích hoạt (SPE = 0) thì mới kích hoạt
+      ) {
+        SET_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        );
+      }
+
+    // Kích hoạt interrupt TXE 
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_TXEIE_MASK
+      );
+
+    // Kích hoạt interrupt RXNE
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_RXNEIE_MASK
+      );
+
+    // Kích hoạt interrupt Error
+
+      SET_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_ERRIE_MASK
+      );
+    
+    // Trả về trạng thái đã khởi động nhận dữ liệu bằng interrupt
+
+      return STAT_OK;
+
   }
 
-  RETR_STAT SPI_Transmit_DMA(
+  sta void SPI_1lineTxISR_8BIT(SPI_Handle_Param *hspi) {
+
+    // Lưu data vào DR để tạo xung clock
+
+      *((__vo ui8*)hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
+      hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+      hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+
+    // Kiểm tra nếu đã truyền xong hết dữ liệu thì tắt interrupt TXE để tránh bị gọi lại ISR liên tục khi không còn dữ liệu để truyền
+
+      if (hspi->Tx_Xfer_Count == 0u) {
+        SPI_CloseTx_ISR(hspi); // Gọi xử lý đóng 1line_TxISR để tắt interrupt TXE và thực hiện các thao tác hoàn thành truyền dữ liệu nếu cần thiết
+      }
+  }
+
+  sta void SPI_1lineTxISR_16BIT(SPI_Handle_Param *hspi) {
+
+    // Lưu data vào DR để tạo xung clock
+
+      hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
+      hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+      hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã truyền đi 1 phần tử)
+
+    // Kiểm tra nếu đã truyền xong hết dữ liệu thì tắt interrupt TXE để tránh bị gọi lại ISR liên tục khi không còn dữ liệu để truyền
+
+      if (hspi->Tx_Xfer_Count == 0u) {
+        SPI_CloseTx_ISR(hspi); // Gọi xử lý đóng 1line_TxISR để tắt interrupt TXE và thực hiện các thao tác hoàn thành truyền dữ liệu nếu cần thiết
+      }
+  }
+
+  sta void SPI_1lineRxISR_8BIT(SPI_Handle_Param *hspi) {
+
+    // Đọc data từ DR
+
+      *((ui8*)hspi->Rx_Buff_Ptr) = hspi->Instance->SPI_DR; // Đọc dữ liệu ràng buộc casting 8-bit
+      hspi->Rx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer nhận vào (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
+      hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
+
+    // Kiểm tra nếu đã nhận xong hết dữ liệu thì tắt interrupt RXNE để tránh bị gọi lại ISR liên tục khi không còn dữ liệu để nhận
+
+      if (hspi->Rx_Xfer_Count == 0u) {
+        SPI_CloseRx_ISR(hspi); // Gọi xử lý đóng 1line_RxISR để tắt interrupt RXNE và thực hiện các thao tác hoàn thành nhận dữ liệu nếu cần thiết
+      }
+  }
+
+  sta void SPI_1lineRxISR_16BIT(SPI_Handle_Param *hspi) {
+
+    // Đọc data từ DR
+
+      *((ui16*)hspi->Rx_Buff_Ptr) = hspi->Instance->SPI_DR; // Đọc dữ liệu ràng buộc casting 16-bit
+      hspi->Rx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer nhận vào (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
+      hspi->Rx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần nhận (giảm đi 1 phần tử vì đã nhận được 1 phần tử)
+
+    // Kiểm tra nếu đã nhận xong hết dữ liệu thì tắt interrupt RXNE để tránh bị gọi lại ISR liên tục khi không còn dữ liệu để nhận
+
+      if (hspi->Rx_Xfer_Count == 0u) {
+        SPI_CloseRx_ISR(hspi); // Gọi xử lý đóng 1line_RxISR để tắt interrupt RXNE và thực hiện các thao tác hoàn thành nhận dữ liệu nếu cần thiết
+      }
+  }
+
+  sta RETR_STAT SPI_EndTxTransaction(
     SPI_Handle_Param *hspi, 
-    const ui8* pdata, 
-    ui16 size
+    ui32 timeout, 
+    ui32 tickstart
   ) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+    // Đợi cờ TXE
+      if (
+        SPI_FlagTimeout(
+          hspi,SPI_SR_TXE_MASK,SET,
+          timeout,tickstart
+        ) != STAT_OK
+      ) {
+        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+      }
+
+    // Đợi cờ BSY
+      if (
+        SPI_FlagTimeout(
+          hspi,SPI_SR_BSY_MASK,RESET,
+          timeout,tickstart
+        ) != STAT_OK
+      ) {
+        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+      }
+
+    return STAT_OK; // Truyền dữ liệu thành công
   }
 
-  RETR_STAT SPI_Receive_DMA(
+  sta RETR_STAT SPI_EndRxTransaction(
     SPI_Handle_Param *hspi, 
-    ui8* pdata, 
-    ui16 size
+    ui32 timeout, 
+    ui32 tickstart
   ) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+    // Kiểm tra trường hợp Master Receiver
+
+      if (
+        (hspi->Init.Mode == SPI_MODE_MASTER) 
+        && 
+        (
+          hspi->Init.Direction == SPI_DIRECTION_2LINES_RXONLY
+          ||
+          hspi->Init.Direction == SPI_DIRECTION_1LINE_RX
+        )
+      ) {
+        CLEAR_BIT(
+          hspi->Instance->SPI_CR1,
+          SPI_CR1_SPE_MASK
+        ); // Tắt SPI để tránh bị treo do không có xung clock khi chỉ nhận dữ liệu ở chế độ Master Receiver
+      }
+
+    // Với trường hợp Master Receiver, kiểm tra RXNE cuối truyền
+      if (
+        (hspi->Init.Mode == SPI_MODE_MASTER) 
+        && 
+        hspi->Init.Direction == SPI_DIRECTION_2LINES_RXONLY
+      ) {
+        if (
+          SPI_FlagTimeout(
+            hspi,SPI_SR_RXNE_MASK,RESET,
+            timeout,tickstart
+          ) != STAT_OK
+        ) {
+          hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+          return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+        }
+      } else {
+        // Với các trường hợp khác, chỉ cần kiểm tra cờ BSY để đảm bảo đã kết thúc hoàn toàn giao tiếp
+        if (
+          SPI_FlagTimeout(
+            hspi,SPI_SR_BSY_MASK,RESET,
+            timeout,tickstart
+          ) != STAT_OK
+        ) {
+          hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+          return STAT_TIMEOUT; // Nhận dữ liệu thất bại do timeout
+        }
+      }
+
+    return STAT_OK; // Nhận dữ liệu thành công
   }
 
-  RETR_STAT SPI_TransmitReceive_DMA(
+  sta RETR_STAT SPI_EndRxTxTransaction(
     SPI_Handle_Param *hspi, 
-    const ui8* pdata_tx, 
-    ui8* pdata_rx, 
-    ui16 size
+    ui32 timeout, 
+    ui32 tickstart
   ) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+    // Đợi cờ TXE
+      if (
+        SPI_FlagTimeout(
+          hspi,SPI_SR_TXE_MASK,SET,
+          timeout,tickstart
+        ) != STAT_OK
+      ) {
+        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+      }
+
+    // Đợi cờ BSY
+      if (
+        SPI_FlagTimeout(
+          hspi,SPI_SR_BSY_MASK,RESET,
+          timeout,tickstart
+        ) != STAT_OK
+      ) {
+        hspi->ErrorCode = SPI_ERROR_TIMEOUT; // Cập nhật mã lỗi vào handle_param
+        return STAT_TIMEOUT; // Truyền dữ liệu thất bại do timeout
+      }
+
+    return STAT_OK; // Truyền dữ liệu thành công
   }
 
-  RETR_STAT SPI_DMA_Pause(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+  sta void SPI_CloseTx_ISR(SPI_Handle_Param *hspi) {
+
   }
 
-  RETR_STAT SPI_DMA_Resume(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+  sta void SPI_CloseRx_ISR(SPI_Handle_Param *hspi) {
+
   }
 
-  RETR_STAT SPI_DMA_Stop(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
+  sta void SPI_CloseRxTx_ISR(SPI_Handle_Param *hspi) {
+
   }
 
-  RETR_STAT SPI_Abort(SPI_Handle_Param *hspi) {
-    // Hàm này sẽ được implement sau 
-    return STAT_OK;
-  }
-
-  RETR_STAT SPI_Abort_IT(SPI_Handle_Param *hspi) {
+  RETR_STAT SPI_Abort(SPI_Handle_Param *hspi, SPI_TRANS_Enum trans) {
     // Hàm này sẽ được implement sau 
     return STAT_OK;
   }

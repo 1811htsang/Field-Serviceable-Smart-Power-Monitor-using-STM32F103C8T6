@@ -180,4 +180,8 @@
     #define SPI_FIRSTBIT_MSB 0x00000000u
     #define SPI_FIRSTBIT_LSB SPI_CR1_LSBFIRST_MASK
 
+  // Khai báo timeout mặc định
+    
+    #define SPI_DEFAULT_TIMEOUT 1000u
+
 #endif /* LIB_SPI_DEF_H_ */
