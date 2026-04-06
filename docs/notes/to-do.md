@@ -37,6 +37,7 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Driver NVIC
 - [x] Viết Unit Test cho Driver NVIC
 - [x] Triển khai các driver lên mạch thực tế để kiểm tra hoạt động
+- [x] Viết Driver SysTick cho khả năng tạo delay và quản lý thời gian với SPI
 - [ ] Viết Driver SPI cho khả năng giao tiếp với ADE7758
 - [ ] Viết Unit Test cho Driver SPI
 - [ ] Viết Driver I2C cho khả năng giao tiếp với LCD 16x2, MCP4728
