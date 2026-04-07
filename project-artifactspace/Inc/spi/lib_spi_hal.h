@@ -216,6 +216,33 @@
     #define IS_SPI_FIRSTBIT(FIRSTBIT) (((FIRSTBIT) == SPI_FIRSTBIT_MSB) || \
                                       ((FIRSTBIT) == SPI_FIRSTBIT_LSB))
 
+  // Khai báo các define ghi tắt
+
+    #define SPI_SPE_ENABLE()  (SET_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK))
+    #define SPI_SPE_DISABLE() (CLEAR_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK))
+    #define SPI_SPE_GET()     (READ_BIT(hspi->Instance->SPI_CR1, SPI_CR1_SPE_MASK))
+
+    #define SPI_TXE_ENABLE()  (SET_BIT(hspi->Instance->SPI_CR2, SPI_CR2_TXEIE_MASK))
+    #define SPI_TXE_DISABLE() (CLEAR_BIT(hspi->Instance->SPI_CR2, SPI_CR2_TXEIE_MASK))
+    #define SPI_TXE_GET()     (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_TXE_MASK))
+
+    #define SPI_RXNE_ENABLE()  (SET_BIT(hspi->Instance->SPI_CR2, SPI_CR2_RXNEIE_MASK))
+    #define SPI_RXNE_DISABLE() (CLEAR_BIT(hspi->Instance->SPI_CR2, SPI_CR2_RXNEIE_MASK))
+    #define SPI_RXNE_GET()    (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_RXNE_MASK))
+
+    #define SPI_ERR_ENABLE()  (SET_BIT(hspi->Instance->SPI_CR2, SPI_CR2_ERRIE_MASK))
+    #define SPI_ERR_DISABLE() (CLEAR_BIT(hspi->Instance->SPI_CR2, SPI_CR2_ERRIE_MASK))
+    #define SPI_ERR_GET()     (READ_BIT(hspi->Instance->SPI_SR, SPI_SR_MODF_MASK | SPI_SR_OVR_MASK | SPI_SR_UDR_MASK | SPI_SR_BSY_MASK))
+
+    #define IS_MASTER(SPI) ((SPI)->Init.Mode == SPI_MODE_MASTER)
+    #define IS_SLAVE(SPI) ((SPI)->Init.Mode == SPI_MODE_SLAVE)
+    #define IS_FD(SPI) ((SPI)->Init.Direction == SPI_DIRECTION_2LINES)
+    #define IS_HDTX(SPI) (((SPI)->Init.Direction == SPI_DIRECTION_1LINE_TX))
+    #define IS_HDRX(SPI) (((SPI)->Init.Direction == SPI_DIRECTION_1LINE_RX))
+    #define IS_FDRX(SPI) (((SPI)->Init.Direction == SPI_DIRECTION_2LINES_RXONLY))
+    #define IS_8BIT(SPI) ((SPI)->Init.DataSize == SPI_DATASIZE_8BIT)
+    #define IS_16BIT(SPI) ((SPI)->Init.DataSize == SPI_DATASIZE_16BIT)
+
   // Khai báo các hàm thành phần
 
     // >> Khai báo hàm vô hiệu hóa SPI
