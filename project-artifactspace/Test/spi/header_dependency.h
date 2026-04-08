@@ -31,9 +31,16 @@
     // >> Từ lib_systick_hal
 
       extern __vo ui32 ms_ticks; // Biến đếm số lượng tick đã trôi qua kể từ khi khởi động hệ thống, được cập nhật trong hàm xử lý ngắt của SysTick
+      ui32 SYSTICK_GetTick(void);
+      void SYSTICK_IncTick(void);
 
     // >> Từ lib_clock_def
 
       #define SPI (0x01ul << 12) // Bit 12 trong RCC_APB2ENR để bật clock cho SPI1
+      #define SPI1 SPI
+
+    // >> Từ lib_clock_hal
+
+      RETR_STAT RCC_PCLK_Reset(ul periph);
 
 #endif /* SPI_HEADER_DEPENDENCY_H_ */

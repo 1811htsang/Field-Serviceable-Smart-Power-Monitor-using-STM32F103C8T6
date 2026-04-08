@@ -92,47 +92,6 @@
         } SPI_TRANS_Enum;
     #endif
 
-  // Khai báo cấu trúc quản lý đa sự kiện và callback (nếu được kích hoạt)
-
-    #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
-
-      // Bộ quản lý ID callback cho các sự kiện khác nhau của SPI
-      tdf_enum SPI_Callback_Event_Param_Type {
-        SPI_TX_CPLT_CB_ID = 0x00u,          // ID callback khi hoàn thành truyền dữ liệu
-        SPI_RX_CPLT_CB_ID = 0x01u,          // ID callback khi hoàn thành nhận dữ liệu
-        SPI_TX_RX_CPLT_CB_ID = 0x02u,       // ID callback khi hoàn thành truyền và nhận dữ liệu
-        SPI_TX_HALF_CPLT_CB_ID = 0x03u,     // ID callback khi hoàn thành nửa quá trình truyền dữ liệu
-        SPI_RX_HALF_CPLT_CB_ID = 0x04u,     // ID callback khi hoàn thành nửa quá trình nhận dữ liệu
-        SPI_TX_RX_HALF_CPLT_CB_ID = 0x05u,  // ID callback khi hoàn thành nửa quá trình truyền và nhận dữ liệu
-        SPI_ERROR_CB_ID = 0x06u,            // ID callback khi có lỗi xảy ra
-        SPI_ABORT_CB_ID = 0x07u,            // ID callback khi quá trình truyền hoặc nhận bị hủy bỏ
-        SPI_MSP_INIT_CB_ID = 0x08u,         // ID callback khởi tạo MSP
-        SPI_MSP_DEINIT_CB_ID = 0x09u        // ID callback giải phóng MSP
-      } SPI_CallbackIDTypeDef;
-
-      // Định nghĩa khai báo thống nhất cho các hàm callback của SPI
-      typedef void (*pSPI_CallbackTypeDef)(SPI_Handle_Param *hspi); // Định nghĩa kiểu con trỏ hàm callback cho SPI
-    #endif
-  
-    /**
-     * Ghi chú:
-     * Trong khai báo thiết kế này, chúng ta đã sử dụng các thành phần sau:
-     * - Init_Param: Chứa tham số cấu hình cho khởi tạo SPI
-     * - Handle_Param: Chứa tham số quản lý trạng thái, quá trình truyền nhận và callback của SPI
-     * - CallbackIDTypeDef: Định nghĩa ID cho các sự kiện callback khác nhau của SPI
-     * - pSPI_CallbackTypeDef: Định nghĩa kiểu con trỏ hàm callback cho SPI
-     * 
-     * Trong Handle_Param chúng ta đã có RxISR và TxISR để quản lý nội bộ xử lý ngắt truyền và nhận dữ liệu,
-     * Việc bổ sung thêm các callback khác như Tx_Cplt_Callback, Rx_Cplt_Callback,... 
-     * sẽ giúp người dùng có thể dễ dàng đăng ký các hàm callback 
-     * cho các sự kiện khác nhau của SPI một cách linh hoạt và tiện lợi hơn. Ngoài ra,
-     * các bộ quản lý callback bên trong Handle_Param đóng vai trò là bảng quản lý callback thay thế tương tự như bên EXTI,
-     * giúp cho việc gọi các hàm callback trở nên dễ dàng và rõ ràng hơn trong quá trình phát triển và sử dụng thư viện SPI này.
-     * Khai báo pSPI_CallbackTypeDef sẽ giúp chúng ta có một kiểu dữ liệu thống nhất để quản lý các hàm callback của SPI,
-     * giúp cho việc đăng ký và gọi các hàm callback trở nên dễ dàng và rõ ràng hơn trong quá trình phát triển 
-     * và sử dụng thư viện SPI này.
-     */
-
   // Khai báo khối quản lý tham số
 
     #ifndef SPI_HANDLE_PARAM_TYPE
@@ -168,19 +127,63 @@
 
           // Quản lý callback cho các sự kiện khác nhau của SPI (nếu được kích hoạt)
           #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
-            pSPI_CallbackTypeDef MSP_Init_Callback;     // Con trỏ tới hàm callback khởi tạo MSP
-            pSPI_CallbackTypeDef MSP_DeInit_Callback;   // Con trỏ tới hàm callback giải phóng MSP
-            pSPI_CallbackTypeDef Tx_Cplt_Callback;      // Con trỏ tới hàm callback khi hoàn thành truyền dữ liệu
-            pSPI_CallbackTypeDef Rx_Cplt_Callback;      // Con trỏ tới hàm callback khi hoàn thành nhận dữ liệu
-            pSPI_CallbackTypeDef TxRx_Cplt_Callback;    // Con trỏ tới hàm callback khi hoàn thành truyền và nhận dữ liệu
-            pSPI_CallbackTypeDef Tx_HalfCplt_Callback;  // Con trỏ tới hàm callback khi hoàn thành nửa quá trình truyền dữ liệu
-            pSPI_CallbackTypeDef Rx_HalfCplt_Callback;    // Con trỏ tới hàm callback khi hoàn thành nửa quá trình nhận dữ liệu
-            pSPI_CallbackTypeDef TxRx_HalfCplt_Callback;  // Con trỏ tới hàm callback khi hoàn thành nửa quá trình truyền và nhận dữ liệu
-            pSPI_CallbackTypeDef Error_Callback;          // Con trỏ tới hàm callback khi có lỗi xảy ra
-            pSPI_CallbackTypeDef Abort_Callback;          // Con trỏ tới hàm callback khi quá trình truyền hoặc nhận bị hủy bỏ
+            void (*MSP_Init_Callback)(struct SPI_Handle_Param *hspi);       // Con trỏ tới hàm callback khởi tạo MSP
+            void (*MSP_DeInit_Callback)(struct SPI_Handle_Param *hspi);     // Con trỏ tới hàm callback giải phóng MSP
+            void (*Tx_Cplt_Callback)(struct SPI_Handle_Param *hspi);        // Con trỏ tới hàm callback khi hoàn thành truyền dữ liệu
+            void (*Rx_Cplt_Callback)(struct SPI_Handle_Param *hspi);        // Con trỏ tới hàm callback khi hoàn thành nhận dữ liệu
+            void (*TxRx_Cplt_Callback)(struct SPI_Handle_Param *hspi);      // Con trỏ tới hàm callback khi hoàn thành truyền và nhận dữ liệu
+            void (*Tx_HalfCplt_Callback)(struct SPI_Handle_Param *hspi);    // Con trỏ tới hàm callback khi hoàn thành nửa quá trình truyền dữ liệu
+            void (*Rx_HalfCplt_Callback)(struct SPI_Handle_Param *hspi);    // Con trỏ tới hàm callback khi hoàn thành nửa quá trình nhận dữ liệu
+            void (*TxRx_HalfCplt_Callback)(struct SPI_Handle_Param *hspi);  // Con trỏ tới hàm callback khi hoàn thành nửa quá trình truyền và nhận dữ liệu
+            void (*Error_Callback)(struct SPI_Handle_Param *hspi);          // Con trỏ tới hàm callback khi có lỗi xảy ra
+            void (*Abort_Callback)(struct SPI_Handle_Param *hspi);          // Con trỏ tới hàm callback khi quá trình truyền hoặc nhận bị hủy bỏ
           #endif 
         } SPI_Handle_Param;
     #endif
+
+  // Khai báo kiểu dữ liệu con trỏ hàm callback (nếu được kích hoạt)
+
+    #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
+      typedef void (*pSPI_CallbackTypeDef)(SPI_Handle_Param *hspi); // Kiểu dữ liệu con trỏ hàm callback cho các sự kiện của SPI
+    #endif
+
+  // Khai báo cấu trúc quản lý đa sự kiện và callback (nếu được kích hoạt)
+
+    #if (SPI_PUBLIC_CALLBACK_ENABLE == 1U)
+
+      // Bộ quản lý ID callback cho các sự kiện khác nhau của SPI
+      tdf_enum SPI_Callback_Event_Param_Type {
+        SPI_TX_CPLT_CB_ID = 0x00u,          // ID callback khi hoàn thành truyền dữ liệu
+        SPI_RX_CPLT_CB_ID = 0x01u,          // ID callback khi hoàn thành nhận dữ liệu
+        SPI_TX_RX_CPLT_CB_ID = 0x02u,       // ID callback khi hoàn thành truyền và nhận dữ liệu
+        SPI_TX_HALF_CPLT_CB_ID = 0x03u,     // ID callback khi hoàn thành nửa quá trình truyền dữ liệu
+        SPI_RX_HALF_CPLT_CB_ID = 0x04u,     // ID callback khi hoàn thành nửa quá trình nhận dữ liệu
+        SPI_TX_RX_HALF_CPLT_CB_ID = 0x05u,  // ID callback khi hoàn thành nửa quá trình truyền và nhận dữ liệu
+        SPI_ERROR_CB_ID = 0x06u,            // ID callback khi có lỗi xảy ra
+        SPI_ABORT_CB_ID = 0x07u,            // ID callback khi quá trình truyền hoặc nhận bị hủy bỏ
+        SPI_MSP_INIT_CB_ID = 0x08u,         // ID callback khởi tạo MSP
+        SPI_MSP_DEINIT_CB_ID = 0x09u        // ID callback giải phóng MSP
+      } SPI_CallbackIDTypeDef;
+    #endif
+  
+    /**
+     * Ghi chú:
+     * Trong khai báo thiết kế này, chúng ta đã sử dụng các thành phần sau:
+     * - Init_Param: Chứa tham số cấu hình cho khởi tạo SPI
+     * - Handle_Param: Chứa tham số quản lý trạng thái, quá trình truyền nhận và callback của SPI
+     * - CallbackIDTypeDef: Định nghĩa ID cho các sự kiện callback khác nhau của SPI
+     * - pSPI_CallbackTypeDef: Định nghĩa kiểu con trỏ hàm callback cho SPI
+     * 
+     * Trong Handle_Param chúng ta đã có RxISR và TxISR để quản lý nội bộ xử lý ngắt truyền và nhận dữ liệu,
+     * Việc bổ sung thêm các callback khác như Tx_Cplt_Callback, Rx_Cplt_Callback,... 
+     * sẽ giúp người dùng có thể dễ dàng đăng ký các hàm callback 
+     * cho các sự kiện khác nhau của SPI một cách linh hoạt và tiện lợi hơn. Ngoài ra,
+     * các bộ quản lý callback bên trong Handle_Param đóng vai trò là bảng quản lý callback thay thế tương tự như bên EXTI,
+     * giúp cho việc gọi các hàm callback trở nên dễ dàng và rõ ràng hơn trong quá trình phát triển và sử dụng thư viện SPI này.
+     * Khai báo pSPI_CallbackTypeDef sẽ giúp chúng ta có một kiểu dữ liệu thống nhất để quản lý các hàm callback của SPI,
+     * giúp cho việc đăng ký và gọi các hàm callback trở nên dễ dàng và rõ ràng hơn trong quá trình phát triển 
+     * và sử dụng thư viện SPI này.
+     */
 
   // Khai báo các kiểm tra nội bộ
 

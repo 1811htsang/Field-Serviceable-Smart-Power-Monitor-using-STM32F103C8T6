@@ -7,18 +7,20 @@
 
 // Khai báo các thư viện cho unit test
 
+  #include <string.h>
   #include "lib_keyword_def.h"
+  #include "lib_spi_def.h"
   #include "header_dependency.h"
 
 // Định nghĩa các hàm mock tương ứng
 
   // >> Từ lib_systick_hal
 
-    stinl ui32 SYSTICK_GetTick(void) {
+    ui32 SYSTICK_GetTick(void) {
       return ms_ticks;
     }
 
-    stinl void SYSTICK_IncTick(void) {
+    void SYSTICK_IncTick(void) {
       ms_ticks++;
     }
 
@@ -32,6 +34,10 @@
   // >> Từ lib_clock_hal
 
     RETR_STAT RCC_PCLK_Reset(ul periph) {
-      // Hàm mock này sẽ không thực hiện thao tác reset clock thật nào cả, chỉ trả về STAT_OK để giả lập việc reset thành công
+      if (periph == SPI1) {
+        memset(&MOCK_SPI_REGS, 0, sizeof(MOCK_SPI_REGS));
+      }
+
+      // Hàm mock này giả lập việc reset thành công và đưa thanh ghi SPI1 về trạng thái reset
       return STAT_OK;
     }

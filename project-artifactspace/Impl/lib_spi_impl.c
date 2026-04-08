@@ -50,41 +50,37 @@
 
   // >> API nội bộ sử dụng cho norm mode
   sta RETR_STAT SPI_Transmit_Norm(
-    SPI_Handle_Param *hspi, 
-    const ui8* pdata, 
-    ui16 size, 
-    ui32 timeout
+    SPI_Handle_Param *hspi, const ui8* pdata, 
+    ui16 size, ui32 timeout
   );
   sta RETR_STAT SPI_Receive_Norm(
-    SPI_Handle_Param *hspi, 
-    ui8* pdata, 
-    ui16 size, 
-    ui32 timeout
+    SPI_Handle_Param *hspi, ui8* pdata, 
+    ui16 size, ui32 timeout
   );
   sta RETR_STAT SPI_TransmitReceive_Norm(
     SPI_Handle_Param *hspi, 
-    const ui8* pdata_tx, 
-    ui8* pdata_rx, 
-    ui16 size, 
-    ui32 timeout
+    const ui8* pdata_tx, ui8* pdata_rx, 
+    ui16 size, ui32 timeout
   );
 
   // >> API nội bộ sử dụng cho intr mode
   sta RETR_STAT SPI_Transmit_Intr(
     SPI_Handle_Param *hspi, 
-    const ui8 *pdata, 
-    ui16 size
+    const ui8 *pdata, ui16 size
   );
   sta RETR_STAT SPI_Receive_Intr(
     SPI_Handle_Param *hspi, 
-    ui8 *pdata, 
-    ui16 size
+    ui8 *pdata, ui16 size
   );
   sta RETR_STAT SPI_TransmitReceive_Intr(
     SPI_Handle_Param *hspi, 
     const ui8 *ptx, ui8 *prx, 
     ui16 size
   );
+
+  // >> API nội bộ sử dụng cho abort mode
+  sta RETR_STAT SPI_Abort_Norm(SPI_Handle_Param *hspi);
+  sta RETR_STAT SPI_Abort_Intr(SPI_Handle_Param *hspi);
 
   // >> API nội bộ cho xử lý ISR 1 line TX/RX
   sta void SPI_1lineTxISR_8BIT(SPI_Handle_Param *hspi);
@@ -107,6 +103,88 @@
   sta RETR_STAT SPI_EndTxTransaction(SPI_Handle_Param *hspi, ui32 timeout, ui32 tickstart);
   sta RETR_STAT SPI_EndRxTransaction(SPI_Handle_Param *hspi, ui32 timeout, ui32 tickstart);
   sta RETR_STAT SPI_EndRxTxTransaction(SPI_Handle_Param *hspi, ui32 timeout, ui32 tickstart);
+
+// Định nghĩa các hàm callback weak mặc định (nếu được kích hoạt)
+
+  __weak void Tx_Cplt_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hoàn thành truyền dữ liệu 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void Rx_Cplt_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hoàn thành nhận dữ liệu 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void TxRx_Cplt_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hoàn thành truyền/nhận dữ liệu 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void Tx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hoàn thành truyền một nửa dữ liệu 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void Rx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hoàn thành nhận một nửa dữ liệu 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void TxRx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hoàn thành truyền/nhận một nửa dữ liệu 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void Error_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác xử lý lỗi 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
+
+  __weak void Abort_Callback(SPI_Handle_Param *hspi) {
+    /**
+     * Ghi chú:
+     * User có thể tự override hàm này 
+     * để implement các thao tác hủy giao tiếp 
+     * tùy thuộc vào thiết kế phần cứng của mình.
+     */
+    return;
+  }
 
 // Định nghĩa các hàm thành phần
 
@@ -590,10 +668,10 @@
               hspi->Abort_Callback = Abort_Callback;
               break;
             case SPI_MSP_INIT_CB_ID:
-              hspi->MSP_Init_Callback = MSP_Init_Callback;
+              hspi->MSP_Init_Callback = SPI_MSP_Init;
               break;
             case SPI_MSP_DEINIT_CB_ID:
-              hspi->MSP_DeInit_Callback = MSP_DeInit_Callback;
+              hspi->MSP_DeInit_Callback = SPI_MSP_DeInit;
               break;
             default:
               hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
@@ -605,10 +683,10 @@
         else if (hspi->State == SPI_RESET) { // Nếu ngoại vi đang ở trạng thái Reset thì chỉ cho phép xóa đăng ký callback khởi tạo và giải phóng MSP
           switch (CallbackID) {
             case SPI_MSP_INIT_CB_ID:
-              hspi->MSP_Init_Callback = MSP_Init_Callback;
+              hspi->MSP_Init_Callback = SPI_MSP_Init;
               break;
             case SPI_MSP_DEINIT_CB_ID:
-              hspi->MSP_DeInit_Callback = MSP_DeInit_Callback;
+              hspi->MSP_DeInit_Callback = SPI_MSP_DeInit;
               break;
             default:
               hspi->ErrorCode = SPI_ERROR_INV_CALLBACK; // Cập nhật mã lỗi vào handle_param
@@ -898,10 +976,12 @@
        */
 
       if (IS_FD(hspi)) { // Chỉ xử lý cờ OVR nếu ở chế độ Full-Duplex vì chỉ có chế độ này mới có sự tham gia của RxBuf
-        __vo ui32 tmp = 0x0u;
-        tmp = hspi->Instance->SPI_DR; // Đọc DR
-        tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
-        tmp = 0u;
+        {
+          __vo ui32 tmp = 0x0u;
+          tmp = hspi->Instance->SPI_DR; // Đọc DR
+          tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+          tmp = 0u;
+        }
       }
 
     // Báo trạng thái hoàn thành
@@ -1256,6 +1336,7 @@
               hspi->Instance->SPI_DR = *((const ui16*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 16-bit
               hspi->Tx_Buff_Ptr += sizeof(ui16); // Cập nhật con trỏ buffer truyền đi (tăng lên 2 byte vì kích thước dữ liệu là 16-bit)
               hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
+              is_TxPhase = 0u; // Chuyển sang pha nhận sau preload để cho phép đọc lại dữ liệu của khung đầu tiên
             }
 
           // Xử lý truyền nhận
@@ -1336,6 +1417,7 @@
               *((__vo ui8*)hspi->Instance->SPI_DR) = *((const ui8*)hspi->Tx_Buff_Ptr); // Nạp dữ liệu ràng buộc casting 8-bit
               hspi->Tx_Buff_Ptr += sizeof(ui8); // Cập nhật con trỏ buffer truyền đi (tăng lên 1 byte vì kích thước dữ liệu là 8-bit)
               hspi->Tx_Xfer_Count--; // Cập nhật lại số lượng phần tử cần truyền (giảm đi 1 phần tử vì đã preload 1 phần tử)
+              is_TxPhase = 0u; // Chuyển sang pha nhận sau preload để cho phép đọc lại dữ liệu của khung đầu tiên
             }
 
           // Xử lý truyền nhận
@@ -1444,10 +1526,12 @@
         if (
           IS_FD(hspi) // Chỉ xử lý cờ OVR nếu ở chế độ Full-Duplex vì chỉ có chế độ này mới có sự tham gia của RxBuf 
         ) {
-          __vo ui32 tmp = 0x0u;
-          tmp = hspi->Instance->SPI_DR; // Đọc DR
-          tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
-          tmp = 0u;
+          {
+            __vo ui32 tmp = 0x0u;
+            tmp = hspi->Instance->SPI_DR; // Đọc DR
+            tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+            tmp = 0u;
+          }
         }
 
       // Báo trạng thái hoàn thành
@@ -2014,10 +2098,12 @@
         if (
           IS_FD(hspi) // Chỉ xử lý cờ OVR nếu ở chế độ Full-Duplex vì chỉ có chế độ này mới có sự tham gia của RxBuf
         ) {
-          __vo ui32 tmp = 0x0u;
-          tmp = hspi->Instance->SPI_DR; // Đọc DR
-          tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
-          tmp = 0u;
+          {
+            __vo ui32 tmp = 0x0u;
+            tmp = hspi->Instance->SPI_DR; // Đọc DR
+            tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+            tmp = 0u;
+          }
         }
 
       // Báo trạng thái hoàn thành
@@ -2107,10 +2193,12 @@
       if (
         hspi->Init.Direction == SPI_DIRECTION_2LINES 
       ) {
-        __vo ui32 tmp = 0x0u;
-        tmp = hspi->Instance->SPI_DR; // Đọc DR
-        tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
-        tmp = 0u;
+        {
+          __vo ui32 tmp = 0x0u;
+          tmp = hspi->Instance->SPI_DR; // Đọc DR
+          tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+          tmp = 0u;
+        }
       }
 
     // Báo trạng thái hoàn thành
@@ -2186,10 +2274,12 @@
       if (
         IS_FD(hspi)
       ) {
-        __vo ui32 tmp = 0x0u;
-        tmp = hspi->Instance->SPI_DR; // Đọc DR
-        tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
-        tmp = 0u;
+        {
+          __vo ui32 tmp = 0x0u;
+          tmp = hspi->Instance->SPI_DR; // Đọc DR
+          tmp = hspi->Instance->SPI_SR; // Đọc SR để xóa cờ OVR
+          tmp = 0u;
+        }
       }
 
     // Báo trạng thái hoàn thành
@@ -2327,9 +2417,187 @@
       }
   }
 
-  RETR_STAT SPI_Abort(SPI_Handle_Param *hspi, SPI_TRANS_Enum trans) {
-    // Hàm này sẽ được implement sau 
+  sta RETR_STAT SPI_Abort_Norm(SPI_Handle_Param *hspi) {
+
+    // Chỉ cho phép abort khi ngoại vi đang thực sự bận hoặc đang ở trạng thái abort
+
+      if (
+        hspi->State == SPI_READY
+        ||
+        hspi->State == SPI_RESET
+      ) {
+        return STAT_ERROR;
+      }
+
+    // Cập nhật trạng thái và lỗi
+
+      hspi->State = SPI_ABORT;
+      hspi->ErrorCode = SPI_ERR_OK;
+
+    // Tắt toàn bộ ngắt SPI để ngăn transaction mới chen vào
+
+      CLEAR_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_TXEIE_MASK | SPI_CR2_RXNEIE_MASK | SPI_CR2_ERRIE_MASK
+      );
+
+    // Đảm bảo khung cuối cùng kết thúc trước khi tắt SPI
+
+      if (
+        SPI_FlagTimeout(
+          hspi,
+          SPI_SR_TXE_MASK,
+          SET,
+          SYSTICK_LOAD_MAX_RELOAD_VALUE,
+          SYSTICK_GetTick()
+        ) != STAT_OK
+      ) {
+        hspi->ErrorCode = SPI_ERROR_TIMEOUT;
+      }
+
+      if (
+        SPI_FlagTimeout(
+          hspi,
+          SPI_SR_BSY_MASK,
+          RESET,
+          SYSTICK_LOAD_MAX_RELOAD_VALUE,
+          SYSTICK_GetTick()
+        ) != STAT_OK
+      ) {
+        hspi->ErrorCode = SPI_ERROR_TIMEOUT;
+      }
+
+    // Tắt SPI và xóa dữ liệu treo/OVR
+
+      SPI_Disable(hspi);
+
+      {
+        __vo ui32 tmp = 0x0u;
+        tmp = hspi->Instance->SPI_DR;
+        tmp = hspi->Instance->SPI_SR;
+        tmp = 0u;
+      }
+
+    // Reset thông tin truyền nhận và ISR nội bộ
+
+      hspi->Tx_Xfer_Count = 0u;
+      hspi->Rx_Xfer_Count = 0u;
+      hspi->Tx_Xfer_Size = 0u;
+      hspi->Rx_Xfer_Size = 0u;
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    // Hoàn tất trạng thái
+
+      hspi->State = SPI_READY;
+
+    // Callback abort hoàn tất
+
+      #if (SPI_PUBLIC_CALLBACK_ENABLE == 1u)
+        if (hspi->Abort_Callback != NULL) {
+          hspi->Abort_Callback(hspi);
+        } else {
+          Abort_Callback(hspi);
+        }
+      #else
+        Abort_Callback(hspi);
+      #endif
+
+    // Trả về kết quả
+
+      if (hspi->ErrorCode != SPI_ERR_OK) {
+        return STAT_TIMEOUT;
+      }
+
     return STAT_OK;
+  }
+
+  sta RETR_STAT SPI_Abort_Intr(SPI_Handle_Param *hspi) {
+
+    // Chỉ cho phép abort khi ngoại vi đang thực sự bận hoặc đang ở trạng thái abort
+
+      if (
+        hspi->State == SPI_READY
+        ||
+        hspi->State == SPI_RESET
+      ) {
+        return STAT_ERROR;
+      }
+
+    // Cập nhật trạng thái và lỗi
+
+      hspi->State = SPI_ABORT;
+      hspi->ErrorCode = SPI_ERR_OK;
+
+    // Tắt toàn bộ ngắt SPI ngay lập tức
+
+      CLEAR_BIT(
+        hspi->Instance->SPI_CR2,
+        SPI_CR2_TXEIE_MASK | SPI_CR2_RXNEIE_MASK | SPI_CR2_ERRIE_MASK
+      );
+
+    // Tắt SPI và flush dữ liệu treo
+
+      SPI_Disable(hspi);
+
+      {
+        __vo ui32 tmp = 0x0u;
+        tmp = hspi->Instance->SPI_DR;
+        tmp = hspi->Instance->SPI_SR;
+        tmp = 0u;
+      }
+
+    // Reset thông tin truyền nhận và ISR nội bộ
+
+      hspi->Tx_Xfer_Count = 0u;
+      hspi->Rx_Xfer_Count = 0u;
+      hspi->Tx_Xfer_Size = 0u;
+      hspi->Rx_Xfer_Size = 0u;
+      hspi->TxISR = NULL;
+      hspi->RxISR = NULL;
+
+    // Hoàn tất trạng thái
+
+      hspi->State = SPI_READY;
+
+    // Callback abort hoàn tất
+
+      #if (SPI_PUBLIC_CALLBACK_ENABLE == 1u)
+        if (hspi->Abort_Callback != NULL) {
+          hspi->Abort_Callback(hspi);
+        } else {
+          Abort_Callback(hspi);
+        }
+      #else
+        Abort_Callback(hspi);
+      #endif
+
+    return STAT_OK;
+  }
+
+  RETR_STAT SPI_Abort(SPI_Handle_Param *hspi, SPI_TRANS_Enum trans) {
+
+    // Kiểm tra tham số đầu vào hợp lệ
+
+      if (hspi == NULL) {
+        return STAT_ERROR;
+      }
+
+    // Lựa chọn hàm abort phù hợp dựa trên trans
+
+      switch (trans) {
+        case SPI_TRANS_NORM:
+          return SPI_Abort_Norm(hspi);
+
+        case SPI_TRANS_INTR:
+          return SPI_Abort_Intr(hspi);
+
+        default:
+          return STAT_ERROR;
+          break;
+      }
+
+    return STAT_ERROR;
   }
 
   RETR_STAT SPI_Transmit(
@@ -2454,88 +2722,6 @@
 
     // Trường hợp mặc định đã return ở trên
     return STAT_ERROR;
-  }
-
-// Định nghĩa các hàm callback weak mặc định (nếu được kích hoạt)
-
-  __weak void Tx_Cplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void Rx_Cplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành nhận dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void TxRx_Cplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền/nhận dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void Tx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền một nửa dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void Rx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành nhận một nửa dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void TxRx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền/nhận một nửa dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void Error_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác xử lý lỗi 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
-  }
-
-  __weak void Abort_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hủy giao tiếp 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
-    return;
   }
 
   
