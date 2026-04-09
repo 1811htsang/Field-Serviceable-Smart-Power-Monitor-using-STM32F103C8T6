@@ -42,3 +42,7 @@ Note này chứa thông tin các linh kiện điện tử thu thập cho đề t
    - Module dùng để chuyển đổi tín hiệu điện 1 pha thành 3 pha, giúp hệ thống có khả năng giám sát năng lượng trên lưới điện công nghiệp giả lập.
    - Số lượng : 2 cái
    - Đường link tại [đây](https://shopee.vn/1-C%C3%A1i-l%E1%BB%91c-MCP4728-E-UN-MCP4728-4728-MSOP-10-Ch%E1%BA%A5t-L%C6%B0%E1%BB%A3ng-T%E1%BB%91t-Nh%E1%BA%A5t-C%C3%B2n-H%C3%A0ng-i.381774615.25388616762).
+10. XBLW TDA2030A IC Amplifier Audio Class AB, TO-220
+   - Module dùng để khuếch đại tín hiệu điện 3 pha thành tín hiệu điện 3 pha có công suất lớn hơn, giúp hệ thống có khả năng giám sát năng lượng trên lưới điện công nghiệp giả lập.
+   - Số lượng : 2 cái
+   - Đường link tại [đây](https://www.thegioiic.com/xblw-tda2030a-ic-amplifier-audio-class-ab-to-220).
