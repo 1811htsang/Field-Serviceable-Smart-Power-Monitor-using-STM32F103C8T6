@@ -13,6 +13,7 @@ Dựa trên các yêu cầu đã được phân tích, hệ thống sẽ cần p
 - Mạch ổn áp L7805CV để cung cấp nguồn 5V ổn định cho các linh kiện điện tử trong hệ thống.
 - Transitor BC547 để điều khiển dòng điện trong mạch điện tử, hỗ trợ việc đóng cắt nguồn điện và điều khiển các thành phần khác.
 - MCP4728 để chuyển đổi tín hiệu điện 1 pha thành 3 pha, giúp hệ thống có khả năng giám sát năng lượng trên lưới điện công nghiệp giả lập.
+- TDA2030 để khuếch đại tín hiệu điện 3 pha thành tín hiệu điện 3 pha có công suất lớn hơn, giúp hệ thống có khả năng giám sát năng lượng trên lưới điện công nghiệp giả lập.
 - LCD 1602 để hiển thị thông tin đo lường điện năng và trạng thái của hệ thống.
 - Module relay để điều khiển tải điện từ vi điều khiển, mô phỏng việc đóng cắt nguồn điện và kiểm tra hoạt động của hệ thống trong các tình huống khác nhau.
 
