@@ -134,23 +134,6 @@
     printf("-> PASSED\n");
   }
 
-  void test_Init_LSI_Success_ShouldSetReadyFlag() {
-    setup();
-    printf("TC4: Init LSI Success Happy Path...\n");
-    
-    RCC_CLK_Init_Param param = { .CLK_Source = RCC_IWDG_SOURCE_LSI }; // LSI
-    RCC_RDYFLG_Typdef rdy_flg;
-
-    // Mô phỏng LSI sẵn sàng ngay lập tức
-    LSI_ready_set();
-    
-    RETR_STAT result = RCC_CLK_Init(&param, &rdy_flg);
-    
-    assert(__OK_CHECK(result));
-    assert(__SET_FLAG_CHECK(rdy_flg.LSI_RDY_FLG));
-    printf("-> PASSED\n");
-  }
-
   void test_Init_InvalidSource_ShouldReturnError() {
     setup();
     printf("TC5: Init with Invalid Source -> Return Error...\n");
@@ -172,21 +155,6 @@
     RCC_RDYFLG_Typdef rdy_flg;
 
     // Không mô phỏng HSE sẵn sàng
-    
-    RETR_STAT result = RCC_CLK_Init(&param, &rdy_flg);
-    
-    assert(__ERROR_CHECK(result));
-    printf("-> PASSED\n");
-  }
-
-  void test_Init_LSI_NotReady_ShouldReturnError() {
-    setup();
-    printf("TC7: LSI Not Ready -> Return Error...\n");
-    
-    RCC_CLK_Init_Param param = { .CLK_Source = RCC_IWDG_SOURCE_LSI }; // LSI
-    RCC_RDYFLG_Typdef rdy_flg;
-
-    // Không mô phỏng LSI sẵn sàng
     
     RETR_STAT result = RCC_CLK_Init(&param, &rdy_flg);
     
@@ -249,10 +217,8 @@ int main() {
     test_Init_NullPointer_ShouldReturnError();
     test_Init_HSI_Success_ShouldSetReadyFlag();
     test_Init_HSE_Success_ShouldSetReadyFlag();
-    test_Init_LSI_Success_ShouldSetReadyFlag();
     test_Init_InvalidSource_ShouldReturnError();
     test_Init_HSE_NotReady_ShouldReturnError();
-    test_Init_LSI_NotReady_ShouldReturnError();
     test_Init_NullRdyFlag_ShouldReturnError();
     test_DeInit_HSI_Busy_ShouldReturnBusy();
     test_DeInit_HSE_Success_ShouldTurnOffHSE();

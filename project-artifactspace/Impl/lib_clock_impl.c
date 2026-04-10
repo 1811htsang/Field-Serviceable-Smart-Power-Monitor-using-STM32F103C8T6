@@ -463,6 +463,11 @@
           return STAT_OK;
           break;
 
+        case SPI1:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2ENR, SPI1);
+          return STAT_OK;
+          break;
+
         default:
           return STAT_ERROR;
           break;
@@ -547,6 +552,83 @@
 
         case GPIOG:
           CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, GPIOG);
+          return STAT_OK;
+          break;
+
+        case SPI1:
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2ENR, SPI1);
+          return STAT_OK;
+          break;
+
+        default:
+          return STAT_ERROR;
+          break;
+      }
+
+    // Kết thúc quá trình
+
+      return STAT_DONE;
+  }
+
+  RETR_STAT RCC_PCLK_Reset(ul periph) {
+    // Kiểm tra tham số đầu vào
+
+      assert_param(IS_RCC_PERIPH(periph));
+
+    // Khóa nguồn clock
+
+      switch (periph) {
+        case AFIO:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, AFIO);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, AFIO);
+          return STAT_OK;
+          break;
+
+        case GPIOA:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOA);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOA);
+          return STAT_OK;
+          break;
+        
+        case GPIOB:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOB);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOB);
+          return STAT_OK;
+          break;
+        
+        case GPIOC:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOC);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOC);
+          return STAT_OK;
+          break;
+        
+        case GPIOD:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOD);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOD);
+          return STAT_OK;
+          break;
+
+        case GPIOE:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOE);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOE);
+          return STAT_OK;
+          break;
+
+        case GPIOF:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOF);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOF);
+          return STAT_OK;
+          break;
+
+        case GPIOG:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOG);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, GPIOG);
+          return STAT_OK;
+          break;
+
+        case SPI1:
+          SET_BIT(RCC_REGS_PTR->RCC_APB2RSTR, SPI1);
+          CLEAR_BIT(RCC_REGS_PTR->RCC_APB2RSTR, SPI1);
           return STAT_OK;
           break;
 

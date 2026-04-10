@@ -27,19 +27,19 @@
   // Khai báo bộ thanh ghi của ngoại vi NVIC
 
     tdf_strc NVIC_REGS_Typedef {
-      __vo BLANK_REG NVIC_ISER[3];    // Offset 0x00, reset 0x0000 0000
-      __vo BLANK_REG RESERVED0[29];    // Offset 0x0C - 0x7F, reserved
-      __vo BLANK_REG NVIC_ICER[3];    // Offset 0x80, reset 0x0000 0000
-      __vo BLANK_REG RESERVED1[29];    // Offset 0x8C - 0xFF, reserved
-      __vo BLANK_REG NVIC_ISPR[3];    // Offset 0x100, reset 0x0000 0000
-      __vo BLANK_REG RESERVED2[29];    // Offset 0x10C - 0x17F, reserved
-      __vo BLANK_REG NVIC_ICPR[3];    // Offset 0x180, reset 0x0000 0000
-      __vo BLANK_REG RESERVED3[29];    // Offset 0x18C - 0x1FF, reserved
-      __vo BLANK_REG NVIC_IABR[3];    // Offset 0x200, reset 0x0000 0000
-      __vo BLANK_REG RESERVED4[61];    // Offset 0x20C - 0x2FF, reserved
+      __vo BLANK_REG_32B NVIC_ISER[3];    // Offset 0x00, reset 0x0000 0000
+      __vo BLANK_REG_32B RESERVED0[29];    // Offset 0x0C - 0x7F, reserved
+      __vo BLANK_REG_32B NVIC_ICER[3];    // Offset 0x80, reset 0x0000 0000
+      __vo BLANK_REG_32B RESERVED1[29];    // Offset 0x8C - 0xFF, reserved
+      __vo BLANK_REG_32B NVIC_ISPR[3];    // Offset 0x100, reset 0x0000 0000
+      __vo BLANK_REG_32B RESERVED2[29];    // Offset 0x10C - 0x17F, reserved
+      __vo BLANK_REG_32B NVIC_ICPR[3];    // Offset 0x180, reset 0x0000 0000
+      __vo BLANK_REG_32B RESERVED3[29];    // Offset 0x18C - 0x1FF, reserved
+      __vo BLANK_REG_32B NVIC_IABR[3];    // Offset 0x200, reset 0x0000 0000
+      __vo BLANK_REG_32B RESERVED4[61];    // Offset 0x20C - 0x2FF, reserved
       __vo ui8 NVIC_IPRE[68];     // Offset 0x300, reset 0x0000 0000
-      __vo BLANK_REG RESERVED5[752];   // Offset 0x344 - 0xBFF, reserved
-      __vo BLANK_REG NVIC_STIR;       // Offset 0xE00, reset 0x0000 0000
+      __vo BLANK_REG_32B RESERVED5[752];   // Offset 0x344 - 0xBFF, reserved
+      __vo BLANK_REG_32B NVIC_STIR;       // Offset 0xE00, reset 0x0000 0000
     } NVIC_REGS_Typedef;
 
     /**

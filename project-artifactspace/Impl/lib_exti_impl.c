@@ -309,7 +309,7 @@
    */
   RETR_STAT EXTI_RegisterCallback(
     EXTI_Handle_Param *handle_param,
-    EXTI_Callback_Event_Param_Type callback_event_type,
+    EXTI_Callback_Event_Param callback_event_type,
     void (*callback_func)(void)
   ) {
 
@@ -319,11 +319,7 @@
     
     // Kiểm tra con trỏ handle_param hợp lệ và con trỏ callback_func không NULL
 
-      if (handle_param == NULL) {
-        return STAT_ERROR;
-      }
-
-      if (callback_func == NULL) {
+      if (handle_param == NULL || callback_func == NULL) {
         return STAT_ERROR;
       }
 

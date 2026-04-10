@@ -55,7 +55,9 @@
 		#define tdf_strc typedef struct
 		#define tdf_enum typedef enum
 
-		#define BLANK_REG uint32_t
+		#define BLANK_REG_32B uint32_t
+		#define BLANK_REG_16B uint16_t
+		#define BLANK_REG_8B uint8_t
 
 		#define __weak __attribute__((weak))
 		

@@ -30,10 +30,10 @@
 	// Khai báo cấu trúc thanh ghi
 
 		tdf_strc IWDG_REGS {
-			__vo BLANK_REG KR;
-			__vo BLANK_REG PR;
-			__vo BLANK_REG RLR;
-			__vo BLANK_REG SR;
+			__vo BLANK_REG_32B KR;
+			__vo BLANK_REG_32B PR;
+			__vo BLANK_REG_32B RLR;
+			__vo BLANK_REG_32B SR;
 		} IWDG_REGS_Typedef;
 
 	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi

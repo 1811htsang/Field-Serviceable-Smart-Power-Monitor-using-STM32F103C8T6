@@ -46,14 +46,14 @@
 		*/
 
 		tdf_strc RCC_REGS {
-			__vo BLANK_REG CR;
-			__vo BLANK_REG CFGR;
-			__vo BLANK_REG CIR;
-			__vo BLANK_REG RCC_APB2RSTR;
-			__vo BLANK_REG RESERVED0[2];
-			__vo BLANK_REG RCC_APB2ENR;
-			__vo BLANK_REG RESERVED1[2];
-			__vo BLANK_REG CSR;
+			__vo BLANK_REG_32B CR;
+			__vo BLANK_REG_32B CFGR;
+			__vo BLANK_REG_32B CIR;
+			__vo BLANK_REG_32B RCC_APB2RSTR;
+			__vo BLANK_REG_32B RESERVED0[2];
+			__vo BLANK_REG_32B RCC_APB2ENR;
+			__vo BLANK_REG_32B RESERVED1[2];
+			__vo BLANK_REG_32B CSR;
 		} RCC_REGS_Typedef;
 
   // >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
@@ -122,5 +122,6 @@
 		#define GPIOE (0x01ul << 6)
 		#define GPIOF (0x01ul << 7)
 		#define GPIOG (0x01ul << 8)
+		#define SPI1	(0x01ul << 12)
 		
 #endif /* LIB_CLOCK_DEF_H_ */

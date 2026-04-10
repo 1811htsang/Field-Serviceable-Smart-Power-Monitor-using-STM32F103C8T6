@@ -21,33 +21,33 @@
   // Khai báo cấu trúc thanh ghi
 
     tdf_strc ITM_REGS {
-      __vo BLANK_REG ITM_STIM[32];   // Tại offset 0x000 đến 0x7C
-      __vo BLANK_REG RESERVED0[864];
-      __vo BLANK_REG ITM_TER;        // Tại offset 0xE00
-      __vo BLANK_REG RESERVED1[15];  
-      __vo BLANK_REG ITM_TPR;        // Tại offset 0xE40
-      __vo BLANK_REG RESERVED2[15];
-      __vo BLANK_REG ITM_TCR;        // Tại offset 0xE80
-      __vo BLANK_REG RESERVED3[29];
-      __vo BLANK_REG ITM_IWR;        // Tại offset 0xEF8
-      __vo BLANK_REG ITM_IRR;        // Tại offset 0xEFC
-      __vo BLANK_REG ITM_IMCR;       // Tại offset 0xF00
-      __vo BLANK_REG RESERVED4[43];
-      __vo BLANK_REG ITM_LAR;        // Tại offset 0xFB0
-      __vo BLANK_REG ITM_LSR;        // Tại offset 0xFB4
-      __vo BLANK_REG RESERVED5[6];
-      __vo BLANK_REG ITM_PID4;       // Tại offset 0xFD0
-      __vo BLANK_REG ITM_PID5;       // Tại offset 0xFD4
-      __vo BLANK_REG ITM_PID6;       // Tại offset 0xFD8
-      __vo BLANK_REG ITM_PID7;       // Tại offset 0xFDC
-      __vo BLANK_REG ITM_PID0;       // Tại offset 0xFE0
-      __vo BLANK_REG ITM_PID1;       // Tại offset 0xFE4
-      __vo BLANK_REG ITM_PID2;       // Tại offset 0xFE8
-      __vo BLANK_REG ITM_PID3;       // Tại offset 0xFEC
-      __vo BLANK_REG ITM_CID0;       // Tại offset 0xFF0
-      __vo BLANK_REG ITM_CID1;       // Tại offset 0xFF4
-      __vo BLANK_REG ITM_CID2;       // Tại offset 0xFF8
-      __vo BLANK_REG ITM_CID3;       // Tại offset 0xFFC
+      __vo BLANK_REG_32B ITM_STIM[32];   // Tại offset 0x000 đến 0x7C
+      __vo BLANK_REG_32B RESERVED0[864];
+      __vo BLANK_REG_32B ITM_TER;        // Tại offset 0xE00
+      __vo BLANK_REG_32B RESERVED1[15];  
+      __vo BLANK_REG_32B ITM_TPR;        // Tại offset 0xE40
+      __vo BLANK_REG_32B RESERVED2[15];
+      __vo BLANK_REG_32B ITM_TCR;        // Tại offset 0xE80
+      __vo BLANK_REG_32B RESERVED3[29];
+      __vo BLANK_REG_32B ITM_IWR;        // Tại offset 0xEF8
+      __vo BLANK_REG_32B ITM_IRR;        // Tại offset 0xEFC
+      __vo BLANK_REG_32B ITM_IMCR;       // Tại offset 0xF00
+      __vo BLANK_REG_32B RESERVED4[43];
+      __vo BLANK_REG_32B ITM_LAR;        // Tại offset 0xFB0
+      __vo BLANK_REG_32B ITM_LSR;        // Tại offset 0xFB4
+      __vo BLANK_REG_32B RESERVED5[6];
+      __vo BLANK_REG_32B ITM_PID4;       // Tại offset 0xFD0
+      __vo BLANK_REG_32B ITM_PID5;       // Tại offset 0xFD4
+      __vo BLANK_REG_32B ITM_PID6;       // Tại offset 0xFD8
+      __vo BLANK_REG_32B ITM_PID7;       // Tại offset 0xFDC
+      __vo BLANK_REG_32B ITM_PID0;       // Tại offset 0xFE0
+      __vo BLANK_REG_32B ITM_PID1;       // Tại offset 0xFE4
+      __vo BLANK_REG_32B ITM_PID2;       // Tại offset 0xFE8
+      __vo BLANK_REG_32B ITM_PID3;       // Tại offset 0xFEC
+      __vo BLANK_REG_32B ITM_CID0;       // Tại offset 0xFF0
+      __vo BLANK_REG_32B ITM_CID1;       // Tại offset 0xFF4
+      __vo BLANK_REG_32B ITM_CID2;       // Tại offset 0xFF8
+      __vo BLANK_REG_32B ITM_CID3;       // Tại offset 0xFFC
 
       /**
        * Ghi chú:

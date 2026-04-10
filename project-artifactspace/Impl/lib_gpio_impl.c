@@ -83,7 +83,7 @@
 
       // Bộ biến tạm thanh ghi để select cấu hình
 
-        __vo BLANK_REG* config_register;
+        __vo BLANK_REG_32B* config_register;
         ui32 config_offset;
 
     // Vòng lặp để cấu hình từng chân GPIO được chọn
@@ -205,7 +205,7 @@
 
       // Bộ biến tạm thanh ghi để select cấu hình
 
-        __vo BLANK_REG* config_register;
+        __vo BLANK_REG_32B* config_register;
         ui32 config_offset;
 
       // Vòng lặp để vô hiệu hóa từng chân GPIO được chọn

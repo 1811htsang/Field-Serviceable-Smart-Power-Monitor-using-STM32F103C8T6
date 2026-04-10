@@ -8,6 +8,8 @@ Ghi chú này tổng hợp các thiết kế hệ thống của dự án nhằm 
 
 Thiết kế sử dụng sẽ lấy ý tưởng từ tài liệu [paper](../references/STM32-Based%20Home%20Automation%20and%20Energy%20Monitoring%20System%20with%20TFT%20Display.pdf) trang 6 nhằm đảm bảo tính ổn định và hiệu quả của hệ thống đã được kiểm chứng.
 
+Sẽ bổ sung thêm các nguồn tài liệu khác để tham khảo và áp dụng các giải pháp thiết kế phù hợp với yêu cầu của dự án sau.
+
 ## Thay đổi thiết kế tương ứng
 
 Từ thiết kế ban đầu, đã có một số thay đổi để phù hợp với yêu cầu của dự án:

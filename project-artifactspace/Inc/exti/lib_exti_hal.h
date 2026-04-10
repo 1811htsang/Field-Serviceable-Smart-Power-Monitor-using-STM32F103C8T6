@@ -39,9 +39,9 @@
 
     #ifndef EXTI_CALLBACK_EVENT_PARAM_TYPE
       #define EXTI_CALLBACK_EVENT_PARAM_TYPE
-        tdf_enum EXTI_Callback_Event_Param_Type {
+        tdf_enum EXTI_Callback_Event_Param {
           EXTI_COMMON_CB_ID = 0xFFu // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
-        } EXTI_Callback_Event_Param_Type;
+        } EXTI_Callback_Event_Param;
     #endif
 
   // Khai báo các kiểm tra tham số đầu vào nội bộ
@@ -75,7 +75,7 @@
     // >> Hàm đăng ký callback xử lý ngắt EXTI
     RETR_STAT EXTI_RegisterCallback(
       EXTI_Handle_Param *handle_param,
-      EXTI_Callback_Event_Param_Type callback_event_type,
+      EXTI_Callback_Event_Param callback_event_type,
       void (*callback_func)(void)
     );
 
