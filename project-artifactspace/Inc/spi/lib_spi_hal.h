@@ -136,7 +136,6 @@
             void (*Rx_HalfCplt_Callback)(struct SPI_Handle_Param *hspi);    // Con trỏ tới hàm callback khi hoàn thành nửa quá trình nhận dữ liệu
             void (*TxRx_HalfCplt_Callback)(struct SPI_Handle_Param *hspi);  // Con trỏ tới hàm callback khi hoàn thành nửa quá trình truyền và nhận dữ liệu
             void (*Error_Callback)(struct SPI_Handle_Param *hspi);          // Con trỏ tới hàm callback khi có lỗi xảy ra
-            void (*Abort_Callback)(struct SPI_Handle_Param *hspi);          // Con trỏ tới hàm callback khi quá trình truyền hoặc nhận bị hủy bỏ
           #endif 
         } SPI_Handle_Param;
     #endif

@@ -16,6 +16,10 @@
  ******************************************************************************
  */
 
+// Bổ sung pragma 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable";
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast";
+
 #ifndef LIB_KEYWORD_DEF_H_
   #define LIB_KEYWORD_DEF_H_
 
