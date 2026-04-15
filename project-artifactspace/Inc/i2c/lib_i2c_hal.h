@@ -56,13 +56,16 @@
       #define I2C_ERR_ENUM_TYPE
         tdf_enum I2C_ERR_Enum {
           I2C_ERR_NONE    = 0x00u,
-          I2C_ERR_BERR    = 0x01u, // Bus error
-          I2C_ERR_ARLO    = 0x02u, // Arbitration lost
-          I2C_ERR_AF      = 0x03u, // Acknowledge failure
-          I2C_ERR_OVR     = 0x04u, // Overrun/Underrun
-          I2C_ERR_PEC     = 0x05u, // PEC error in reception
-          I2C_ERR_TIMEOUT = 0x06u, // Timeout error
-          I2C_ERR_UNKNOWN = 0xFFu  // Unknown error
+          I2C_ERR_BERR    = 0x01u,    // Bus error
+          I2C_ERR_ARLO    = 0x02u,    // Arbitration lost
+          I2C_ERR_AF      = 0x03u,    // Acknowledge failure
+          I2C_ERR_OVR     = 0x04u,    // Overrun/Underrun
+          I2C_ERR_PEC     = 0x05u,    // PEC error in reception
+          I2C_ERR_TIMEOUT = 0x06u,    // Timeout error
+          I2C_ERR_START   = 0x07u,    // Start condition error
+          I2C_ERR_STOP    = 0x08u,    // Stop condition error
+          I2C_ERR_ADDR_NACK = 0x09u,  // NACK received after sending address
+          I2C_ERR_UNKNOWN = 0xFFu     // Unknown error
         } I2C_ERR_Enum;
     #endif
 
@@ -84,17 +87,16 @@
           I2C_REGS_Typedef *Instance; // Con trỏ tới bộ thanh ghi của ngoại vi I2C
           I2C_Init_Param Init;         // Tham số cấu hình khởi tạo cho ngoại vi I2C
 
-          // Quản lý phía truyền dữ liệu
-          const ui8* Tx_Buff_Ptr;     // Con trỏ tới buffer chứa dữ liệu cần truyền
-          ui16 Tx_Xfer_Size;          // Kích thước dữ liệu cần truyền (tính theo số lượng phần tử, không phải số byte)
-          __vo ui16 Tx_Xfer_Count;    // Biến đếm số lượng phần tử đã truyền được
-          __vo ui32 Tx_Xfer_Options;  // Tùy chọn cho quá trình truyền dữ liệu (nếu có)
+          // Quản lý truyền nhận dữ liệu
+          const ui8* Buff_Ptr;     // Con trỏ tới buffer chứa dữ liệu cần truyền
+          ui16 Xfer_Size;          // Kích thước dữ liệu cần truyền (tính theo số lượng phần tử, không phải số byte)
+          __vo ui16 Xfer_Count;    // Biến đếm số lượng phần tử đã truyền được
 
-          // Quản lý phía nhận dữ liệu
-          ui8* Rx_Buff_Ptr;           // Con trỏ tới buffer chứa dữ liệu nhận được
-          ui16 Rx_Xfer_Size;          // Kích thước dữ liệu cần nhận (tính theo số lượng phần tử, không phải số byte)
-          __vo ui16 Rx_Xfer_Count;    // Biến đếm số lượng phần tử đã nhận được
-          __vo ui32 Rx_Xfer_Options;  // Tùy chọn cho quá trình nhận dữ liệu (nếu có)
+          /**
+           * Ghi chú:
+           * Khác với SPI, I2C là truyền half-duplex 
+           * nên không cần phải quản lý buffer nhận và buffer truyền riêng biệt.
+           */
 
           __vo I2C_STAT_Enum State;    // Trạng thái hiện tại của ngoại vi I2C
           __vo I2C_ERR_Enum ErrorCode; // Mã lỗi nếu có lỗi xảy ra
