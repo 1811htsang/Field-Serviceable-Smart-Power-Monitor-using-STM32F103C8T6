@@ -133,7 +133,7 @@
     #define IS_I2C_NOSTRETCH(NOSTRETCH) (((NOSTRETCH) == I2C_NOSTRETCH_ENABLE) || \
                                         ((NOSTRETCH) == I2C_NOSTRETCH_DISABLE))
 
-    #define IS_I2C_FREQUENCY(FREQ) ((FREQ) <= 0x32u)
+    #define IS_I2C_FREQUENCY(FREQ, CFG) ((FREQ) <= (CFG))
 
     /**
      * Ghi chú:

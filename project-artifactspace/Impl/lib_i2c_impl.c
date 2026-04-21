@@ -281,3 +281,102 @@
 
     return STAT_OK; // Yêu cầu thành công, đã gửi địa chỉ và sẵn sàng nhận dữ liệu
   }
+
+  RETR_STAT I2C_Init(I2C_Handle_Param *hi2c) {
+    // Assert tham số đầu vào
+
+      if (hi2c == NULL) {
+        return STAT_ERROR;
+      }
+
+    // Assert param của handler
+
+      assert_param(hi2c->Instance);
+      assert_param(IS_I2C_MODE(hi2c->Init.Mode));
+      assert_param(IS_I2C_CLOCKSPEED(hi2c->Init.ClockSpeed));
+      assert_param(IS_I2C_DUTYCYCLE(hi2c->Init.DutyCycle));
+      assert_param(IS_I2C_OWNADDRESS(hi2c->Init.OwnAddress));
+      assert_param(IS_I2C_ADDRESSINGMODE(hi2c->Init.AddressingMode));
+      assert_param(IS_I2C_NOSTRETCH(hi2c->Init.NoStretchMode));
+
+    // Báo bận
+
+      hi2c->State = I2C_BUSY;
+
+    // Tắt I2C trước
+      
+      I2C_Disable(hi2c);
+
+    // Reset I2C
+
+      I2C_SWRST_RESET(hi2c);
+
+    // Kiểm tra PCLK1
+
+      assert_param(IS_I2C_FREQUENCY(
+        hi2c->Init.ClockSpeed, RCC_Get_PCLK1_Freq()
+      ));
+
+    // Nạp giá trị vào CR2
+
+      ui32 freq = RCC_Get_PCLK1_Freq() / 1000000u;
+      MODIFY_REG(hi2c->Instance->I2C_CR2, I2C_CR2_FREQ_MASK, freq);
+      
+    // Cấu hình rise time cho TRISE
+
+      if (hi2c->Init.ClockSpeed <= 100000u) {
+        // Standard mode
+
+          MODIFY_REG(hi2c->Instance->I2C_TRISE, I2C_TRISE_MASK, freq + 1u);
+      } else {
+        // Fast mode
+
+          MODIFY_REG(hi2c->Instance->I2C_TRISE, I2C_TRISE_MASK, (freq * 300u) / 1000u + 1u);
+      }
+
+    // Cấu hình CCR
+
+      
+
+  }
+
+  RETR_STAT I2C_DeInit(I2C_Handle_Param *hi2c) {
+
+  }
+
+  RETR_STAT I2C_M_TX(
+    I2C_Handle_Param *hi2c, const ui8* pdata, 
+    ui16 size, ui32 timeout
+  ) {
+
+  }
+
+  RETR_STAT I2C_S_TX(
+    I2C_Handle_Param *hi2c, const ui8* pdata, 
+    ui16 size, ui32 timeout
+  ) {
+
+  }
+
+  RETR_STAT I2C_M_RX(
+    I2C_Handle_Param *hi2c, ui8* pdata, 
+    ui16 size, ui32 timeout
+  ) {
+
+  }
+
+  RETR_STAT I2C_S_RX(
+    I2C_Handle_Param *hi2c, ui8* pdata, 
+    ui16 size, ui32 timeout
+  ) {
+
+  }
+
+  RETR_STAT I2C_IsDeviceReady(
+    I2C_Handle_Param *hi2c, 
+    ui16 DevAddress, 
+    ui32 Trials, 
+    ui32 Timeout
+  ) {
+
+  }

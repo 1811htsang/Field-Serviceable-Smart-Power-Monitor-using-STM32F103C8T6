@@ -39,7 +39,7 @@
       __vo BLANK_REG_16B I2C_SR1;         // Offset 0x14, reset 0x0000
       __vo BLANK_REG_16B I2C_SR2;         // Offset 0x18, reset 0x0000
       __vo BLANK_REG_16B I2C_CCR;         // Offset 0x1C, reset 0x0000
-      __vo BLANK_REG_16B RESERVED1;       // Offset 0x20, reset 0x0002 (TRISE không sử dụng)
+      __vo BLANK_REG_16B I2C_TRISE;       // Offset 0x20, reset 0x0002 (TRISE không sử dụng)
     } I2C_REGS_Typedef;
 
   // >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
@@ -194,6 +194,10 @@
 
     #define I2C_CCR_F_S_POS 15u
     #define I2C_CCR_F_S_MASK (1u << I2C_CCR_F_S_POS)
+
+  // Khai báo mask TRISE
+
+    #define I2C_TRISE_MASK 0x3Fu
 
   // Khai báo các chế độ duty 
     
