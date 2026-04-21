@@ -100,6 +100,7 @@
 
           __vo I2C_STAT_Enum State;    // Trạng thái hiện tại của ngoại vi I2C
           __vo I2C_ERR_Enum ErrorCode; // Mã lỗi nếu có lỗi xảy ra
+          __vo I2C_MODE_Enum CurrentMode; // Trạng thái hiện tại của I2C
 
           __vo ui16 TargetAddress;           // Địa chỉ của thiết bị I2C mục tiêu trong quá trình truyền nhận
         } I2C_Handle_Param;
@@ -209,6 +210,16 @@
     #define I2C_DATA_CONFIG(hi2c, DATA) do { \
       ((hi2c)->Instance->DR) = (DATA); \
     } while(0)
+
+    #define I2C_CCR_GENERIC_CONFIG(PCLK, SPEED, COEFF) (((((PCLK) - 1u)/((SPEED) * (COEFF))) + 1u) & I2C_CCR_CCR_MASK)
+
+    #define I2C_CCR_STANDARD(PCLK, SPEED) ((I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 2u) < 4u)? 4u:I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 2u))
+ 
+    #define I2C_CCR_FAST(PCLK, SPEED, DUTY) (((DUTY) == I2C_DUTY_2)? I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 3u) : (I2C_CCR_CALCULATION((PCLK), (SPEED), 25u) | I2C_DUTY_16_9))
+
+    #define I2C_CCR_AUTO(PCLK, SPEED, DUTY) (((SPEED) <= 100000u)? (I2C_CCR_STANDARD((PCLK), (SPEED))) : \
+                                            ((I2C_CCR_FAST((PCLK), (SPEED), (DUTY)) & I2C_CCR_CCR_MASK) == 0u)? 1u : \
+                                            ((I2C_CCR_FAST((PCLK), (SPEED), (DUTY))) | I2C_CCR_F_S_MASK))
 
     /**
      * Ghi chú:

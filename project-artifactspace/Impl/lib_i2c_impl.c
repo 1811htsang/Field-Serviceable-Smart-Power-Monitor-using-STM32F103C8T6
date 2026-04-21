@@ -152,8 +152,8 @@
   sta RETR_STAT I2C_M_ReqWrite(
     I2C_Handle_Param *hi2c, 
     ui16 DevAddress, 
-    ui16 Size, 
-    ui32 Timeout
+    ui16 Timeout, 
+    ui32 Tickstart
   ) {
     // Bật Acknowledge
 
@@ -168,7 +168,7 @@
       if (
         I2C_FlagTimeout(
           hi2c,I2C_SR1_SB_MASK,SET,
-          Timeout,SYSTICK_GetTick()
+          Timeout, Tickstart
         ) != STAT_OK
       ) {
         hi2c->ErrorCode = I2C_ERR_START; // Cập nhật mã lỗi vào handle_param
@@ -186,7 +186,6 @@
 
     // Đợi cờ ADDR và kiểm tra cờ AF song song để đảm bảo đã gửi địa chỉ thành công
 
-      uint32_t tickstart = SYSTICK_GetTick();
       while (!READ_BIT(hi2c->Instance->I2C_SR1, I2C_SR1_ADDR_MASK)) {
         if (READ_BIT(hi2c->Instance->I2C_SR1, I2C_SR1_AF_MASK)) {
           I2C_GENERATE_STOP(hi2c); // Gửi STOP để giải phóng bus
@@ -194,7 +193,7 @@
           hi2c->ErrorCode = I2C_ERR_ADDR_NACK;
           return STAT_ERROR;
         }
-        if ((SYSTICK_GetTick() - tickstart) >= Timeout) {
+        if ((SYSTICK_GetTick() - Tickstart) >= Timeout) {
           return STAT_TIMEOUT;
         }
       }
@@ -210,7 +209,8 @@
     I2C_Handle_Param *hi2c, 
     ui16 DevAddress, 
     ui16 Size, 
-    ui32 Timeout
+    ui32 Timeout,
+    ui32 Tickstart
   ) {
     // Bật Acknowledge
 
@@ -225,7 +225,7 @@
       if (
         I2C_FlagTimeout(
           hi2c,I2C_SR1_SB_MASK,SET,
-          Timeout,SYSTICK_GetTick()
+          Timeout, Tickstart
         ) != STAT_OK
       ) {
         hi2c->ErrorCode = I2C_ERR_START; // Cập nhật mã lỗi vào handle_param
@@ -251,7 +251,7 @@
           hi2c->ErrorCode = I2C_ERR_ADDR_NACK;
           return STAT_ERROR;
         }
-        if ((SYSTICK_GetTick() - tickstart) >= Timeout) {
+        if ((SYSTICK_GetTick() - Tickstart) >= Timeout) {
           return STAT_TIMEOUT;
         }
       }
@@ -336,18 +336,140 @@
 
     // Cấu hình CCR
 
-      
+      MODIFY_REG(
+        hi2c->Instance->I2C_CCR, 
+        (I2C_CCR_F_S_MASK | I2C_CCR_DUTY_MASK | I2C_CCR_CCR_MASK), 
+        I2C_CCR_AUTO(freq, hi2c->Init.ClockSpeed, hi2c->Init.DutyCycle)
+      );
 
+    // Cấu hình No Stretch
+
+      MODIFY_REG(
+        hi2c->Instance->I2C_CR1, 
+        (I2C_CR1_NOSTRETCH_MASK), 
+        hi2c->Init.NoStretchMode
+      );
+
+    // Cấu hình OAR1
+
+      MODIFY_REG(
+        hi2c->Instance->I2C_OAR1, 
+        (I2C_OAR1_ADDMODE_MASK || I2C_OAR1_ADD_MASK), 
+        hi2c->Init.NoStretchMode
+      );
+
+    // Cấu hình OAR2
+
+      memset(hi2c->Instance->RESERVED0, 0, sizeof(hi2c->Instance->RESERVED0));
+
+    // Bật I2C
+
+      I2C_PE_ENABLE(hi2c);
+
+    // Cập nhật status
+
+      hi2c->State = I2C_READY;
+      hi2c->ErrorCode = I2C_ERR_NONE;
+
+    return STAT_OK;
   }
 
   RETR_STAT I2C_DeInit(I2C_Handle_Param *hi2c) {
+    // Kiểm tra param
 
+      if (hi2c == NULL) {
+        return STAT_ERROR;
+      }
+
+    // tắt I2C
+
+      I2C_Disable(hi2c);
+
+    // reset I2C
+
+      I2C_SWRST_RESET(hi2c);
+
+    // cập nhật status
+
+      hi2c->State = I2C_READY;
+      hi2c->ErrorCode = I2C_ERR_NONE;
+
+    return STAT_OK;
   }
 
   RETR_STAT I2C_M_TX(
     I2C_Handle_Param *hi2c, const ui8* pdata, 
     ui16 size, ui32 timeout
   ) {
+    // Bổ sung tickstart
+      
+      ui32 tickstart = SYSTICK_GetTick();
+
+    // Kiểm tra state
+
+      if (hi2c->State != I2C_READY) {
+        return STAT_BUSY;
+      }
+
+    // Đợi cờ BSY
+      
+      if (I2C_FlagTimeout(hi2c, I2C_SR2_BUSY_MASK, SET, 100 , tickstart) != SET) {
+        return STAT_BUSY;
+      }
+
+    // Kiểm tra lại I2C
+      
+      if (hi2c->Instance->I2C_CR1 & I2C_CR1_PE_MASK != I2C_CR1_PE_MASK) {
+        I2C_PE_ENABLE(hi2c);
+      }
+
+    // Xóa cờ POS
+      
+      I2C_POS_DISABLE(hi2c);
+
+    // Update state
+
+      hi2c->State = I2C_BUSY_TX;
+      hi2c->CurrentMode = I2C_MODE_MASTER;
+      hi2c->ErrorCode = I2C_ERR_NONE;
+
+    // Chuẩn bị tham số truyền tải
+
+      hi2c->Buff_Ptr = pdata;
+      hi2c->Xfer_Count = size;
+      hi2c->Xfer_Size = size;
+
+    // Gửi yêu cầu
+
+      if (I2C_M_ReqWrite(hi2c, hi2c->TargetAddress, timeout, tickstart) != STAT_OK) {
+        return STAT_ERROR;
+      }
+
+    // Bắt đầu vòng truyền
+
+      while (hi2c->Xfer_Count > 0u) {
+        // Đợi cờ TXE để đảm bảo data register đã sẵn sàng nhận dữ liệu mới
+
+          if (
+            I2C_FlagTimeout(
+              hi2c,I2C_SR1_TXE_MASK,SET,
+              timeout, tickstart
+            ) != STAT_OK
+          ) {
+            if (READ_BIT(hi2c->Instance->I2C_SR1, I2C_SR1_AF_MASK)) {
+              I2C_GENERATE_STOP(hi2c); // Gửi STOP để giải phóng bus
+              I2C_CLEAR_AF(hi2c);      // Xóa cờ báo lỗi NACK
+              hi2c->ErrorCode = I2C_ERR_AF; // Cập nhật mã lỗi vào handle_param
+              return STAT_ERROR;
+            }
+          }
+
+        // Gửi dữ liệu tiếp theo
+
+          hi2c->Instance->I2C_DR = *(hi2c->Buff_Ptr++);
+          hi2c->Xfer_Count--;
+      }
+
 
   }
 
