@@ -86,6 +86,13 @@
     // >> Hàm reset ngoại vi
     RETR_STAT RCC_PCLK_Reset(ul periph);
 
+    // >> Hàm cấu hình PLL
+    RETR_STAT RCC_PLL_Config(
+      ul PLL_Source, 
+      ul PLL_MUL, 
+      ul PLLXTPRE
+    );
+
     // >> Hàm chuyển đổi SYSCLK
     /*
      * Hàm chuyển đổi nguồn SYSCLK của hệ thống.
@@ -127,8 +134,8 @@
 
             if (
               __DIFF_CHECK(
-                READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSI),
-                RCC_CFGR_REG_SWS_HSI
+                READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_SWS_HSI),
+                RCC_CFGR_SWS_HSI
               )
             ) {
               return STAT_ERROR;
@@ -138,8 +145,19 @@
           case RCC_SYSCLK_SOURCE_HSE:
             if (
               __DIFF_CHECK(
-                READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_REG_SWS_HSE),
-                RCC_CFGR_REG_SWS_HSE
+                READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_SWS_HSE),
+                RCC_CFGR_SWS_HSE
+              )
+            ) {
+              return STAT_ERROR;
+            }
+            break;
+
+          case RCC_SYSCLK_SOURCE_PLL:
+            if (
+              __DIFF_CHECK(
+                READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_SWS_PLL),
+                RCC_CFGR_SWS_PLL
               )
             ) {
               return STAT_ERROR;
@@ -163,7 +181,7 @@
      * Phụ thuộc ngoài module Clock: Không có
      */
     stinl void RCC_CSS_Enable(void) {
-      SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_CSSON_SET);
+      SET_BIT(RCC_REGS_PTR->CR, RCC_CR_CSSON_SET);
     }
 
     // >> Hàm tắt CSS
@@ -173,7 +191,7 @@
      * Phụ thuộc ngoài module Clock: Không có
      */
     stinl void RCC_CSS_Disable(void) {
-      CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_CSSON_SET);
+      CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_CSSON_SET);
     }
 
     // >> Hàm kiểm tra clock HSI sẵn sàng
@@ -188,8 +206,8 @@
     stinl RETR_STAT RCC_IsHSIReady(void) {
       if (
         __DIFF_CHECK(
-          READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET),
-          RCC_CR_REG_HSION_SET
+          READ_BIT(RCC_REGS_PTR->CR, RCC_CR_HSION_SET),
+          RCC_CR_HSION_SET
         )
       ) {
         return STAT_NRDY;
@@ -210,14 +228,61 @@
     stinl RETR_STAT RCC_IsHSEReady(void) {
       if (
         __DIFF_CHECK(
-          READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET),
-          RCC_CR_REG_HSEON_SET
+          READ_BIT(RCC_REGS_PTR->CR, RCC_CR_HSEON_SET),
+          RCC_CR_HSEON_SET
         )
       ) {
         return STAT_NRDY;
       } else {
         return STAT_RDY;
       }
+    }
+
+    ui32 RCC_Get_SYSCLK_Freq(void);
+
+    stinl ui32 RCC_Get_HCLK_Freq(void) {
+      ui32 sysclk_freq = RCC_Get_SYSCLK_Freq();
+      ui32 hpre = 0;
+
+      // Check for AHB prescaler
+      if (
+        __DIFF_CHECK(
+          READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_HPRE_DIV2),
+          RCC_CFGR_HPRE_DIV2
+        )
+      ) {
+        hpre = 2u; // AHB prescaler is set to divide by 2
+      } else {
+        hpre = 1u; // AHB prescaler is set to divide by 1
+      }
+
+      return sysclk_freq / hpre;
+    }
+
+    stinl ui32 RCC_Get_PCLK1_Freq(void) {
+      ui32 hclk_freq = RCC_Get_HCLK_Freq();
+      ui32 ppre1 = 0;
+
+      // Check for APB1 prescaler
+      if (
+        __DIFF_CHECK(
+          READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_PPRE1_DIV4),
+          RCC_CFGR_PPRE1_DIV4
+        )
+      ) {
+        ppre1 = 4u; // APB1 prescaler is set to divide by 4
+      } else if (
+        __DIFF_CHECK(
+          READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_PPRE1_DIV2),
+          RCC_CFGR_PPRE1_DIV2
+        )
+      ) {
+        ppre1 = 2u; // APB1 prescaler is set to divide by 2
+      } else {
+        ppre1 = 1u; // APB1 prescaler is set to divide by 1
+      }
+
+      return hclk_freq / ppre1;
     }
 
 #endif /* LIB_CLOCK_HAL_H_ */

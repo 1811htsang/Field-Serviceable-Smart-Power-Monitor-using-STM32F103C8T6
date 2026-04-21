@@ -104,14 +104,14 @@
 
           // Bật HSI
 
-            SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSION_SET);
+            SET_BIT(RCC_REGS_PTR->CR, RCC_CR_HSION_SET);
           
           // Chờ HSI sẵn sàng
 
             while (
               __DIFF_CHECK(
-                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), 
-                RCC_CR_REG_HSIRDY_ON
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_HSIRDY_ON), 
+                RCC_CR_HSIRDY_ON
               )
             ) {
               
@@ -142,8 +142,8 @@
 
             if (
               __DIFF_CHECK(
-                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSIRDY_ON), 
-                RCC_CR_REG_HSIRDY_ON
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_HSIRDY_ON), 
+                RCC_CR_HSIRDY_ON
               )
             ) {
               return STAT_ERROR; // HSI không thể sẵn sàng
@@ -190,14 +190,14 @@
 
           // Bật HSE
 
-            SET_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
+            SET_BIT(RCC_REGS_PTR->CR, RCC_CR_HSEON_SET);
 
           // Chờ HSE sẵn sàng
 
             while (
               __DIFF_CHECK(
-                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), 
-                RCC_CR_REG_HSERDY_ON
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_HSERDY_ON), 
+                RCC_CR_HSERDY_ON
               )
             ) {
 
@@ -227,8 +227,8 @@
 
             if (
               __DIFF_CHECK(
-                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSERDY_ON), 
-                RCC_CR_REG_HSERDY_ON
+                READ_BIT(RCC_REGS_PTR->CR, RCC_CR_HSERDY_ON), 
+                RCC_CR_HSERDY_ON
               )
             ) {
               return STAT_ERROR; // HSE không thể sẵn sàng
@@ -370,7 +370,7 @@
           
           // Tắt HSE
 
-            CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_REG_HSEON_SET);
+            CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_HSEON_SET);
             break;
 
         default:
@@ -640,4 +640,146 @@
     // Kết thúc quá trình
 
       return STAT_DONE;
+  }
+
+  RETR_STAT RCC_PLL_Config(
+    ul PLL_Source, 
+    ul PLL_MUL, 
+    ul PLLXTPRE
+  ) {
+    // Kiểm tra tham số đầu vào
+
+      assert_param(IS_RCC_PLL_SOURCE(PLL_Source));
+      assert_param(IS_RCC_PLL_MUL(PLL_MUL));
+      assert_param(IS_RCC_PLLXTPRE(PLLXTPRE));
+
+    // Cấu hình PLL
+
+      // Tắt PLL trước khi cấu hình
+      CLEAR_BIT(RCC_REGS_PTR->CR, RCC_CR_PLLON_SET);
+
+      // Cấu hình nguồn PLL
+      MODIFY_REG(RCC_REGS_PTR->CFGR, RCC_CFGR_PLLSRC_MASK, PLL_Source);
+
+      // Cấu hình hệ số nhân PLL
+      MODIFY_REG(RCC_REGS_PTR->CFGR, RCC_CFGR_PLLMUL_MASK, PLL_MUL);
+
+      // Cấu hình phân chia HSE cho PLL nếu cần
+      MODIFY_REG(RCC_REGS_PTR->CFGR, RCC_CFGR_PLLXTPRE_MASK, PLLXTPRE);
+
+      // Bật PLL sau khi cấu hình
+      SET_BIT(RCC_REGS_PTR->CR, RCC_CR_PLLON_SET);
+
+    // Chờ PLL sẵn sàng
+
+      while (
+        __DIFF_CHECK(
+          READ_BIT(RCC_REGS_PTR->CR, RCC_CR_PLLRDY_ON), 
+          RCC_CR_PLLRDY_ON
+        )
+      ) {
+
+        /**
+         * Ghi chú:
+         * Ở đây không cần làm gì.
+         */
+
+        #ifdef UNIT_TEST
+          
+          /**
+           * Ghi chú:
+           * Ở đây khu vực này sẽ giả lập việc PLL không thể sẵn sàng thì sẽ dừng lại,
+           * Do trong unit sẽ có các hàm giả lập việc PLL sẵn sàng nên 
+           * trường hợp PLL sẵn sàng sẽ bỏ qua vòng lặp này
+           */
+
+          for (int i = 10; i >= 0; i--) {
+
+          }
+          break;
+          
+        #endif
+      }
+
+    // Kiểm tra PLL đã sẵn sàng chưa
+
+      if (
+        __DIFF_CHECK(
+          READ_BIT(RCC_REGS_PTR->CR, RCC_CR_PLLRDY_ON), 
+          RCC_CR_PLLRDY_ON
+        )
+      ) {
+        return STAT_ERROR; // PLL không thể sẵn sàng
+      }
+
+    // Kết thúc quy trình cấu hình
+
+      return STAT_DONE;
+  }
+
+  ui32 RCC_Get_SYSCLK_Freq(void) {
+    if (
+      __DIFF_CHECK(
+        READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_SWS_HSI),
+        RCC_CFGR_SWS_HSI
+      )
+    ) {
+      return 8000000ul; // HSI frequency
+    } else if (
+      __DIFF_CHECK(
+        READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_SWS_HSE),
+        RCC_CFGR_SWS_HSE
+      )
+    ) {
+      return 8000000ul; // HSE frequency (assuming 8 MHz external crystal)
+    } else if (
+      __DIFF_CHECK(
+        READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_SWS_PLL),
+        RCC_CFGR_SWS_PLL
+      )
+    ) {
+      ui32 pll_input_freq = 0;
+      
+      // Check HSE Divider for PLL entry
+        
+        if (
+          __DIFF_CHECK(
+            READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_PLLXTPRE_MASK),
+            RCC_CFGR_PLLXTPRE_DIV2
+          )
+        ) {
+          pll_input_freq = 4000000ul; // HSE divided by 2
+        } else {
+          pll_input_freq = 8000000ul; // HSE directly
+        }
+
+      // Check for PLLMUL
+
+        ui32 pll_mul_factor = 0;
+        ui32 pllmul_bits = READ_BIT(RCC_REGS_PTR->CFGR, RCC_CFGR_PLLMUL_MASK);
+        switch (pllmul_bits) {
+          case RCC_CFGR_PLLMUL_X2:
+            pll_mul_factor = 2;
+            break;
+          case RCC_CFGR_PLLMUL_X4:
+            pll_mul_factor = 4;
+            break;
+          case RCC_CFGR_PLLMUL_X8:
+            pll_mul_factor = 8;
+            break;
+          case RCC_CFGR_PLLMUL_X9:
+            pll_mul_factor = 9;
+            break;
+          default:
+            return 0; // Invalid PLL multiplication factor
+        }
+
+      // Calculate PLL output frequency
+
+        return pll_input_freq * pll_mul_factor;
+
+      
+    } else {
+      return 0; // Unknown clock source
+    }
   }
