@@ -19,13 +19,25 @@
 
       #ifndef RCC_RSTFLG_TYPEDEF
 				#define RCC_RSTFLG_TYPEDEF
+
+          /*
+           * Cấu trúc lưu các cờ nguồn reset của RCC.
+           *
+           * Trường:
+           *   IsPinReset - Cờ reset bởi tín hiệu ngoài.
+           *   IsPorReset - Cờ reset bởi nguồn điện.
+           *   IsSftReset - Cờ reset bởi phần mềm.
+           *   IsIwdgReset - Cờ reset bởi watchdog độc lập.
+           *   IsWwdgReset - Cờ reset bởi watchdog cửa sổ.
+           *   IsLowPwrReset - Cờ reset bởi chế độ điện áp thấp.
+           */
           tdf_strc RCC_RSTFLG_Typedef {
-            ui IsPinReset;  // Cờ đánh dấu reset bởi tín hiệu bên ngoài (PIN NRST)
-            ui IsPorReset;  // Cờ đánh dấu reset bởi nguồn điện (POR)
-            ui IsSftReset;  // Cờ đánh dấu reset bởi phần mềm (SFT)
-            ui IsIwdgReset; // Cờ đánh dấu reset bởi watchdog độc lập (IWDG)
-            ui IsWwdgReset; // Cờ đánh dấu reset bởi watchdog cửa sổ (WWDG)
-            ui IsLowPwrReset; // Cờ đánh dấu reset bởi chế độ điện áp thấp (Low Power)
+            ui IsPinReset;
+            ui IsPorReset;
+            ui IsSftReset;
+            ui IsIwdgReset;
+            ui IsWwdgReset;
+            ui IsLowPwrReset;
           } RCC_RSTFLG_Typedef;
 			#endif
 

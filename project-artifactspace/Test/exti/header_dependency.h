@@ -19,25 +19,49 @@
 
       #ifndef EXTI_HANDLE_PARAM_TYPE
         #define EXTI_HANDLE_PARAM_TYPE
+
+          /*
+           * Cấu trúc tham số cho handle EXTI.
+           *
+           * Trường:
+           *   Line - Line EXTI cần xử lý.
+           *   Callback - Hàm callback được gọi khi có ngắt.
+           */
           tdf_strc EXTI_Handle_Param{
-            ui16 Line;      // Chọn line EXTI cần xử lý
-            void (*Callback)(void); // Con trỏ hàm callback để gọi khi có ngắt EXTI xảy ra
+            ui16 Line;
+            void (*Callback)(void);
           } EXTI_Handle_Param;
       #endif
 
       #ifndef EXTI_CALLBACK_EVENT_PARAM_TYPE
         #define EXTI_CALLBACK_EVENT_PARAM_TYPE
+
+          /*
+           * Bộ mã callback sự kiện EXTI.
+           *
+           * Trường:
+           *   EXTI_COMMON_CB_ID - ID callback chung cho mọi line EXTI.
+           */
           tdf_enum EXTI_Callback_Event_Param {
-            EXTI_COMMON_CB_ID = 0xFFU // ID callback chung cho tất cả các line EXTI, sử dụng khi không cần phân biệt line EXTI nào được kích hoạt
+            EXTI_COMMON_CB_ID = 0xFFU
           } EXTI_Callback_Event_Param;
       #endif
 
     // >> Từ lib_afio_hal
 
+
+      /*
+       * Cấu trúc tham số khởi tạo AFIO EXTI.
+       *
+       * Trường:
+       *   Port - Cổng GPIO được ánh xạ sang EXTI.
+       *   Pin - Số pin GPIO được ánh xạ sang EXTI.
+       *   Line - Line EXTI tương ứng.
+       */
       tdf_strc AFIO_EXTI_Init_Param {
-        ui16 Port;      // Chọn GPIOx cần cấu hình ngắt ngoài
-        ui16 Pin;       // Chọn vị trí chân GPIO cần cấu hình ngắt ngoài (0-3/4-7/8-11/12-15)
-        ui16 Line;      // Lưu thông tin về Line EXTI tương ứng với chân GPIO đã chọn, sử dụng cho param của EXTI
+        ui16 Port;
+        ui16 Pin;
+        ui16 Line;
       } AFIO_EXTI_Init_Param;
 
     // >> Từ lib_gpio_def
@@ -49,11 +73,21 @@
   
     // >> Từ lib_gpio_hal
 
+
+      /*
+       * Cấu trúc tham số khởi tạo GPIO dùng cho EXTI.
+       *
+       * Trường:
+       *   Pin - Chân GPIO cần cấu hình.
+       *   Mode - Chế độ hoạt động của chân GPIO.
+       *   Pull - Trạng thái pull-up/pull-down.
+       *   Trigger - Kiểu trigger ngắt ngoài.
+       */
       tdf_strc GPIO_Init_Param{
-        ui16 Pin;       // Chọn chân GPIO cần cấu hình
-        ui8 Mode;       // Chọn chế độ hoạt động cho chân GPIO
-        ui8 Pull;       // 1: Kích hoạt pull-up, 0: Kích hoạt pull-down (chỉ áp dụng cho chế độ input)
-        ui8 Trigger;    // Chọn kiểu trigger ngắt ngoài (rising/falling/both) nếu chân GPIO được cấu hình cho EXTI, ngược lại sẽ bỏ qua tham số này
+        ui16 Pin;
+        ui8 Mode;
+        ui8 Pull;
+        ui8 Trigger;
       } GPIO_Init_Param;
 
       #define IS_GPIO_TRIGGER(TRIGGER) (((TRIGGER) == GPIO_TRIGGER_NONE)   || \

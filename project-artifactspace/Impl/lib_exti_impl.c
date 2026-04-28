@@ -85,10 +85,10 @@
 
       assert_param(IS_GPIO_TRIGGER(gpio_init_param->Trigger));
 
-    /**
+    /*
      * Ghi chú:
-    * Do AFIO_EXTI_Init_Param đã được kiểm tra kỹ lưỡng trong
-     * hàm AFIO_EXTI_Line_Init nên ta sẽ không kiểm tra lại ở đây nữa.
+     *   AFIO_EXTI_Init_Param đã được kiểm tra kỹ trong AFIO_EXTI_Line_Init.
+     *   Hàm này không lặp lại kiểm tra đó để tránh trùng logic.
      */
 
     // Cấu hình line EXTI dựa vào thông tin trigger trong GPIO_Init_Param và thông tin line đã khởi tạo trong AFIO_EXTI_Init_Param

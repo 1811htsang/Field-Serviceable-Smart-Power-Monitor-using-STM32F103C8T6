@@ -24,13 +24,25 @@
 
     #ifndef I2C_INIT_PARAM_TYPE
       #define I2C_INIT_PARAM_TYPE
-        tdf_strc I2C_Init_Param { // Cấu trúc tham số để khởi tạo ngoại vi I2C
-          ui32 Mode;              // Chọn chế độ hoạt động cho I2C (Master/Slave)
-          ui32 ClockSpeed;        // Chọn tốc độ clock cho I2C (tối đa 400kHz)
-          ui32 DutyCycle;         // Chọn chu kỳ nhiệm vụ trong chế độ fast mode
-          ui32 OwnAddress;        // Chọn địa chỉ riêng của thiết bị (7-bit hoặc 10-bit)
-          ui32 AddressingMode;    // Chọn chế độ định địa chỉ (7-bit hoặc 10-bit)
-          ui32 NoStretchMode;     // Chọn chế độ không kéo dài tín hiệu (Enable/Disable)
+
+        /*
+         * Cấu trúc tham số khởi tạo I2C.
+         *
+         * Trường:
+         *   Mode - Chọn chế độ hoạt động cho I2C.
+         *   ClockSpeed - Tốc độ clock của I2C.
+         *   DutyCycle - Chu kỳ nhiệm vụ trong fast mode.
+         *   OwnAddress - Địa chỉ riêng của thiết bị.
+         *   AddressingMode - Chế độ định địa chỉ 7-bit hoặc 10-bit.
+         *   NoStretchMode - Chế độ không kéo dài tín hiệu.
+         */
+        tdf_strc I2C_Init_Param {
+          ui32 Mode;
+          ui32 ClockSpeed;
+          ui32 DutyCycle;
+          ui32 OwnAddress;
+          ui32 AddressingMode;
+          ui32 NoStretchMode;
         } I2C_Init_Param;
     #endif
 
@@ -38,6 +50,10 @@
 
     #ifndef I2C_STAT_ENUM_TYPE
       #define I2C_STAT_ENUM_TYPE
+
+        /*
+         * Trạng thái trả về của driver I2C.
+         */
         tdf_enum I2C_STAT_Enum {
           I2C_STAT_OK     = 0x00u,
           I2C_READY       = 0x01u,
@@ -54,21 +70,25 @@
 
     #ifndef I2C_ERR_ENUM_TYPE
       #define I2C_ERR_ENUM_TYPE
+
+        /*
+         * Bộ mã lỗi của driver I2C.
+         */
         tdf_enum I2C_ERR_Enum {
           I2C_ERR_NONE    = 0x00u,
-          I2C_ERR_BERR    = 0x01u,    // Bus error
-          I2C_ERR_ARLO    = 0x02u,    // Arbitration lost
-          I2C_ERR_AF      = 0x03u,    // Acknowledge failure
-          I2C_ERR_OVR     = 0x04u,    // Overrun/Underrun
-          I2C_ERR_PEC     = 0x05u,    // PEC error in reception
-          I2C_ERR_TIMEOUT = 0x06u,    // Timeout error
-          I2C_ERR_START   = 0x07u,    // Start condition error
-          I2C_ERR_STOP    = 0x08u,    // Stop condition error
-          I2C_ERR_ADDR_NACK = 0x09u,  // NACK received after sending address
-          I2C_ERR_TXE    = 0x0Au,    // Transmit data register empty error
-          I2C_ERR_RXNE   = 0x0Bu,    // Receive data register not empty error
-          I2C_ERR_BTF    = 0x0Cu,    // Byte transfer finished error
-          I2C_ERR_UNKNOWN = 0xFFu     // Unknown error
+          I2C_ERR_BERR    = 0x01u,
+          I2C_ERR_ARLO    = 0x02u,
+          I2C_ERR_AF      = 0x03u,
+          I2C_ERR_OVR     = 0x04u,
+          I2C_ERR_PEC     = 0x05u,
+          I2C_ERR_TIMEOUT = 0x06u,
+          I2C_ERR_START   = 0x07u,
+          I2C_ERR_STOP    = 0x08u,
+          I2C_ERR_ADDR_NACK = 0x09u,
+          I2C_ERR_TXE    = 0x0Au,
+          I2C_ERR_RXNE   = 0x0Bu,
+          I2C_ERR_BTF    = 0x0Cu,
+          I2C_ERR_UNKNOWN = 0xFFu
         } I2C_ERR_Enum;
     #endif
 
@@ -86,26 +106,35 @@
 
     #ifndef I2C_HANDLE_PARAM_TYPE
       #define I2C_HANDLE_PARAM_TYPE
-        tdf_strc I2C_Handle_Param { // Cấu trúc tham số để quản lý trạng thái và quá trình truyền nhận của ngoại vi I2C
-          I2C_REGS_Typedef *Instance; // Con trỏ tới bộ thanh ghi của ngoại vi I2C
-          I2C_Init_Param Init;         // Tham số cấu hình khởi tạo cho ngoại vi I2C
+
+        /*
+         * Cấu trúc handle quản lý trạng thái và truyền nhận của I2C.
+         *
+         * Trường:
+         *   Instance - Con trỏ tới bộ thanh ghi của I2C.
+         *   Init - Tham số cấu hình khởi tạo.
+         *   Buff_Ptr - Con trỏ buffer truyền nhận.
+         *   Xfer_Size - Kích thước dữ liệu cần truyền nhận.
+         *   Xfer_Count - Số phần tử còn lại trong quá trình truyền nhận.
+         *   State - Trạng thái hiện tại của I2C.
+         *   ErrorCode - Mã lỗi hiện tại.
+         *   CurrentMode - Chế độ hoạt động hiện tại.
+         *   TargetAddress - Địa chỉ mục tiêu trong giao tiếp.
+         */
+        tdf_strc I2C_Handle_Param {
+          I2C_REGS_Typedef *Instance;
+          I2C_Init_Param Init;
 
           // Quản lý truyền nhận dữ liệu
-          ui8* Buff_Ptr;     // Con trỏ tới buffer chứa dữ liệu cần truyền
-          ui16 Xfer_Size;          // Kích thước dữ liệu cần truyền (tính theo số lượng phần tử, không phải số byte)
-          __vo ui16 Xfer_Count;    // Biến đếm số lượng phần tử đã truyền được
+          ui8* Buff_Ptr;
+          ui16 Xfer_Size;
+          __vo ui16 Xfer_Count;
 
-          /**
-           * Ghi chú:
-           * Khác với SPI, I2C là truyền half-duplex 
-           * nên không cần phải quản lý buffer nhận và buffer truyền riêng biệt.
-           */
+          __vo I2C_STAT_Enum State;
+          __vo I2C_ERR_Enum ErrorCode;
+          __vo I2C_MODE_Enum CurrentMode;
 
-          __vo I2C_STAT_Enum State;    // Trạng thái hiện tại của ngoại vi I2C
-          __vo I2C_ERR_Enum ErrorCode; // Mã lỗi nếu có lỗi xảy ra
-          __vo I2C_MODE_Enum CurrentMode; // Trạng thái hiện tại của I2C
-
-          __vo ui16 TargetAddress;           // Địa chỉ của thiết bị I2C mục tiêu trong quá trình truyền nhận
+          __vo ui16 TargetAddress;
         } I2C_Handle_Param;
     #endif
 
@@ -113,9 +142,13 @@
 
     #ifndef I2C_DIRECTION_ENUM_TYPE
       #define I2C_DIRECTION_ENUM_TYPE
+
+        /*
+         * Hướng truyền nhận dữ liệu của I2C.
+         */
         tdf_enum I2C_DIRECTION_Enum {
-          I2C_DIRECTION_TX = 0x00u, // Chế độ truyền dữ liệu
-          I2C_DIRECTION_RX = 0x01u  // Chế độ nhận dữ liệu
+          I2C_DIRECTION_TX = 0x00u,
+          I2C_DIRECTION_RX = 0x01u
         } I2C_DIRECTION_Enum;
     #endif
 

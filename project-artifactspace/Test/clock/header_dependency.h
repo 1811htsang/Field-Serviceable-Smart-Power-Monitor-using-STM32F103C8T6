@@ -22,26 +22,50 @@
 
     // >> Từ lib_iwdg_hal
 
+
+			/*
+			 * Cấu trúc tham số khởi tạo IWDG.
+			 *
+			 * Trường:
+			 *   Prescaler - Hệ số chia tần số IWDG.
+			 *   Reload - Giá trị nạp lại cho bộ đếm.
+			 */
 			tdf_strc IWDG_Init_Param {
-				ui Prescaler; // Chọn bộ chia tần số của IWDG
-				ui Reload;    // Giá trị nạp lại cho bộ đếm giảm
+				ui Prescaler;
+				ui Reload;
 			} IWDG_Init_Param;
 
 		// >> Từ lib_clock_hal
 			
 			#ifndef RCC_CLK_INIT_PARAM_TYPE
 				#define RCC_CLK_INIT_PARAM_TYPE
+
+				/*
+				 * Cấu trúc tham số khởi tạo clock hệ thống.
+				 *
+				 * Trường:
+				 *   CLK_Source - Nguồn clock hệ thống cần chọn.
+				 */
 					tdf_strc RCC_CLK_Init_Param{
-						ul CLK_Source; // Chọn nguồn clock hệ thống
+						ul CLK_Source;
 					} RCC_CLK_Init_Param;
 			#endif
 
 			#ifndef RCC_RDYFLG_TYPEDEF
 				#define RCC_RDYFLG_TYPEDEF
+
+				/*
+				 * Cấu trúc lưu các cờ sẵn sàng của clock.
+				 *
+				 * Trường:
+				 *   HSI_RDY_FLG - Cờ trạng thái HSI.
+				 *   HSE_RDY_FLG - Cờ trạng thái HSE.
+				 *   LSI_RDY_FLG - Cờ trạng thái LSI.
+				 */
 					tdf_strc RCC_RDYFLG_Typedef {
-						__vo ui HSI_RDY_FLG : 1; // Cờ trạng thái sẵn sàng HSI
-						__vo ui HSE_RDY_FLG : 1; // Cờ trạng thái sẵn sàng HSE
-						__vo ui LSI_RDY_FLG : 1; // Cờ trạng thái sẵn sàng LSI
+						__vo ui HSI_RDY_FLG : 1;
+						__vo ui HSE_RDY_FLG : 1;
+						__vo ui LSI_RDY_FLG : 1;
 					} RCC_RDYFLG_Typedef;
 			#endif
 
