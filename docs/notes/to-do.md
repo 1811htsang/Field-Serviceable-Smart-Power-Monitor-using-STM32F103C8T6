@@ -41,7 +41,7 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Driver SPI cho khả năng giao tiếp với ADE7758
 - [x] Viết Unit Test cho Driver SPI
 - [x] Viết Driver I2C cho khả năng giao tiếp với LCD 16x2, MCP4728
-- [ ] Viết Unit Test cho Driver I2C
+- [x] Viết Unit Test cho Driver I2C
 - [ ] Thiết kế Schematics & PCB cho toàn bộ hệ thống
 - [ ] Viết Driver UART cho khả năng giao tiếp với máy tính qua cổng UART
 - [ ] Viết Unit Test cho Driver UART
