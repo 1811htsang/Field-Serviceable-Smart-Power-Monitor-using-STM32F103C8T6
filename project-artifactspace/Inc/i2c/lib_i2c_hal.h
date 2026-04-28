@@ -13,11 +13,11 @@
     #include <stdint.h>
 
     #ifndef UNIT_TEST
-      #include "generic/lib_keyword_def.h";
-      #include "i2c/lib_i2c_def.h";
+      #include "generic/lib_keyword_def.h"
+      #include "i2c/lib_i2c_def.h"
     #else
-      #include "lib_keyword_def.h";
-      #include "lib_i2c_def.h";
+      #include "lib_keyword_def.h"
+      #include "lib_i2c_def.h"
     #endif
 
   // Khai báo cấu trúc tham số hàm khởi tạo
@@ -251,7 +251,7 @@
 
     #define I2C_CCR_STANDARD(PCLK, SPEED) ((I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 2u) < 4u)? 4u:I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 2u))
  
-    #define I2C_CCR_FAST(PCLK, SPEED, DUTY) (((DUTY) == I2C_DUTY_2)? I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 3u) : (I2C_CCR_CALCULATION((PCLK), (SPEED), 25u) | I2C_DUTY_16_9))
+    #define I2C_CCR_FAST(PCLK, SPEED, DUTY) (((DUTY) == I2C_DUTY_2)? I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 3u) : (I2C_CCR_GENERIC_CONFIG((PCLK), (SPEED), 25u) | I2C_DUTY_16_9))
 
     #define I2C_CCR_AUTO(PCLK, SPEED, DUTY) (((SPEED) <= 100000u)? (I2C_CCR_STANDARD((PCLK), (SPEED))) : \
                                             ((I2C_CCR_FAST((PCLK), (SPEED), (DUTY)) & I2C_CCR_CCR_MASK) == 0u)? 1u : \

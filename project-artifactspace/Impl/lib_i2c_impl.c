@@ -26,8 +26,6 @@
     #include "systick/lib_systick_hal.h"
     #include "i2c/lib_i2c_def.h"
     #include "i2c/lib_i2c_hal.h"
-    #include "clock/lib_clock_def.h"
-    #include "clock/lib_clock_hal.h"
   #endif
 
 // Khai báo biến quản lý thời gian
