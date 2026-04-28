@@ -65,6 +65,9 @@
           I2C_ERR_START   = 0x07u,    // Start condition error
           I2C_ERR_STOP    = 0x08u,    // Stop condition error
           I2C_ERR_ADDR_NACK = 0x09u,  // NACK received after sending address
+          I2C_ERR_TXE    = 0x0Au,    // Transmit data register empty error
+          I2C_ERR_RXNE   = 0x0Bu,    // Receive data register not empty error
+          I2C_ERR_BTF    = 0x0Cu,    // Byte transfer finished error
           I2C_ERR_UNKNOWN = 0xFFu     // Unknown error
         } I2C_ERR_Enum;
     #endif
@@ -88,7 +91,7 @@
           I2C_Init_Param Init;         // Tham số cấu hình khởi tạo cho ngoại vi I2C
 
           // Quản lý truyền nhận dữ liệu
-          const ui8* Buff_Ptr;     // Con trỏ tới buffer chứa dữ liệu cần truyền
+          ui8* Buff_Ptr;     // Con trỏ tới buffer chứa dữ liệu cần truyền
           ui16 Xfer_Size;          // Kích thước dữ liệu cần truyền (tính theo số lượng phần tử, không phải số byte)
           __vo ui16 Xfer_Count;    // Biến đếm số lượng phần tử đã truyền được
 
@@ -228,6 +231,8 @@
      */
 
     #define I2C_GET_FLAG(hi2c, FLAG) (READ_BIT((hi2c)->Instance->SR1, (FLAG)))
+
+    #define I2C_CLEAR_AF(hi2c) CLEAR_BIT((hi2c)->Instance->I2C_SR1, I2C_SR1_AF_MASK)
 
   // Khai báo các hàm thành phần
 
