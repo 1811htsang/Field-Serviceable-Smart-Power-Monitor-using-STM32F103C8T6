@@ -1,5 +1,5 @@
 # Giới thiệu tổng quan
-Đây là tài liệu git Hub Copilot Instructions. Nó cung cấp hướng dẫn cụ thể về cách sử dụng GitHub Copilot trong bối cảnh của dự án này.
+Đây là tài liệu GitHub Copilot Instructions. Nó cung cấp hướng dẫn cụ thể về cách sử dụng GitHub Copilot trong bối cảnh của dự án này.
 
 **Tên dự án:** Field-Serviceable Smart Power Monitor using STM32F103C8T6
 
@@ -286,15 +286,27 @@ Cấu trúc file định nghĩa cấu hình ngoại vi mới (`lib_<peripheral>_
 
 	// Khai báo các thư viện sử dụng chung
 
+    Nội dung khi báo thụt vào 1 tab so với phần comment
+
 	// Khai báo địa chỉ ngoại vi
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
 	// Khai báo địa chỉ thanh ghi cụ thể
 
+    Nội dung khi báo thụt vào 1 tab so với phần comment
+
 	// Khai báo cấu trúc thanh ghi
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
 	// >> Tạo con trỏ phần cứng thật và con trỏ phần cứng giả tới ngoại vi
 
+    Nội dung khi báo thụt vào 1 tab so với phần comment
+
 	// Khai báo các định nghĩa bit cần sử dụng trên các thanh ghi
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
 #endif /* LIB_<PERIPHERAL>_DEF_H_ */
 ```
@@ -319,15 +331,27 @@ Cấu trúc file khai báo hàm sử dụng ngoại vi mới (`lib_<peripheral>_
 
   // Khai báo các thư viện sử dụng chung
 
+    Nội dung khi báo thụt vào 1 tab so với phần comment
+
   // Khai báo cấu trúc tham số hàm khởi tạo (nếu có)  
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
 	// Khai báo các cờ trả về có thời hạn (nếu có)
 
+    Nội dung khi báo thụt vào 1 tab so với phần comment
+
   // Khai báo các kiểm tra tham số đầu vào nội bộ (nếu có)
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
   // Khai báo IQRHandler (nếu có)
 
+    Nội dung khi báo thụt vào 1 tab so với phần comment
+
   // Khai báo các hàm thành phần
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
 #endif /* LIB_<PERIPHERAL>_HAL_H_ */
 ```
@@ -350,6 +374,33 @@ Cấu trúc file triển khai chi tiết ngoại vi mới (`lib_<peripheral>_imp
 
 // Định nghĩa các hàm thành phần
 
+  void A() {
+    // Thiết lập môi trường kiểm thử, khởi tạo ngoại vi giả, v.v.
+
+      Nội dung khi báo thụt vào 1 tab so với phần comment, với mỗi dòng hoặc cụm các dòng phải có một comment giải thích chức năng của nó, mỗi dòng hoặc cụm dòng đã có comment phải có một dòng trống phía trên để tách biệt với phần comment giải thích hàm, và có một dòng trống phía dưới để tách biệt với phần comment giải thích hàm tiếp theo, đồng thời thụt vào 1 tab so với phần comment giải thích hàm để dễ đọc hơn.
+  }
+
+```
+
+Lưu ý rằng, trước mỗi phần định nghĩa hàm thành phần, cần có một comment giải thích chức năng của hàm đó, các tham số đầu vào, và giá trị trả về (nếu có). Comment này tuân thủ như sau:
+
+```c
+/*
+   * <Chức năng của hàm>
+   *
+   * Tham số:
+   *   <Tham số 1> - <Mô tả tham số 1>
+   *   <Tham số 2> - <Mô tả tham số 2>
+   *
+   * Logic:
+   *   - <Giải thích logic thực hiện của hàm, có thể bao gồm các bước xử lý chính>
+   *
+   * Trả về:
+   *   <Giá trị trả về> - <Mô tả giá trị trả về, nếu có>
+   *
+   * Phụ thuộc ngoài module GPIO:
+   *   - <Liệt kê các hàm hoặc biến phụ thuộc từ các module khác nếu có, ví dụ: hàm delay_ms() từ module timer>
+   */
 ```
 
 ### Cấu trúc file header dependency
@@ -366,14 +417,22 @@ Cấu trúc file định nghĩa phụ thuộc cho kiểm thử ngoại vi mới 
   #define <PERIPHERAL>_HEADER_DEPENDENCY_H_
 
   // Khai báo các thư viện chung cho unit test
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
   
   // Khai báo các dependency definition từ các file header cần thiết
 
     // >> Từ lib_a_def/hal
 
+      Nội dung khi báo thụt vào 1 tab so với phần comment
+
     // >> Từ lib_b_def/hal
 
+      Nội dung khi báo thụt vào 1 tab so với phần comment
+
   // Khai báo các dependency function từ các file header cần thiết ngoài module đang test
+
+    Nội dung khi báo thụt vào 1 tab so với phần comment
 
 #endif /* <PERIPHERAL>_HEADER_DEPENDENCY_H_ */
 ```
@@ -390,13 +449,15 @@ Cấu trúc file nguồn phụ thuộc cho kiểm thử ngoại vi mới (`sourc
 
 // Khai báo các thư viện cho unit test
 
-  /*
-    Thông thường chỉ cần include file header dependency
-  */
+  Nội dung khi báo thụt vào 1 tab so với phần comment
 
 // Khai báo các dependency của các hàm cần định nghĩa
 
+  Nội dung khi báo thụt vào 1 tab so với phần comment
+
 // Định nghĩa các hàm mock tương ứng
+
+  Nội dung khi báo thụt vào 1 tab so với phần comment
 ```
 
 ### Cấu trúc file unit test implementation
@@ -411,21 +472,22 @@ Cấu trúc file kiểm thử đơn vị cho ngoại vi mới (`unit_test_implem
 
 // Khai báo các thư viện cho unit test
 
-  /*
-    Ở unit_test_implementation.c này, 
-    cần include file header dependency và file của ngoại vi đang test
-  */
+  Nội dung khi báo thụt vào 1 tab so với phần comment
 
 // Khai báo ngoại vi giả cho mục đích unit test
 
+  Nội dung khi báo thụt vào 1 tab so với phần comment
+
 // Gọi ủy quyền các biến và hàm mock từ source_dependency.c
+
+  Nội dung khi báo thụt vào 1 tab so với phần comment
 
 // Định nghĩa các hàm 
 
   void setup() {
-    /*
-      Hàm này được gọi trước mỗi test case để khởi tạo lại trạng thái cho unit test
-    */
+    // Thiết lập môi trường kiểm thử, khởi tạo ngoại vi giả, v.v.
+
+      Nội dung khi báo thụt vào 1 tab so với phần comment
   }
 
 // Thực thi tất cả các test case
