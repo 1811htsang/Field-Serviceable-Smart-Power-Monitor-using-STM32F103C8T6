@@ -28,18 +28,55 @@
 
 // Định nghĩa các hàm 
 
+  /*
+   * Hàm xử lý khi assert_param thất bại trong unit test.
+   *
+   * Tham số:
+   *   file - Tên file nơi assert thất bại.
+   *   line - Số dòng chứa assert thất bại.
+   *
+   * Logic:
+   *   - In thông báo lỗi.
+   *   - Đánh dấu cờ assert_caught.
+   *   - Quay về nhánh test qua longjmp.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void assert_failed(ui8* file, ui8 line) {
     printf("Assertion using assert_param failed in file %s on line %u.\n", file, line);
     assert_caught = TRUE;
     longjmp(assert_env, 1);
   }
 
+  /*
+   * Callback giả để kiểm tra việc đăng ký callback SPI.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được kiểm thử.
+   *
+   * Logic:
+   *   - Không thực hiện xử lý nào ngoài việc xác nhận hàm được gọi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void dummy_callback(SPI_Handle_Param *hspi) {
-    // Hàm callback giả để kiểm tra việc đăng ký callback
   }
 
+  /*
+   * Callback MSP Init giả để kiểm tra dữ liệu truyền vào callback.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI được truyền vào callback.
+   *
+   * Logic:
+   *   - In các trường của handle để đối chiếu khi test.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void SPI_MSP_Init(SPI_Handle_Param *hspi) {
-    // Hàm MSP Init giả để kiểm tra việc đăng ký callback khởi tạo MSP
 
     // Thực hiện in ra toàn bộ thông tin của hspi để kiểm tra xem hàm callback có nhận đúng tham số hay không
     printf("MSP_Init Callback Called with hspi:\n");
@@ -54,6 +91,18 @@
     printf("  Init.FirstBit: %u\n", hspi->Init.FirstBit);
   }
 
+  /*
+   * Khởi tạo lại trạng thái unit test trước mỗi test case.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Xóa thanh ghi SPI giả.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void setup() {
 
     // Hàm này được gọi trước mỗi test case để khởi tạo lại trạng thái cho unit test
@@ -62,6 +111,19 @@
     memset(&MOCK_SPI_REGS, 0, sizeof(SPI_REGS_Typedef));
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_Init nhận con trỏ NULL.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Gọi SPI_Init với tham số NULL.
+   *   - Xác nhận hàm trả về lỗi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Init_NULLPointer_ShouldReturnError() {
     setup();
     printf("TC1: Check Null Pointer...\n");
@@ -69,6 +131,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_Init nhận Instance không hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với Instance NULL.
+   *   - Xác nhận assert được kích hoạt.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Init_InvalidInstance_ShouldAssert() {
     setup();
     printf("TC2: Check Invalid Instance Pointer...\n");
@@ -77,6 +152,19 @@
     ASSERT_EXPECT_FAIL(__ERROR_CHECK(SPI_Init(&hspi))); // Hàm sẽ assert fail do con trỏ Instance không hợp lệ
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_Init nhận mode không hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với mode sai.
+   *   - Xác nhận assert được kích hoạt.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Init_InvalidMode_ShouldAssert() {
     setup();
     printf("TC3: Check Invalid Mode...\n");
@@ -88,6 +176,19 @@
     ASSERT_EXPECT_FAIL(SPI_Init(&hspi)); // Hàm sẽ assert fail do giá trị Mode không hợp lệ
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_Init nhận bộ tham số không hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với bộ tham số sai.
+   *   - Xác nhận assert được kích hoạt.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Init_InvalidParameters_ShouldAssert() {
     setup();
     printf("TC4: Check Invalid Parameters...\n");
@@ -102,6 +203,20 @@
     ASSERT_EXPECT_FAIL(SPI_Init(&hspi)); // Hàm sẽ assert fail do giá trị BaudRatePrescaler không hợp lệ cho chế độ Master
   }
 
+  /*
+   * Kiểm tra SPI_Init với đầu vào hợp lệ và cấu hình thanh ghi đúng.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle hợp lệ.
+   *   - Gọi SPI_Init.
+   *   - So sánh giá trị thanh ghi cấu hình.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Init_ValidInput_ShouldConfigureSPI() {
     setup();
     printf("TC5: Valid Input -> Configure SPI...\n");
@@ -130,6 +245,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_DeInit nhận con trỏ NULL.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Gọi SPI_DeInit với tham số NULL.
+   *   - Xác nhận hàm trả về lỗi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_DeInit_NULLPointer_ShouldReturnError() {
     setup();
     printf("TC6: Check Null Pointer...\n");
@@ -137,6 +265,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_DeInit nhận Instance không hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với Instance NULL.
+   *   - Xác nhận assert được kích hoạt.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_DeInit_InvalidInstance_ShouldAssert() {
     setup();
     printf("TC7: Check Invalid Instance Pointer...\n");
@@ -145,6 +286,20 @@
     ASSERT_EXPECT_FAIL(SPI_DeInit(&hspi)); // Hàm sẽ assert fail do con trỏ Instance không hợp lệ
   }
 
+  /*
+   * Kiểm tra SPI_DeInit với đầu vào hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Khởi tạo SPI trước khi deinit.
+   *   - Gọi SPI_DeInit.
+   *   - Xác nhận các thanh ghi được reset đúng.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_DeInit_ValidInput_ShouldDeInitSPI() {
     setup();
     printf("TC8: Valid Input -> DeInit SPI...\n");
@@ -176,6 +331,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra đăng ký callback khi SPI đang ở trạng thái không cho phép.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với trạng thái BUSY.
+   *   - Xác nhận hàm trả về lỗi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_RegisterCallback_InvalidState_ShouldReturnError() {
     setup();
     printf("TC9: Check Register Callback with Invalid State...\n");
@@ -189,6 +357,20 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra đăng ký callback khi SPI ở trạng thái hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle ở trạng thái READY.
+   *   - Đăng ký callback mẫu.
+   *   - Xác nhận con trỏ callback được cập nhật.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_RegisterCallback_ValidState_ShouldRegisterCallback() {
     setup();
     printf("TC10: Check Register Callback with Valid State...\n");
@@ -212,6 +394,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra hủy đăng ký callback khi SPI đang ở trạng thái không cho phép.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với trạng thái BUSY.
+   *   - Xác nhận hàm trả về lỗi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_UnRegisterCallback_InvalidState_ShouldReturnError() {
     setup();
     printf("TC11: Check UnRegister Callback with Invalid State...\n");
@@ -225,6 +420,20 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra hủy đăng ký callback khi SPI ở trạng thái hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle ở trạng thái READY với callback đã đăng ký.
+   *   - Hủy đăng ký callback.
+   *   - Xác nhận callback quay về giá trị mặc định.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_UnRegisterCallback_ValidState_ShouldUnRegisterCallback() {
     setup();
     printf("TC12: Check UnRegister Callback with Valid State...\n");
@@ -249,6 +458,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra trường hợp SPI_Transmit nhận tham số không hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Gọi SPI_Transmit với con trỏ NULL và size không hợp lệ.
+   *   - Xác nhận hàm trả về lỗi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Transmit_InvalidParameters_ShouldReturnError() {
     setup();
     printf("TC13: Check Transmit with Invalid Parameters...\n");
@@ -258,6 +480,20 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra SPI_Transmit với tham số hợp lệ ở cả 8-bit và 16-bit.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle hợp lệ cho 8-bit và 16-bit.
+   *   - Gọi SPI_Transmit với từng trường hợp.
+   *   - Xác nhận dữ liệu được ghi đúng vào thanh ghi DR.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_SPI_Transmit_ValidParameters_ShouldTransmitData() {
     setup();
     printf("TC14: Check Transmit with Valid Parameters...\n");

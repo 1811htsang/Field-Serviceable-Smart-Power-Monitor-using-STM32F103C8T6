@@ -48,6 +48,19 @@
     longjmp(assert_env, 1);
   }
 
+  /*
+   * Khởi tạo lại trạng thái unit test cho driver EXTI.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Xóa thanh ghi EXTI giả.
+   *   - Đưa cờ assert về trạng thái mặc định.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void setup() {
     /*
       Hàm này được gọi trước mỗi test case để khởi tạo lại trạng thái cho unit test
@@ -57,6 +70,18 @@
     memset(&MOCK_EXTI_REGS, 0, sizeof(EXTI_REGS_Typedef));
   }
 
+  /*
+   * Callback mẫu dùng trong các bài test đăng ký callback EXTI.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - In thông điệp xác nhận callback được gọi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void callback_example(void) {
     /*
       Hàm callback mẫu để sử dụng trong test case đăng ký callback cho EXTI
@@ -64,6 +89,18 @@
     printf("Callback function called successfully.\n");
   }
 
+  /*
+   * Callback mẫu thứ hai dùng trong các bài test đăng ký callback EXTI.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - In thông điệp xác nhận callback được gọi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void callback_register_example(void) {
     /*
       Hàm callback mẫu khác để sử dụng trong test case đăng ký callback cho EXTI
@@ -71,6 +108,18 @@
     printf("Another callback function called successfully.\n");
   }
 
+  /*
+   * Mô phỏng một ngắt EXTI pending trên line chỉ định.
+   *
+   * Tham số:
+   *   line - Line EXTI cần mô phỏng pending bit.
+   *
+   * Logic:
+   *   - Set bit tương ứng trong thanh ghi PR giả.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void interrupt_trigger(ui16 line) {
     /*
       Hàm này mô phỏng việc thiết lập giá trị cho thanh ghi PR của ngoại vi EXTI giả để tạo ngắt pending cho line tương ứng
@@ -78,6 +127,19 @@
     MOCK_EXTI_REGS.EXTI_PR |= (0x0001u << line); // Set bit tương ứng trong PR để tạo ngắt pending
   }
 
+  /*
+   * Kiểm tra trường hợp EXTI_RegisterParam nhận con trỏ NULL.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Gọi hàm với tham số NULL.
+   *   - Xác nhận hàm trả về lỗi.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_EXTI_RegisterParam_NullPointer_ShouldReturnError() {
     setup();
     printf("TC1: Check Null Pointer...\n");
@@ -91,6 +153,19 @@
     printf("-> PASSED\n");
   }
 
+  /*
+   * Kiểm tra trường hợp line EXTI không hợp lệ khi đăng ký.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với line không hợp lệ.
+   *   - Gọi hàm và xác nhận assert được kích hoạt.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_EXTI_RegisterParam_InvalidLine_ShouldAssert() {
     setup();
     printf("TC2: Check Invalid Line Parameter...\n");
@@ -106,6 +181,20 @@
     ASSERT_EXPECT_FAIL(EXTI_RegisterParam(&handle_param));
   }
 
+  /*
+   * Kiểm tra đăng ký EXTI với tham số hợp lệ.
+   *
+   * Tham số:
+   *   Không có.
+   *
+   * Logic:
+   *   - Tạo handle với line hợp lệ và callback mẫu.
+   *   - Gọi EXTI_RegisterParam.
+   *   - Xác nhận callback được đăng ký đúng.
+   *
+   * Trả về:
+   *   Không có.
+   */
   void test_EXTI_RegisterParam_ValidParameter_ShouldRegisterCallback() {
     setup();
     printf("TC3: Check Valid Parameter...\n");

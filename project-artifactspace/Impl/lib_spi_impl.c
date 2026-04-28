@@ -106,83 +106,131 @@
 
 // Định nghĩa các hàm callback weak mặc định (nếu được kích hoạt)
 
+  /*
+   * Callback mặc định khi truyền SPI hoàn tất.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý hậu truyền dữ liệu.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void Tx_Cplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi nhận SPI hoàn tất.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý hậu nhận dữ liệu.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void Rx_Cplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành nhận dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi truyền và nhận SPI hoàn tất.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý hậu truyền/nhận dữ liệu.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void TxRx_Cplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền/nhận dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi truyền SPI đạt mốc một nửa.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý mốc giữa của quá trình truyền.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void Tx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền một nửa dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi nhận SPI đạt mốc một nửa.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý mốc giữa của quá trình nhận.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void Rx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành nhận một nửa dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi truyền và nhận SPI đạt mốc một nửa.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý mốc giữa của quá trình truyền/nhận.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void TxRx_HalfCplt_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hoàn thành truyền/nhận một nửa dữ liệu 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi SPI phát sinh lỗi.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý lỗi giao tiếp.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void Error_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác xử lý lỗi 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 
+  /*
+   * Callback mặc định khi SPI bị hủy giao tiếp.
+   *
+   * Tham số:
+   *   hspi - Con trỏ tới handle SPI đang được sử dụng.
+   *
+   * Logic:
+   *   - Cho phép ứng dụng ghi đè để xử lý trạng thái sau khi abort.
+   *
+   * Trả về:
+   *   Không có.
+   */
   __weak void Abort_Callback(SPI_Handle_Param *hspi) {
-    /**
-     * Ghi chú:
-     * User có thể tự override hàm này 
-     * để implement các thao tác hủy giao tiếp 
-     * tùy thuộc vào thiết kế phần cứng của mình.
-     */
     return;
   }
 

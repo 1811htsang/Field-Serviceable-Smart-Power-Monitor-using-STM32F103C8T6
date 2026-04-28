@@ -36,14 +36,32 @@
 
 // Khai báo các hàm nội bộ
   
-  // >> Hàm chờ cờ với timeout, trả về STAT_OK nếu cờ đạt trạng thái mong muốn, trả về STAT_TIMEOUT nếu timeout xảy ra
+  /*
+   * Hàm chờ cờ I2C đạt trạng thái mong muốn trong giới hạn timeout.
+   *
+   * Tham số:
+   *   hi2c - Con trỏ tới handle I2C đang thao tác.
+   *   flag_mask - Mặt nạ cờ cần kiểm tra.
+   *   desired_status - Trạng thái mong muốn của cờ sau khi chờ.
+   *   timeout - Thời gian chờ tối đa tính bằng ms.
+   *   tickstart - Tick khởi đầu để tính timeout.
+   *   RegisterID - ID thanh ghi cần đọc, dùng để phân biệt SR1 và SR2.
+   *
+   * Logic:
+   *   - Đọc thanh ghi tương ứng theo RegisterID.
+   *   - Chờ tới khi cờ đạt trạng thái mong muốn hoặc timeout xảy ra.
+   *   - Cập nhật mã lỗi timeout nếu vượt quá thời gian chờ.
+   *
+   * Trả về:
+   *   RETR_STAT - STAT_OK nếu cờ hợp lệ, STAT_TIMEOUT nếu hết thời gian chờ.
+   */
   sta RETR_STAT I2C_FlagTimeout(
     I2C_Handle_Param *hi2c, 
     ui32 flag_mask, 
     ui32 desired_status, 
     ui32 timeout, 
     ui32 tickstart,
-    ui8 RegisterID // New parameter to specify SR1 or SR2
+    ui8 RegisterID
   );
 
   // >> Hàm request master write
@@ -66,7 +84,7 @@
     ui32 desired_status, 
     ui32 timeout, 
     ui32 tickstart,
-    ui8 RegisterID // New parameter to specify SR1 or SR2
+    ui8 RegisterID
   ) {
 
     // Khởi tạo biến đếm thời gian đã trôi qua
