@@ -59,3 +59,9 @@ Note that this sections can be expand with new requirements in the future.
 - 4N35SM Optocoupler
 - MCP4728E to simulate the 3-phase voltage and current inputs for testing purposes.
 - Various resistors, capacitors, diodes, and connectors as per the schematic or PCB design.
+
+---
+
+## Current Status
+
+The project is now switching to hardware phase with package conversion board is in order to facilitate the prototyping process. Therefore, the development is quite slow at the moment due to delivery time of the package conversion board.
