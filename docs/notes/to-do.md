@@ -42,10 +42,13 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [x] Viết Unit Test cho Driver SPI
 - [x] Viết Driver I2C cho khả năng giao tiếp với LCD 16x2, MCP4728
 - [x] Viết Unit Test cho Driver I2C
-- [ ] Thiết kế Schematics & PCB cho toàn bộ hệ thống
+- [x] Bổ sung các board chuyển đổi từ SOP-24, SSOP-24 sang DIP-24 cho ADE7758
+- [x] Bổ sung board chuyển đổi từ MSOP-10 sang DIP-10 cho MCP4728
+- [ ] Bổ sung tài liệu về hoạt động của ADE7758 và MCP4728 trong hệ thống
 - [ ] Viết Driver UART cho khả năng giao tiếp với máy tính qua cổng UART
 - [ ] Viết Unit Test cho Driver UART
 - [ ] Triển khai Driver lên mạch thực tế
+
 
 ## Giai đoạn Cốt lõi
 
@@ -63,6 +66,10 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 
 - [ ] Viết Python script gửi file qua XMODEM
 - [ ] So sánh kích thước
+
+## Giai đoạn hoàn thiện mạch thực tế
+
+- [ ] Thiết kế Schematics & PCB cho toàn bộ hệ thống
 
 ## Danh sách Commit chủ chốt
 
