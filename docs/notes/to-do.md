@@ -49,7 +49,6 @@ Có thể cân nhắc bổ sung việc triển khai Unity Test Framework để v
 - [ ] Viết Unit Test cho Driver UART
 - [ ] Triển khai Driver lên mạch thực tế
 
-
 ## Giai đoạn Cốt lõi
 
 - [ ] Phân vùng bộ nhớ
