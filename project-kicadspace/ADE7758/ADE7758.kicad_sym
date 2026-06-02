@@ -1,0 +1,366 @@
+
+(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)
+  (symbol "ADE7758" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+    (property "Reference" "IC" (id 0) (at -4.445 10.795 0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Value" "ADE7758" (id 1) (at -5.715 -12.7 0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Footprint" "ADE7758:SOIC24" (id 2) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MF" "Analog Devices" (id 4) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Description" "\n                        \n                            ADI 3 Phase Energy Mtr IC w/per phase\n                        \n" (id 5) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Package" "SOIC-24 Analog Devices" (id 6) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Price" "None" (id 7) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "SnapEDA_Link" "https://www.snapeda.com/parts/ADE7758/Analog+Devices/view-part/?ref=snap" (id 8) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MP" "ADE7758" (id 9) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Purchase-URL" "https://www.snapeda.com/api/url_track_click_mouser/?unipart_id=4222974&manufacturer=Analog Devices&part_name=ADE7758&search_term=None" (id 10) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Availability" "In Stock" (id 11) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "Check_prices" "https://www.snapeda.com/parts/ADE7758/Analog+Devices/view-part/?ref=eda" (id 12) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (symbol "ADE7758_1_0"
+      (polyline
+        (pts (xy 5.08 10.16) (xy -6.35 10.16)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy -5.08 -10.16) (xy 5.08 -10.16)) (stroke (width 0.254))
+      )
+      (arc (start -5.08 -10.16) (mid -6.8003 -5.199) (end -6.35 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start -6.35 10.16) (mid -5.2667 5.0636) (end -6.35 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (polyline
+        (pts (xy 5.08 -10.16) (xy 5.08 10.16)) (stroke (width 0.254))
+      )
+      (pin output line (at 7.62 7.62 180.0) (length 2.54)
+        (name "APCF"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "1"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at 7.62 -7.62 180.0) (length 2.54)
+        (name "CLKIN"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "19"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin output line (at 7.62 -5.08 180.0) (length 2.54)
+        (name "CLKOUT"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "20"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin output line (at 7.62 5.08 180.0) (length 2.54)
+        (name "VARCF"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "17"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+    (symbol "ADE7758_2_0"
+      (polyline
+        (pts (xy 5.08 10.16) (xy -5.08 10.16)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy -3.81 -10.16) (xy 5.08 -10.16)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy 5.08 -10.16) (xy 5.08 10.16)) (stroke (width 0.254))
+      )
+      (arc (start -3.81 -10.16) (mid -5.5303 -5.199) (end -5.08 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start -5.08 10.16) (mid -3.9967 5.0636) (end -5.08 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (pin input inverted (at 7.62 -7.62 180.0) (length 2.54)
+        (name "CS"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "21"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at 7.62 0.0 180.0) (length 2.54)
+        (name "DI"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "22"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin output line (at 7.62 2.54 180.0) (length 2.54)
+        (name "DO"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "24"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin output inverted (at 7.62 7.62 180.0) (length 2.54)
+        (name "IRQ"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "18"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at 7.62 -2.54 180.0) (length 2.54)
+        (name "SCK"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "23"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+    (symbol "ADE7758_3_0"
+      (polyline
+        (pts (xy -3.81 6.35) (xy 2.54 6.35)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy 3.81 -6.35) (xy -3.81 -6.35)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy -3.81 -6.35) (xy -3.81 6.35)) (stroke (width 0.254))
+      )
+      (arc (start 2.54 6.35) (mid 3.8541 3.3002) (end 3.81 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start 3.81 -6.35) (mid 3.1329 -3.1647) (end 3.81 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (pin input line (at -6.35 -3.81 0) (length 2.54)
+        (name "IN"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "6"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -6.35 3.81 0) (length 2.54)
+        (name "IP"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "5"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+    (symbol "ADE7758_4_0"
+      (polyline
+        (pts (xy -3.81 6.35) (xy 2.54 6.35)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy 3.81 -6.35) (xy -3.81 -6.35)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy -3.81 -6.35) (xy -3.81 6.35)) (stroke (width 0.254))
+      )
+      (arc (start 2.54 6.35) (mid 3.8541 3.3002) (end 3.81 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start 3.81 -6.35) (mid 3.1329 -3.1647) (end 3.81 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (pin input line (at -6.35 -3.81 0) (length 2.54)
+        (name "IN"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "8"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -6.35 3.81 0) (length 2.54)
+        (name "IP"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "7"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+    (symbol "ADE7758_5_0"
+      (polyline
+        (pts (xy -3.81 6.35) (xy 2.54 6.35)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy 3.81 -6.35) (xy -3.81 -6.35)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy -3.81 -6.35) (xy -3.81 6.35)) (stroke (width 0.254))
+      )
+      (arc (start 2.54 6.35) (mid 3.8541 3.3002) (end 3.81 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start 3.81 -6.35) (mid 3.1329 -3.1647) (end 3.81 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (pin input line (at -6.35 -3.81 0) (length 2.54)
+        (name "IN"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "10"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -6.35 3.81 0) (length 2.54)
+        (name "IP"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "9"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+    (symbol "ADE7758_6_0"
+      (polyline
+        (pts (xy -5.08 10.16) (xy 3.81 10.16)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy 6.35 -10.16) (xy -5.08 -10.16)) (stroke (width 0.254))
+      )
+      (arc (start 3.81 10.16) (mid 5.5303 5.199) (end 5.08 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start 6.35 -10.16) (mid 4.6297 -5.1989) (end 5.08 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (polyline
+        (pts (xy -5.08 -10.16) (xy -5.08 10.16)) (stroke (width 0.254))
+      )
+      (pin power_in line (at -7.62 0.0 0) (length 2.54)
+        (name "AGND"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "11"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin power_in line (at -7.62 2.54 0) (length 2.54)
+        (name "AVDD"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "4"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin power_in line (at -7.62 -7.62 0) (length 2.54)
+        (name "DGND"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "2"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin power_in line (at -7.62 -5.08 0) (length 2.54)
+        (name "DVDD"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "3"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin bidirectional line (at -7.62 7.62 0) (length 2.54)
+        (name "REF"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "12"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+    (symbol "ADE7758_7_0"
+      (polyline
+        (pts (xy -5.08 10.16) (xy 3.81 10.16)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy 5.08 -10.16) (xy -5.08 -10.16)) (stroke (width 0.254))
+      )
+      (polyline
+        (pts (xy -5.08 -10.16) (xy -5.08 10.16)) (stroke (width 0.254))
+      )
+      (arc (start 3.81 10.16) (mid 5.5303 5.199) (end 5.08 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (arc (start 5.08 -10.16) (mid 3.9967 -5.0636) (end 5.08 0.0)
+        (stroke (width 0.254) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (pin input line (at -7.62 7.62 0) (length 2.54)
+        (name "VAP"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "16"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -7.62 2.54 0) (length 2.54)
+        (name "VBP"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "15"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -7.62 -2.54 0) (length 2.54)
+        (name "VCP"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "14"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin input line (at -7.62 -7.62 0) (length 2.54)
+        (name "VN"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "13"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+  )
+)
